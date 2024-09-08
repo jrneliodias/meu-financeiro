@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -5,11 +6,16 @@
         <meta name="keywords" content="My Dashboard">
         <meta name="description" content="My Dashboard">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=SUSE:wght@100..800&display=swap"
+              rel="stylesheet">
+        <link href="{% static 'css/custom.css' %}" rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
-        <title>Document</title>
+        <title>Dashboard</title>
     </head>
     <body class=" bg-slate-900 w-full h-screen grid grid-cols-[auto_1fr]">
-        <aside class="w-full p-3 text-white flex flex-col justify-start gap-4  border-r border-slate-700 min-w-[100px]">
+        <aside class="w-full pt-10 p-3 text-white flex flex-col justify-start gap-4  border-r border-slate-700 min-w-[100px]">
             <a href="{% url 'index' %}" class="font-semibold hover:text-slate-400">Home</a>
             <a href="{% url 'index' %}" class="font-semibold hover:text-slate-400">Registros</a>
         </aside>
