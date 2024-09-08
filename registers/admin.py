@@ -13,9 +13,15 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_per_page = 30
 
 
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'created_at', 'updated_at')
+    list_filter = ('type',)
+    search_fields = ('name',)
+
+
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Expense, ExpenseAdmin)
 admin.site.register(Income)
 admin.site.register(Investment)
-admin.site.register(Category)
 admin.site.register(PaymentMethod)
 admin.site.register(Installment)
