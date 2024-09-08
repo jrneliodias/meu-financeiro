@@ -4,12 +4,12 @@ from .models import Expense, Income, Investment, Category, PaymentMethod
 
 
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('description', 'amount', 'date',
-                    'category', 'payment_method')
+    list_display = ('description', 'date',
+                    'category', 'payment_method',  'amount')
     # Filtros por categoria e método de pagamento
-    list_filter = ('category', 'payment_method', 'date')
+    list_filter = ('date', 'category', 'payment_method')
     search_fields = ('description',)  # Habilitar pesquisa pela descrição
-    ist_per_page = 20  # Exibir 20 despesas por página
+    list_per_page = 30
 
 
 admin.site.register(Expense, ExpenseAdmin)
