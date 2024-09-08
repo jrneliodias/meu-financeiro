@@ -22,8 +22,10 @@
                class="font-semibold hover:bg-slate-700 px-3 py-1 rounded-lg {% if request.path == '/register/expense' %}bg-blue-800 font-semibold{% endif %}">Register Expense</a>
             <a href="{% url 'register_income' %}"
                class="font-semibold hover:bg-slate-700 px-3 py-1 rounded-lg {% if request.path == '/register/income' %}bg-blue-800 font-semibold{% endif %}">Register Income</a>
+            <a href="/admin"
+               class="font-semibold hover:bg-slate-700 px-3 py-1 rounded-lg ">Admin</a>
         </aside>
-        <div class="p-6 text-white">
+        <div class="p-6 text-white ">
             {% block content %}
             {% endblock content %}
         </div>
