@@ -118,6 +118,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Ensure Django knows where to find static files
+STATICFILES_DIRS = [BASE_DIR / 'registers/static']
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
