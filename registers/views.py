@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .forms import ExpenseForm
-from .services import ExpenseService, InstallmentService
+from .forms import ExpenseForm, IncomeForm
+from .services import ExpenseService, InstallmentService, IncomeService
 from django.contrib import messages
 # Create your views here.
 
@@ -39,3 +39,26 @@ def register_expense(request):
 
 def expense_success(request):
     return render(request, 'register/expense_success.html')
+
+
+def register_income(request):
+    if (request.method == 'POST'):
+        form = IncomeForm(request.POST)
+        if not form.is_valid():
+            return
+        income_data = form.cleaned_data
+
+        user = request.user
+
+        income_service = IncomeService()
+        income = income_service.create_income(user, income_data)
+
+        return redirect('expense_success')
+
+    else:
+        form = IncomeForm()
+    return render(request, 'register/income_form.html', {'form': form})
+
+
+def income_success(request):
+    return render(request, 'register/income_success.html')

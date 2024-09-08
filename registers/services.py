@@ -1,4 +1,4 @@
-from .models import Expense, Installment
+from .models import Expense, Installment, Income
 from dateutil.relativedelta import relativedelta
 
 
@@ -66,3 +66,25 @@ class InstallmentService:
             expenses.append(expense)
 
         return installment, expenses
+
+
+class IncomeService:
+    """ Expense service"""
+
+    def create_income(self, user, income_data):
+        """_summary_
+
+        Args:
+            user (_type_): _description_
+            income_data (_type_): _description_
+        """
+        income = Income(
+            user=user,
+            description=income_data['description'],
+            amount=income_data['amount'],
+            date=income_data['date'],
+            category=income_data['category'],
+            payment_method=income_data['payment_method'],
+        )
+        income.save()
+        return income
