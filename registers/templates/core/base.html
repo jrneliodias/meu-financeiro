@@ -16,11 +16,12 @@
     </head>
     <body class=" bg-slate-900 w-full h-screen grid grid-cols-[auto_1fr]">
         <aside class="w-full pt-10 p-3 text-white flex flex-col justify-start gap-4  border-r border-slate-700 min-w-[100px]">
-            <a href="{% url 'index' %}" class="font-semibold hover:text-slate-400">Home</a>
+            <a href="{% url 'index' %}"
+               class="font-semibold hover:bg-slate-700 px-3 py-1 rounded-lg {% if request.path == '/' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">Home</a>
             <a href="{% url 'register_expense' %}"
-               class="font-semibold hover:text-slate-400">Register Expense</a>
+               class="font-semibold hover:bg-slate-700 px-3 py-1 rounded-lg {% if request.path == '/register/expense' %}bg-blue-800 font-semibold{% endif %}">Register Expense</a>
             <a href="{% url 'register_income' %}"
-               class="font-semibold hover:text-slate-400">Register Income</a>
+               class="font-semibold hover:bg-slate-700 px-3 py-1 rounded-lg {% if request.path == '/register/income' %}bg-blue-800 font-semibold{% endif %}">Register Income</a>
         </aside>
         <div class="p-6 text-white">
             {% block content %}
