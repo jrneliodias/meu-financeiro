@@ -98,10 +98,12 @@ def get_expenses_by_month_and_category(year):
     expenses_by_category_by_month = {category: dict(
         months) for category, months in expenses_by_category.items()}
 
-    expenses_by_category_by_month_sorted = sort_by_month(
+    expenses_by_category_by_month_sorted = sort_category_by_month(
         expenses_by_category_by_month)
 
-    return expenses_by_category_by_month_sorted, dict(total_expense_by_month)
+    total_expense_by_month_sorted = sort_by_month(total_expense_by_month)
+
+    return expenses_by_category_by_month_sorted, total_expense_by_month_sorted
 
 
 def get_expenses_by_selected_month(year, month):
@@ -127,7 +129,7 @@ def get_distinct_categories():
     return Expense.objects.values_list('category__name', flat=True).distinct()
 
 
-def sort_by_month(data):
+def sort_category_by_month(data):
     # Define the correct order of months
     _, month_tuple = get_distinct_years_and_months()
     month_order = list(map(lambda x: x[1], month_tuple))
@@ -140,4 +142,14 @@ def sort_by_month(data):
             sorted(months.items(), key=lambda x: month_order.index(x[0])))
         sorted_data[category] = sorted_months
 
+    return sorted_data
+
+
+def sort_by_month(data):
+    # Define the correct order of months
+    _, month_tuple = get_distinct_years_and_months()
+    month_order = list(map(lambda x: x[1], month_tuple))
+
+    sorted_data = dict(
+        sorted(data.items(), key=lambda x: month_order.index(x[0])))
     return sorted_data
