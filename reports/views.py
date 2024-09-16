@@ -34,10 +34,14 @@ def expense_report(request):
     # Get distinct category names
     categories = get_distinct_categories()
 
+    # Get incomes by month
+    incomes_by_month = get_incomes_by_month(selected_year)
+
     # Prepare the context
     context = {
         'expenses_by_category_by_month': expenses_by_category_by_month,
         'total_expense_by_month': total_expense_by_month,
+        'incomes_by_month': incomes_by_month,
         'categories': categories,
         'current_year': current_year,
         'distinct_years': distinct_years,
@@ -104,6 +108,23 @@ def get_expenses_by_month_and_category(year):
     total_expense_by_month_sorted = sort_by_month(total_expense_by_month)
 
     return expenses_by_category_by_month_sorted, total_expense_by_month_sorted
+
+
+def get_incomes_by_month(year):
+    """Returns a dictionary where onths as keys and the total income for that month as values."""
+    income_by_month_query_set = Income.objects.filter(date__year=year).annotate(
+        month=TruncMonth('date')
+    ).values('month').annotate(total_amount=Sum('amount')).order_by('month',)
+
+    income_by_month_dict = {item['month'].strftime('%B'): float(
+        item['total_amount']) for item in list(income_by_month_query_set)}
+
+    _, month_tuple = get_distinct_years_and_months()
+
+    income_by_month_dict_filled = {
+        label: income_by_month_dict.get(label, 0.0) for _, label in month_tuple}
+
+    return income_by_month_dict_filled
 
 
 def get_expenses_by_selected_month(year, month):

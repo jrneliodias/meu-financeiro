@@ -26,8 +26,8 @@
             </select>
         </form>
         <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
-            <h2 class="text-2xl font-bold">Gasto mensal por categoria</h2>
-            <div class="h-[300px] mt-2 p-3">
+            <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
+            <div class="h-[350px] mt-2 p-3">
                 <canvas id="expenseChart" class="w-full"></canvas>
             </div>
         </div>
@@ -72,6 +72,13 @@
                 data: [{% for value in total_expense_by_month.values %} {{ value }}, {% endfor %}],
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                label:'Total Income',
+                data: [{% for value in incomes_by_month.values %} {{ value }}, {% endfor %}],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
         },
