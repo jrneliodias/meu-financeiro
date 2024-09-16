@@ -47,6 +47,22 @@ class Installment(models.Model):
         return f"{self.description} - Total: {self.total_amount} ({self.total_installments} installments)"
 
 
+class RecurringExpense(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    description = models.CharField(max_length=100)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    start_date = models.DateField()
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, limit_choices_to={'type': 'expense'})
+    payment_method = models.ForeignKey(
+        PaymentMethod, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.description} - Total: {self.total_amount} "
+
+
 class Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=100)
@@ -61,6 +77,8 @@ class Expense(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     installment_plan = models.ForeignKey(
         Installment, on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
+    reccurring_expense = models.ForeignKey(
+        RecurringExpense, on_delete=models.CASCADE, null=True, blank=True, related_name='recurring_expenses')
 
     def __str__(self):
         return f"{self.description} - {self.category} - {str(self.amount)}"
