@@ -84,7 +84,6 @@ class IncomeService:
             amount=income_data['amount'],
             date=income_data['date'],
             category=income_data['category'],
-            payment_method=income_data['payment_method'],
         )
         income.save()
         return income

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense, Income
+from .models import Expense, Income, Category
 
 
 class ExpenseForm(forms.ModelForm):
@@ -14,6 +14,12 @@ class ExpenseForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'})
 
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ExpenseForm, self).__init__(*args, **kwargs)
+
+        # Order the category field by name
+        self.fields['category'].queryset = Category.objects.order_by('name')
 
 
 class IncomeForm(forms.ModelForm):
