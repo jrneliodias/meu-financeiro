@@ -1,9 +1,10 @@
 {% extends "core/base.html" %}
+{% load currency_filters %}
 {% block content %}
     <h1 class="text-3xl font-bold my-3">Dashboard</h1>
     <div class="flex flex-col ">
         <form method="get"
-              class=" flex bg-slate-800/40 p-6 rounded-lg  space-x-4 w-fit">
+              class=" flex bg-slate-800/40 p-4 rounded-lg  space-x-4 w-fit">
             <select name="month"
                     id="month"
                     class="w-full min-w-[150px] px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900"
@@ -30,36 +31,83 @@
                 <canvas id="expenseChart" class="w-full"></canvas>
             </div>
         </div>
+        <section class="my-3 space-y-4 bg-slate-800/50 rounded-lg mt-6 p-3">
+            <h2 class="text-2xl font-bold">Expenses by Category</h2>
+            <table class="p-2" border="1">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        {% for month_num,month_name in distinct_months %}<th class="text-left">{{ month_name }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category,month_total in expenses_by_category_by_month.items %}
+                        <tr class="*:p-1 border-b border-slate-700">
+                            <td>{{ category }}</td>
+                            {% for month,value in month_total.items %}
+                                <td class="text-left {% if value == 0.0 %}text-slate-600{% endif %}">{{ value|brl_currency }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tr class="*:p-1 border-b border-slate-700">
+                        <td class="font-bold">Total</td>
+                        {% for month,value in total_expense_by_month.items %}
+                            <td class="text-left font-bold">{{ value|brl_currency }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script>
     const ctx = document.getElementById('expenseChart').getContext('2d');
     const expenseChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [{% for expense in expenses_by_category %} "{{ expense.category__name }}", {% endfor %}],
+            labels: [{% for month in total_expense_by_month.keys %} "{{ month }}", {% endfor %}],
             datasets: [{
                 label: 'Total Amount',
-                data: [{% for expense in expenses_by_category %} {{ expense.total_amount }}, {% endfor %}],
+                data: [{% for value in total_expense_by_month.values %} {{ value }}, {% endfor %}],
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
             }]
         },
         options: {
-            responsive: true,  // Ensures responsiveness
-            maintainAspectRatio: false,  // Disables maintaining fixed aspect ratio
+            responsive: true,  // Makes the chart responsive
+            maintainAspectRatio: false,  // Allows it to resize dynamically
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true  // Ensure the y-axis starts at 0
                 },
-                x:{
+                x: {
                     ticks: {
-                        color:  'rgba(255, 255, 255, 0.6)',
+                        color: 'rgba(255, 255, 255, 0.6)'  // Adjust the color of the x-axis labels
+                    }
                 }
             },
+            plugins: {
+                tooltip: {
+                    enabled: true // Keeps tooltips enabled
+                },
+                // Custom plugin to draw values above the bars
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: function(value, context) {
+                        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value); // Format the value to two decimal places
+                    },
+                    color: 'white',  // Color of the text above the bars
+                    font: {
+                        weight: 'bold',
+                        size: 12
+                    }
+                }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
     </script>
 {% endblock content %}
