@@ -53,10 +53,23 @@ class IncomeAdmin(admin.ModelAdmin):
     actions = [duplicate_entries]
 
 
+class PaymentMethodAdmin(admin.ModelAdmin):
+    list_display = ('name', 'start_billing_day', 'created_at', 'updated_at')
+    search_fields = ('name',)
+
+
+class InvestmentAdmin(admin.ModelAdmin):
+    list_display = ('description', 'amount',
+                    'date', 'created_at', 'updated_at')
+    search_fields = ('description',)
+    ordering = ['-date']
+    actions = [duplicate_entries]
+
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Expense, ExpenseAdmin)
 admin.site.register(Income, IncomeAdmin)
-admin.site.register(Investment)
-admin.site.register(PaymentMethod)
+admin.site.register(Investment, InvestmentAdmin)
+admin.site.register(PaymentMethod, PaymentMethodAdmin)
 admin.site.register(Installment, InstallmentAdmin)
 admin.site.register(RecurringExpense, RecurringExpenseAdmin)

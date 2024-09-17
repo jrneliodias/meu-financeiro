@@ -23,6 +23,8 @@ class Category(models.Model):
 
 class PaymentMethod(models.Model):
     name = models.CharField(max_length=100)
+    start_billing_day = models.IntegerField(
+        help_text="Day of the month when billing starts")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
