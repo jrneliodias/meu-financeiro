@@ -5,6 +5,7 @@ from collections import defaultdict
 from registers.models import Expense, Income, Installment
 import calendar
 from datetime import datetime
+from pprint import pprint
 
 
 def index(request):
@@ -24,7 +25,7 @@ def expense_report(request):
         request, current_year, current_month)
 
     # Get expenses grouped by month and category for the current year
-    expenses_by_category_by_month, total_expense_by_month = get_expenses_by_month_and_category(
+    expenses_by_category_by_month, total_expense_by_month, total_expense_by_month_list = get_expenses_by_month_and_category(
         selected_year)
     print(type(total_expense_by_month))
     # Get expenses for the selected month
@@ -37,10 +38,15 @@ def expense_report(request):
     # Get incomes by month
     incomes_by_month = get_incomes_by_month(selected_year)
 
+    formatted_expenses = [
+        total_expense_by_month_list.get(month_name, 'R$ 0,00') for _, month_name in distinct_months
+    ]
+
     # Prepare the context
     context = {
         'expenses_by_category_by_month': expenses_by_category_by_month,
         'total_expense_by_month': total_expense_by_month,
+        'total_expense_by_month_list': formatted_expenses,
         'incomes_by_month': incomes_by_month,
         'categories': categories,
         'current_year': current_year,
@@ -92,7 +98,7 @@ def get_expenses_by_month_and_category(year):
         category = expense['category__name']
         total = float(expense['total_amount'])
 
-        expenses_by_category[category][month] = total
+        expenses_by_category[category][month] = format_brl(total)
         total_expense_by_month[month] += total
 
     for category, months in expenses_by_category.items():
@@ -105,9 +111,13 @@ def get_expenses_by_month_and_category(year):
     expenses_by_category_by_month_sorted = sort_category_by_month(
         expenses_by_category_by_month)
 
+    total_expense_by_month_list = {month: format_brl(
+        amount) for month, amount in total_expense_by_month.items()}
+    pprint(total_expense_by_month_list)
+
     total_expense_by_month_sorted = sort_by_month(total_expense_by_month)
 
-    return expenses_by_category_by_month_sorted, total_expense_by_month_sorted
+    return expenses_by_category_by_month_sorted, total_expense_by_month_sorted, total_expense_by_month_list
 
 
 def get_incomes_by_month(year):
@@ -174,3 +184,13 @@ def sort_by_month(data):
     sorted_data = dict(
         sorted(data.items(), key=lambda x: month_order.index(x[0])))
     return sorted_data
+
+
+def format_brl(value):
+    """
+    Formats a float value into Brazilian Real currency format (R$ 1.234,90).
+    """
+    # Ensure value has two decimal places and replace the decimal and thousand separators
+    formatted_value = "R$ {:,.2f}".format(value).replace(
+        ",", "X").replace(".", ",").replace("X", ".")
+    return formatted_value

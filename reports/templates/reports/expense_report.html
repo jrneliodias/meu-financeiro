@@ -1,5 +1,4 @@
 {% extends "core/base.html" %}
-{% load currency_filters %}
 {% block content %}
     <h1 class="text-3xl font-bold my-3">Dashboard</h1>
     <div class="flex flex-col ">
@@ -45,15 +44,13 @@
                         <tr class="*:p-1 border-b border-slate-700">
                             <td>{{ category }}</td>
                             {% for month,value in month_total.items %}
-                                <td class="text-left {% if value == 0.0 %}text-slate-600{% endif %}">{{ value|brl_currency }}</td>
+                                <td class="text-left {% if value == 0.0 %}text-slate-600{% endif %}">{{ value }}</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
                     <tr class="*:p-1 border-b border-slate-700">
                         <td class="font-bold">Total</td>
-                        {% for month,value in total_expense_by_month.items %}
-                            <td class="text-left font-bold">{{ value|brl_currency }}</td>
-                        {% endfor %}
+                        {% for value in total_expense_by_month_list %}<td class="text-left font-bold">{{ value }}</td>{% endfor %}
                     </tr>
                 </tbody>
             </table>
