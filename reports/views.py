@@ -2,10 +2,12 @@ from django.shortcuts import render
 from django.db.models.functions import TruncMonth, TruncYear
 from django.db.models import Sum
 from collections import defaultdict
-from registers.models import Expense, Income, Installment
+from registers.models import Expense, Income, PaymentMethod
 import calendar
 from datetime import datetime
 from pprint import pprint
+from django.forms.models import model_to_dict
+from calendar import monthrange
 
 
 def index(request):
@@ -19,6 +21,7 @@ def expense_report(request):
 
     # Get distinct years and months
     distinct_years, distinct_months = get_distinct_years_and_months()
+    month_by_year = get_months_by_year(current_year)
 
     # Get the selected year and month from the request
     selected_year, selected_month, selected_month_name = get_selected_year_and_month(
@@ -34,6 +37,9 @@ def expense_report(request):
 
     # Get distinct category names
     categories = get_distinct_categories()
+    print(get_payment_methods_and_start_billing_days())
+    print(get_total_expenses_amount_by_payment_method_and_month(
+        month_by_year, selected_year))
 
     # Get incomes by month
     incomes_by_month = get_incomes_by_month(selected_year)
@@ -59,6 +65,78 @@ def expense_report(request):
     }
 
     return render(request, 'reports/expense_report.html', context)
+
+
+def get_payment_methods_and_start_billing_days():
+    payment_methods_db = PaymentMethod.objects.all()
+    data = []
+
+    if payment_methods_db:
+        for payment_method in payment_methods_db:
+            method_dict = model_to_dict(payment_method)
+            data.append(method_dict)
+    return data
+
+
+def get_total_expenses_amount_by_payment_method_and_month(month_list: list[tuple[str, str]], year: int):
+
+    interval_filter = calculate_time_interval_for_custom_start_billing_day(
+        month_list, year)
+
+    for interval in interval_filter:
+        previous_month_24th = interval[1]
+        current_month_24th = interval[2]
+        credit_expenses = Expense.objects.filter(
+            payment_method__start_billing_day=24,  # Credit card payments start on 24th
+            date__gte=previous_month_24th,
+            date__lte=current_month_24th
+        ).values('category__name').annotate(total_amount=Sum('amount'))
+        expense_by_category = {}
+        for credit_expense in credit_expenses:
+            category = credit_expense['category__name']
+            total_amount = credit_expense['total_amount']
+            if category in expense_by_category:
+                expense_by_category[category] += total_amount
+            else:
+                expense_by_category[category] = total_amount
+
+        pprint(expense_by_category)
+
+
+def calculate_time_interval_for_custom_start_billing_day(month_list: list[tuple[str, str]], year: int):
+    payment_methods = get_payment_methods_and_start_billing_days()
+    interval_filter = []
+    for payment_method in payment_methods:
+        if (payment_method['start_billing_day'] == 1):
+            continue
+        print(payment_method['name'])
+        for month_num, month_name in month_list:
+            previous_month = int(month_num) - 1 if int(month_num) > 1 else 12
+            current_month_start = datetime(
+                year, previous_month, payment_method['start_billing_day'])
+            current_month_end = datetime(
+                year, month_num, payment_method['start_billing_day'])
+            interval_filter.append(
+                (month_name, current_month_start, current_month_end))
+    return interval_filter
+
+
+def calculate_total_expenses_amount_by_payment_method_and_month(month: int, year: int, payment_method: dict):
+
+    expenses_by_payment = Expense.objects.filter(date__year=year
+                                                 ).values('payment_method__name'
+                                                          ).annotate(month=TruncMonth('date')
+                                                                     ).annotate(total_amount=Sum('amount')
+                                                                                )
+
+    return expenses_by_payment
+
+
+def get_months_by_year(year):
+    months_set = Expense.objects.filter(date__year=year).annotate(month=TruncMonth(
+        'date')).values('month').distinct().order_by('month')
+    return [(expense['month'].month, calendar.month_name[expense['month'].month])
+            for expense in months_set]
 
 
 def get_distinct_years_and_months():
