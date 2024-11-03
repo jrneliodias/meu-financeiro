@@ -4,10 +4,13 @@ from collections import defaultdict
 import calendar
 from datetime import datetime
 from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
+from reports.services import ExpenseService
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
 category_repository = CategoryRepository()
+
+expense_service = ExpenseService(expense_repository)
 
 
 def index(request):
@@ -47,6 +50,9 @@ def expense_report(request):
         total_expense_by_month_list.get(month_name, 'R$ 0,00') for _, month_name in distinct_months
     ]
 
+    monthy_payment_method_expense_totals = expense_service.monthly_payment_method_expense_totals(
+        current_year)
+
     # Prepare the context
     context = {
         'expenses_by_category_by_month': expenses_by_category_by_month,
@@ -60,7 +66,8 @@ def expense_report(request):
         'selected_month': selected_month,
         'selected_year': selected_year,
         'selected_month_name': selected_month_name,
-        'expenses_by_category': expenses_by_category
+        'expenses_by_category': expenses_by_category,
+        'monthy_payment_method_expense_totals': monthy_payment_method_expense_totals
     }
 
     return render(request, 'reports/expense_report.html', context)
