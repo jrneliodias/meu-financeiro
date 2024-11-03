@@ -5,31 +5,46 @@ import calendar
 
 
 class ExpenseRepository:
+
     def get_expenses_by_filter(self, filter):
         start_date = filter.get('start_date', None)
         end_date = filter.get('end_date', None)
         values = filter.get('values', None)
 
-        credit_expenses = Expense.objects.filter(  # Credit card payments start on 24th
-            date__gte=start_date,
-            date__lte=end_date,
-        ).values(values).annotate(total_amount=Sum('amount'))
+        credit_expenses = (
+            Expense.objects
+            .filter(  # Credit card payments start on 24th
+                date__gte=start_date,
+                date__lte=end_date,
+            )
+            .values(values)
+            .annotate(total_amount=Sum('amount'))
+        )
 
         return credit_expenses
 
     def get_months_by_year(self, year):
-        months_set = Expense.objects.filter(date__year=year).annotate(month=TruncMonth(
-            'date')).values('month').distinct().order_by('month')
+        months_set = (
+            Expense.objects
+            .filter(date__year=year)
+            .annotate(month=TruncMonth('date'))
+            .values('month')
+            .distinct()
+            .order_by('month')
+        )
         return [(expense['month'].month, calendar.month_name[expense['month'].month])
                 for expense in months_set]
 
-    def get_total_expenses_amount_by_payment_method_and_month(self, month: int, year: int, payment_method: dict):
+    def get_total_expenses_amount_by_payment_method_and_month(self, year: int):
 
-        expenses_by_payment = Expense.objects.filter(date__year=year
-                                                     ).values('payment_method__name'
-                                                              ).annotate(month=TruncMonth('date')
-                                                                         ).annotate(total_amount=Sum('amount')
-                                                                                    )
+        expenses_by_payment = (
+            Expense.objects
+            .filter(date__year=year)
+            .annotate(month=TruncMonth('date'))
+            .values('month', 'payment_method__name')
+            .annotate(total_amount=Sum('amount'))
+            .order_by('month', 'payment_method__name')
+        )
 
         return expenses_by_payment
 
