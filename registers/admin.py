@@ -1,8 +1,6 @@
 from django.contrib import admin
-# Register your models here.
 from .models import *
 from rangefilter.filters import DateRangeFilter
-from django.db.models import Sum
 
 
 @admin.action(description="Duplicate selected entries")
@@ -11,6 +9,15 @@ def duplicate_entries(modeladmin, request, queryset):
         # Create a copy of the object
         obj.pk = None  # Set pk to None to create a new object instead of updating the existing one
         obj.save()     # Save the new duplicated object
+
+
+@admin.action(description="Triplicate selected entries")
+def triplicate_entries(modeladmin, request, queryset):
+    for obj in queryset:
+        for _ in range(3):
+            # Create a copy of the object
+            obj.pk = None  # Set pk to None to create a new object instead of updating the existing one
+            obj.save()     # Save the new duplicated object
 
    # Register the duplicate action
 
@@ -23,7 +30,7 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_filter = (('date', DateRangeFilter), 'category', 'payment_method')
     search_fields = ('description',)  # Habilitar pesquisa pela descrição
     list_per_page = 40
-    actions = [duplicate_entries]
+    actions = [duplicate_entries, triplicate_entries]
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -33,10 +40,20 @@ class CategoryAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
+class ExpenseInline(admin.TabularInline):  # You can also use `admin.StackedInline`
+    model = Expense
+    extra = 0  # Do not display extra blank forms
+    fields = ['description', 'amount', 'date', 'category',
+              'payment_method']  # Customize the displayed fields
+    readonly_fields = ['description', 'amount', 'date', 'category',
+                       'payment_method']  # Make fields read-only if necessary
+
+
 class InstallmentAdmin(admin.ModelAdmin):
     list_display = ('description', 'total_amount', 'total_installments',
                     'start_date', 'category', 'payment_method', 'created_at', 'updated_at')
     search_fields = ('name',)
+    inlines = [ExpenseInline]
 
 
 class RecurringExpenseAdmin(admin.ModelAdmin):
