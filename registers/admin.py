@@ -25,7 +25,7 @@ def triplicate_entries(modeladmin, request, queryset):
 class ExpenseAdmin(admin.ModelAdmin):
     ordering = ['-date']  # Default order by date descending
     list_display = ('description', 'date',
-                    'category', 'payment_method',  'amount', 'created_at')
+                    'category', 'payment_method',  'amount', 'reccurring_expense')
     # Filtros por categoria e método de pagamento
     list_filter = (('date', DateRangeFilter), 'category', 'payment_method')
     search_fields = ('description',)  # Habilitar pesquisa pela descrição

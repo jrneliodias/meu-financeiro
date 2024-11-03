@@ -1,13 +1,9 @@
 from django.shortcuts import render
 from django.db.models.functions import TruncMonth, TruncYear
-from django.db.models import Sum
 from collections import defaultdict
-from registers.models import Expense, Income
 import calendar
 from datetime import datetime
-from reports.repository.expense_repository import ExpenseRepository
-from reports.repository.income_repository import IncomeRepository
-from reports.repository.category_repository import CategoryRepository
+from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
