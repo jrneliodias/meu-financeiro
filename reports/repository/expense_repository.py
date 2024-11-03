@@ -1,6 +1,7 @@
 from registers.models import Expense
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth, TruncYear
+
 import calendar
 
 
@@ -46,30 +47,52 @@ class ExpenseRepository:
             .order_by('month', 'payment_method__name')
         )
 
-        return expenses_by_payment
+        return list(expenses_by_payment)
 
     def get_months_by_year(self, year):
-        months_set = Expense.objects.filter(date__year=year).annotate(month=TruncMonth(
-            'date')).values('month').distinct().order_by('month')
+        months_set = (
+            Expense.objects
+            .filter(date__year=year)
+            .annotate(month=TruncMonth('date'))
+            .values('month')
+            .distinct()
+            .order_by('month')
+        )
         return [(expense['month'].month, calendar.month_name[expense['month'].month])
                 for expense in months_set]
 
     def get_distinct_years_in_tuples(self):
         """Returns distinct years from the Expense model."""
-        distinct_years = Expense.objects.annotate(year=TruncYear(
-            'date')).values('year').distinct().order_by('year')
+        distinct_years = (
+            Expense
+            .objects
+            .annotate(year=TruncYear('date'))
+            .values('year')
+            .distinct()
+            .order_by('year')
+        )
         return [(expense['year'].year, expense['year'].year) for expense in distinct_years]
 
     def get_distinct_months_in_tuples(self):
         """Returns distinct months from the Expense model."""
-        distinct_months = Expense.objects.annotate(month=TruncMonth(
-            'date')).values('month').distinct().order_by('month')
+        distinct_months = (
+            Expense.objects
+            .annotate(month=TruncMonth('date'))
+            .values('month')
+            .distinct()
+            .order_by('month')
+        )
         return [(expense['month'].month, calendar.month_name[expense['month'].month]) for expense in distinct_months]
 
     def get_months_in_list(self):
         """Retrieve distinct months from the database."""
-        distinct_months = Expense.objects.annotate(month=TruncMonth(
-            'date')).values('month').distinct().order_by('month')
+        distinct_months = (
+            Expense.objects
+            .annotate(month=TruncMonth('date'))
+            .values('month')
+            .distinct()
+            .order_by('month')
+        )
         months_list = [calendar.month_name[expense['month'].month]
                        for expense in distinct_months]
         return months_list
@@ -81,13 +104,26 @@ class ExpenseRepository:
 
     def get_expenses_for_year(self, year):
         """Fetch expenses for the given year, grouped by month and category."""
-        return Expense.objects.filter(date__year=year).annotate(
-            month=TruncMonth('date')
-        ).values('month', 'category__name').annotate(
-            total_amount=Sum('amount')
-        ).order_by('category__name', 'month')
+        return (
+            Expense.objects
+            .filter(date__year=year)
+            .annotate(
+                month=TruncMonth('date')
+            )
+            .values('month', 'category__name')
+            .annotate(
+                total_amount=Sum('amount')
+            )
+            .order_by('category__name', 'month')
+        )
 
     def get_expenses_group_by_category_and_month(self, year, month):
-        return Expense.objects.filter(date__year=year, date__month=month).values(
-            'category__name'
-        ).annotate(total_amount=Sum('amount')).order_by('category__name')
+        return (
+            Expense.objects
+            .filter(date__year=year, date__month=month)
+            .values(
+                'category__name'
+            )
+            .annotate(total_amount=Sum('amount'))
+            .order_by('category__name')
+        )
