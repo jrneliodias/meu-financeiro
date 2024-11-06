@@ -72,8 +72,8 @@ class ExpenseService:
             }
             transformed_payments.append(month_entry)
 
-        with open('expenses_by_payment.json', 'w', encoding='utf-8') as file:
-            json.dump(transformed_payments, file,
-                      ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
+        # with open('expenses_by_payment.json', 'w', encoding='utf-8') as file:
+        #     json.dump(transformed_payments, file,
+        #               ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
 
         return transformed_payments

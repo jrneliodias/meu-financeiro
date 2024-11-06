@@ -3,4 +3,9 @@
     <div class="flex justify-center items-center h-screen w-full">
         <h2>Expense Registered Successfully!</h2>
     </div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+        </ul>
+    {% endif %}
 {% endblock content %}
