@@ -53,6 +53,8 @@ def expense_report(request):
     monthy_payment_method_expense_totals = expense_service.monthly_payment_method_expense_totals(
         current_year)
 
+    calculated_monthy_payment_method_expense_totals = expense_service.calculate_monthly_payment_method_total_expense()
+
     # Prepare the context
     context = {
         'expenses_by_category_by_month': expenses_by_category_by_month,
@@ -67,7 +69,8 @@ def expense_report(request):
         'selected_year': selected_year,
         'selected_month_name': selected_month_name,
         'expenses_by_category': expenses_by_category,
-        'monthy_payment_method_expense_totals': monthy_payment_method_expense_totals
+        'monthy_payment_method_expense_totals': monthy_payment_method_expense_totals,
+        'calculated_monthy_payment_method_expense_totals': calculated_monthy_payment_method_expense_totals
     }
 
     return render(request, 'reports/expense_report.html', context)
