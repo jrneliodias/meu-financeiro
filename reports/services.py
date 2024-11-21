@@ -64,8 +64,6 @@ class ExpenseService:
                 payment_method, start_date, end_date)
 
             billing_month = self.get_billing_month(day, start_date, end_date)
-            print(
-                f"{billing_month}: {total_expenses}")
             expenses_by_month[billing_month] += float(
                 total_expenses)
 
