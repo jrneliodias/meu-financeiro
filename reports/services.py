@@ -15,12 +15,13 @@ from .utils import convert_values_to_float
 
 
 class ExpenseService:
-    def __init__(self, expense_repository, income_repository):
+    def __init__(self, expense_repository, income_repository, year):
 
         self.expense_repository = expense_repository
         self.income_repository = income_repository
+        self.year = year
 
-    def calculate_monthly_payment_method_total_expense(self):
+    def calculate_monthly_payment_method_total_expense(self, ):
         payment_methods = PaymentMethod.objects.all()
         labels = [month for month in calendar.month_name if month]
         datasets = []
@@ -62,7 +63,7 @@ class ExpenseService:
 
     def calculate_total_incomes_by_month(self):
         monthly_incomes_queryset = self.income_repository.get_incomes_by_month(
-            2024)
+            self.year)
         monthly_incomes_dict = {income['month'].month: income['total_amount']
                                 for income in monthly_incomes_queryset}
         all_months = list(range(1, 13))
@@ -75,7 +76,6 @@ class ExpenseService:
 
     def create_month_total_datasets(self):
         monthly_expenses_total = self.calculate_monthly_expenses_total()
-        print(monthly_expenses_total)
         monthly_incomes_income = self.calculate_total_incomes_by_month()
 
         monthly_expenses_total['datasets'].append(
@@ -99,9 +99,13 @@ class ExpenseService:
         )
 
     def calculate_total_expense_for_payment_method(self, expenses_by_month, payment_method, day):
-        for month in range(1, 12):
-            start_date = date(2024, month, day)
-            end_date = date(2024, month+1, day)
+        for month in range(1, 13):
+            start_date = date(self.year, month, day)
+            if month == 12:
+                end_date = date(self.year, 12, calendar.monthrange(
+                    self.year, 12)[1])  # Last day of December
+            else:
+                end_date = date(self.year, month + 1, day)
             total_expenses = self.get_total_expenses_amount_by_payment_method(
                 payment_method, start_date, end_date)
 
