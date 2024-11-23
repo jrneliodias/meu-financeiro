@@ -31,6 +31,12 @@
             </div>
         </div>
         <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
+            <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
+            <div class="h-[350px] mt-2 p-3">
+                <canvas id="expenseIncomeTotalChart" class="w-full"></canvas>
+            </div>
+        </div>
+        <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
             <h2 class="text-2xl font-bold">Calculated Monthly Expenses by Payment Method</h2>
             <div class="h-[350px] mt-2 p-3 w-full">
                 <canvas id="calculatedPaymentMethodExpenseChart" class="w-full"></canvas>
@@ -326,5 +332,94 @@ new Chart(calculatedPaymentMethodExpenseChartCtx, {
     },
     plugins: [ChartDataLabels]
 });
+
+const expenseIncomeColors = [
+   
+{
+    backgroundColor: 'rgba(167, 139, 250, 0.2)',   // Darker purple with opacity
+    borderColor: 'rgba(167, 139, 250, 1)',         // Lighter purple for border
+    borderWidth: 1
+},
+
+{
+    backgroundColor: 'rgba(52, 211, 153, 0.2)',    // Darker green with opacity
+    borderColor: 'rgba(52, 211, 153, 1)',          // Lighter green for border
+    borderWidth: 1
+},
+]
+
+const calculatedExpenseIncomeTotal = {{ monthly_expense_income_datasets|safe }};
+
+
+const calculatedExpenseIncomeTotalCtx = document.getElementById('expenseIncomeTotalChart').getContext('2d');
+
+const calculatedExpenseIncomeTotalDatasets = calculatedExpenseIncomeTotal.datasets.map((dataset, index) => ({
+    label: dataset.label, // Payment method name
+    data: dataset.datasets,   // Monthly expenses for this payment method
+    backgroundColor: expenseIncomeColors[index % expenseIncomeColors.length].backgroundColor, // Rotate through colors
+    borderColor: expenseIncomeColors[index % expenseIncomeColors.length].borderColor,
+    borderWidth: expenseIncomeColors[index % expenseIncomeColors.length].borderWidth,
+}));
+
+console.log(calculatedExpenseIncomeTotalDatasets)
+
+new Chart(calculatedExpenseIncomeTotalCtx, {
+    type: 'bar', // Change to 'line' for line charts
+    data: {
+        labels: calculatedExpenseIncomeTotal.labels, // Months
+        datasets: calculatedExpenseIncomeTotalDatasets, // Payment method datasets
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top', // Position the legend at the top
+            },
+            tooltip: {
+                enabled: true,
+            },
+            // Custom plugin to draw values above the bars
+            datalabels: {
+                anchor: 'end',
+                align: function(context) {
+                    const value = context.dataset.data[context.dataIndex]; // Get the current data value
+                    return value > 3000 ? 'start' : 'end';  // Dynamic alignment based on value
+                },
+                rotation: -90,
+                formatter: function(value, context) {
+                    return value > 0 
+                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+                    : ''; // Hide labels for values <= 0
+                },
+                color: 'white',  // Color of the text above the bars
+                font: {
+                    weight: 'bold',
+                    size: 12
+                }
+            }
+           
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Month',
+                },
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Total Expenses',
+                },
+            },
+        },
+        
+        
+    },
+    plugins: [ChartDataLabels]
+});
+
     </script>
 {% endblock content %}
