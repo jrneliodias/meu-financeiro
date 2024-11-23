@@ -26,26 +26,14 @@
         </form>
         <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
             <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
-            <div class="h-[350px] mt-2 p-3">
-                <canvas id="expenseChart" class="w-full"></canvas>
-            </div>
-        </div>
-        <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
-            <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
-            <div class="h-[350px] mt-2 p-3">
+            <div class="h-[350px] mt-2 p-3 px-0">
                 <canvas id="expenseIncomeTotalChart" class="w-full"></canvas>
             </div>
         </div>
         <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
             <h2 class="text-2xl font-bold">Calculated Monthly Expenses by Payment Method</h2>
-            <div class="h-[350px] mt-2 p-3 w-full">
+            <div class="h-[350px] mt-2 p-3 px-0 w-full">
                 <canvas id="calculatedPaymentMethodExpenseChart" class="w-full"></canvas>
-            </div>
-        </div>
-        <div class="bg-slate-800/50 rounded-lg mt-6 p-3">
-            <h2 class="text-2xl font-bold">Monthly Expenses by Payment Method</h2>
-            <div class="h-[350px] mt-2 p-3 w-full">
-                <canvas id="paymentMethodExpenseChart" class="w-full"></canvas>
             </div>
         </div>
         <section class="my-3 space-y-4 bg-slate-800/50 rounded-lg mt-6 p-3">
@@ -77,91 +65,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script>
-    const ctx = document.getElementById('expenseChart').getContext('2d');
-    const expenseChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [{% for month in total_expense_by_month.keys %} "{{ month }}", {% endfor %}],
-            datasets: [{
-                label: 'Total Amount',
-                data: [{% for value in total_expense_by_month.values %} {{ value }}, {% endfor %}],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            },
-            {
-                label:'Total Income',
-                data: [{% for value in incomes_by_month.values %} {{ value }}, {% endfor %}],
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,  // Makes the chart responsive
-            maintainAspectRatio: false,  // Allows it to resize dynamically
-            scales: {
-                y: {
-                    beginAtZero: true  // Ensure the y-axis starts at 0
-                },
-                x: {
-                    ticks: {
-                        color: 'rgba(255, 255, 255, 0.6)'  // Adjust the color of the x-axis labels
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    enabled: true // Keeps tooltips enabled
-                },
-                // Custom plugin to draw values above the bars
-                datalabels: {
-                    anchor: 'end',
-                    align: 'end',
-                    formatter: function(value, context) {
-                        return value > 0 
-                        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-                        : undefined; // Hide labels for values <= 0
-                    },
-                    color: 'white',  // Color of the text above the bars
-                    font: {
-                        weight: 'bold',
-                        size: 12
-                    }
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
-
-    const paymentMethdCtx = document.getElementById('paymentMethodExpenseChart').getContext('2d');
-    const paymentMethodRawData = {{ monthy_payment_method_expense_totals|safe }};
-    const labels = paymentMethodRawData.map(entry => entry.month);
-    const datasets = {}
-
-    const colors = [
-   
-    {
-        backgroundColor: 'rgba(253, 186, 116, 0.2)',   // Darker orange with opacity
-        borderColor: 'rgba(253, 186, 116, 1)',         // Lighter orange for border
-        borderWidth: 1
-    },
-    {
-        backgroundColor: 'rgba(167, 139, 250, 0.2)',   // Darker purple with opacity
-        borderColor: 'rgba(167, 139, 250, 1)',         // Lighter purple for border
-        borderWidth: 1
-    },
-    {
-        backgroundColor: 'rgba(52, 211, 153, 0.2)',    // Darker green with opacity
-        borderColor: 'rgba(52, 211, 153, 1)',          // Lighter green for border
-        borderWidth: 1
-    },
-    {
-        backgroundColor: 'rgba(96, 165, 250, 0.2)',    // Darker light blue with opacity
-        borderColor: 'rgba(96, 165, 250, 1)',          // Lighter light blue for border
-        borderWidth: 1
-    }
-    ]
     const PaymentMethodcolors = [
    
     {
@@ -187,82 +90,6 @@
     }
     ]
 
-    paymentMethodRawData.forEach(entry => {
-        entry.payment.forEach(payment => {
-            const method = payment.payment_method_name;
-            const amount = parseFloat(payment.total_amount);
-
-            if (!datasets[method]) {
-                datasets[method] = {
-                    label: method,
-                    data: Array(paymentMethodRawData.length).fill(0),
-                };
-            }
-            datasets[method].data[labels.indexOf(entry.month)] = amount;
-
-        })
-    });
-
-    const chartDatasets = Object.values(datasets).map((dataset,index) => ({
-        label: dataset.label,
-        data: dataset.data,
-        borderColor: colors[index].borderColor,
-        backgroundColor: colors[index].backgroundColor,
-        borderWidth: 1
-    }));
-
-    new Chart(paymentMethdCtx, {
-        type: 'bar',  // You can change this to 'bar' or 'pie' based on preference
-        data: {
-            labels: labels,
-            datasets: chartDatasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Month'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Total Amount'
-                    }
-                }
-            },
-        
-        plugins: {
-            tooltip: {
-                enabled: true,
-            },
-            // Custom plugin to draw values above the bars
-            datalabels: {
-                anchor: 'end',
-                align: function(context) {
-                    const value = context.dataset.data[context.dataIndex]; // Get the current data value
-                    return value > 1000 ? 'start' : 'end';  // Dynamic alignment based on value
-                },
-                rotation: -90,
-                formatter: function(value, context) {
-                    return value > 0 
-                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-                    : ''; // Hide labels for values <= 0
-                },
-                color: 'white',  // Color of the text above the bars
-                font: {
-                    weight: 'bold',
-                    size: 12
-                }
-            }
-        }
-    },
-plugins: [ChartDataLabels]
-    });
-                
    
     const calculatedPaymentMethodRawData = {{ calculated_monthy_payment_method_expense_totals|safe }};
     const calculatedPaymentMethodLabels = calculatedPaymentMethodRawData.labels; // Extract the months
@@ -320,6 +147,7 @@ new Chart(calculatedPaymentMethodExpenseChartCtx, {
                 },
             },
             y: {
+                display:false,
                 beginAtZero: true,
                 title: {
                     display: true,
@@ -408,6 +236,7 @@ new Chart(calculatedExpenseIncomeTotalCtx, {
                 },
             },
             y: {
+                display:false,
                 beginAtZero: true,
                 title: {
                     display: true,

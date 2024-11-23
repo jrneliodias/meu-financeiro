@@ -10,8 +10,6 @@ expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
 category_repository = CategoryRepository()
 
-expense_service = ExpenseService(expense_repository, income_repository)
-
 
 def index(request):
     return render(request, 'core/index.html')
@@ -31,6 +29,8 @@ def expense_report(request):
     # Get the selected year and month from the request
     selected_year, selected_month, selected_month_name = get_selected_year_and_month(
         request, current_year, current_month)
+    expense_service = ExpenseService(
+        expense_repository, income_repository, year=selected_year)
 
     # Get expenses grouped by month and category for the current year
     expenses_by_category_by_month, total_expense_by_month, total_expense_by_month_list = get_expenses_by_month_and_category(
@@ -53,9 +53,12 @@ def expense_report(request):
     monthy_payment_method_expense_totals = expense_service.monthly_payment_method_expense_totals(
         current_year)
 
-    calculated_monthy_payment_method_expense_totals = expense_service.calculate_monthly_payment_method_total_expense()
+    calculated_monthy_payment_method_expense_totals = expense_service.calculate_monthly_payment_method_total_expense(
+    )
 
-    monthy_expense_total = expense_service.calculate_monthly_expenses_total()
+    monthy_expense_total = expense_service.calculate_monthly_expenses_total(
+
+    )
     monthly_expense_income_datasets = expense_service.create_month_total_datasets()
 
     # Prepare the context
