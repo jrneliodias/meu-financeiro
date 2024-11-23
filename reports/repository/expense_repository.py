@@ -7,6 +7,17 @@ import calendar
 
 class ExpenseRepository:
 
+    def get_total_payment_method_expenses_by_filter(self, payment_method, start_date, end_date):
+
+        return (
+            Expense.objects.filter(
+                payment_method=payment_method,
+                date__gte=start_date,
+                date__lte=end_date
+            )
+            .aggregate(total=Sum('amount'))['total']
+        )
+
     def get_expenses_by_filter(self, filter):
         start_date = filter.get('start_date', None)
         end_date = filter.get('end_date', None)
