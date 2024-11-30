@@ -98,18 +98,33 @@ class ExpenseService:
             end_date.strftime("%B")
         )
 
-    def calculate_total_expense_for_payment_method(self, expenses_by_month, payment_method, day):
+    def calculate_end_date(self, billing_day, month, year):
+
+        if month == 12:
+            last_month_day = calendar.monthrange(year, 12)[1]
+            # Last day of December
+            return date(self.year, month, last_month_day)
+
+        if billing_day == 1:
+            last_month_day = calendar.monthrange(year, month)[1]
+            return date(
+                year,
+                month,
+                last_month_day
+            )
+
+        return date(year, month + 1, billing_day-1)
+
+    def calculate_total_expense_for_payment_method(self, expenses_by_month, payment_method, billing_day):
         for month in range(1, 13):
-            start_date = date(self.year, month, day)
-            if month == 12:
-                end_date = date(self.year, 12, calendar.monthrange(
-                    self.year, 12)[1])  # Last day of December
-            else:
-                end_date = date(self.year, month + 1, day)
+            start_date = date(self.year, month, billing_day)
+            end_date = self.calculate_end_date(
+                billing_day, month, self.year)
             total_expenses = self.get_total_expenses_amount_by_payment_method(
                 payment_method, start_date, end_date)
 
-            billing_month = self.get_billing_month(day, start_date, end_date)
+            billing_month = self.get_billing_month(
+                billing_day, start_date, end_date)
             expenses_by_month[billing_month] += total_expenses
         monthy_payment_method_expense_float = convert_values_to_float(
             expenses_by_month)
