@@ -67,9 +67,11 @@
                                 <td>{{ expense.created_at }}</td>
                                 <td>{{ expense.updated_at }}</td>
                                 <td>{{ expense.reccurring_expense.description }}</td>
-                                <td class="px-4 py-2 text-end">
+                                <td class="px-4 py-2 text-center">
                                     <a href="{% url 'expense_update' expense.id %}"
-                                       class="text-blue-600 hover:underline">Edit</a>
+                                       class="text-blue-600 hover:underline">
+                                        <i class="fa-solid fa-edit hover:text-blue-800"></i>
+                                    </a>
                                 </td>
                             </tr>
                         {% empty %}
@@ -234,7 +236,6 @@ const calculatedExpenseIncomeTotalDatasets = calculatedExpenseIncomeTotal.datase
     borderWidth: expenseIncomeColors[index % expenseIncomeColors.length].borderWidth,
 }));
 
-console.log(calculatedExpenseIncomeTotalDatasets)
 
 new Chart(calculatedExpenseIncomeTotalCtx, {
     type: 'bar', // Change to 'line' for line charts
