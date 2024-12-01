@@ -7,6 +7,14 @@ import calendar
 
 class ExpenseRepository:
 
+    def get_monthly_expenses_by_year(self, year, month):
+        return (
+            Expense.objects
+            .filter(date__year=year)
+            .filter(date__month=month)
+            .order_by('date')
+        )
+
     def get_total_payment_method_expenses_by_filter(self, payment_method, start_date, end_date):
 
         return (

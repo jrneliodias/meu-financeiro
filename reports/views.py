@@ -5,6 +5,9 @@ import calendar
 from datetime import datetime
 from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
 from reports.services import ExpenseService
+from django.views.generic import UpdateView
+from registers.models import Expense
+from registers.forms import ExpenseForm
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
@@ -29,6 +32,7 @@ def expense_report(request):
     # Get the selected year and month from the request
     selected_year, selected_month, selected_month_name = get_selected_year_and_month(
         request, current_year, current_month)
+
     expense_service = ExpenseService(
         expense_repository, income_repository, year=selected_year)
 
@@ -56,10 +60,11 @@ def expense_report(request):
     calculated_monthy_payment_method_expense_totals = expense_service.calculate_monthly_payment_method_total_expense(
     )
 
-    monthy_expense_total = expense_service.calculate_monthly_expenses_total(
-
-    )
+    monthy_expense_total = expense_service.calculate_monthly_expenses_total()
     monthly_expense_income_datasets = expense_service.create_month_total_datasets()
+    monthly_expenses_queryset = get_expenses_by_month(
+        selected_year, selected_month
+    )
 
     # Prepare the context
     context = {
@@ -77,10 +82,18 @@ def expense_report(request):
         'expenses_by_category': expenses_by_category,
         'monthy_payment_method_expense_totals': monthy_payment_method_expense_totals,
         'calculated_monthy_payment_method_expense_totals': calculated_monthy_payment_method_expense_totals,
-        'monthly_expense_income_datasets': monthly_expense_income_datasets
+        'monthly_expense_income_datasets': monthly_expense_income_datasets,
+        'monthly_expenses_queryset': monthly_expenses_queryset
     }
 
     return render(request, 'reports/expense_report.html', context)
+
+
+class ExpenseUpdateView(UpdateView):
+    model = Expense
+    form_class = ExpenseForm
+    template_name = 'reports/expense_update.html'
+    success_url = '/'
 
 
 def get_expenses_by_month_and_category(year):
@@ -209,6 +222,11 @@ def sort_by_month(data):
     sorted_data = dict(
         sorted(data.items(), key=lambda x: month_order.index(x[0])))
     return sorted_data
+
+
+def get_expenses_by_month(year, month):
+
+    return expense_repository.get_monthly_expenses_by_year(year, month)
 
 
 def format_brl(value):
