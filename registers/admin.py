@@ -67,6 +67,7 @@ class IncomeAdmin(admin.ModelAdmin):
                     'date', 'category', 'created_at', 'updated_at')
     search_fields = ('description',)
     ordering = ['-date']
+    list_filter = (('date', DateRangeFilter), 'category')
     actions = [duplicate_entries]
 
 
