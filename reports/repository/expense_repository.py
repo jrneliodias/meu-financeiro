@@ -55,7 +55,7 @@ class ExpenseRepository:
         return [(expense['month'].month, calendar.month_name[expense['month'].month])
                 for expense in months_set]
 
-    def get_total_expenses_amount_by_payment_method_and_month(self, year: int):
+    def get_monthly_expenses_by_payment_method(self, year: int):
 
         expenses_by_payment = (
             Expense.objects
@@ -146,3 +146,14 @@ class ExpenseRepository:
             .annotate(total_amount=Sum('amount'))
             .order_by('category__name')
         )
+
+    def get_monthly_category_payment_method_total_expenses(self, year: int):
+
+        expenses_by_payment = (
+            Expense.objects
+            .filter(date__year=year)
+            .values('date', 'category__name', 'payment_method__name', 'amount')
+            .order_by('category__name', 'date')
+        )
+
+        return list(expenses_by_payment)

@@ -12,25 +12,26 @@ import json
 import calendar
 from decimal import Decimal
 from .utils import convert_values_to_float
+from collections import defaultdict
 
 
 class ExpenseService:
-    def __init__(self, expense_repository, income_repository, year):
+    def __init__(self, expense_repository, income_repository, year=2024):
 
         self.expense_repository = expense_repository
         self.income_repository = income_repository
         self.year = year
 
-    def calculate_monthly_payment_method_total_expense(self, ):
+    def calculate_monthly_payment_method_total_expense_datasets(self, ):
         payment_methods = PaymentMethod.objects.all()
         labels = [month for month in calendar.month_name if month]
         datasets = []
         for payment_method in payment_methods:
             monthly_expenses = {month: 0 for month in labels}
-            day = payment_method.start_billing_day
+            start_billing_day = payment_method.start_billing_day
 
             monthly_expenses = self.calculate_total_expense_for_payment_method(
-                monthly_expenses, payment_method, day
+                monthly_expenses, payment_method, start_billing_day
             )
 
             datasets.append({
@@ -44,7 +45,7 @@ class ExpenseService:
         }
 
     def calculate_monthly_expenses_total(self):
-        monthly_payment_method_expense_totals = self.calculate_monthly_payment_method_total_expense()
+        monthly_payment_method_expense_totals = self.calculate_monthly_payment_method_total_expense_datasets()
         datasets = monthly_payment_method_expense_totals["datasets"]
 
         total_sum = [0]*len(datasets[0]["data"])
@@ -130,47 +131,8 @@ class ExpenseService:
             expenses_by_month)
         return monthy_payment_method_expense_float
 
-    def calculate_time_interval_for_custom_start_billing_day(self, month_list: list[tuple[str, str]], year: int):
-        payment_methods = PaymentMethodRepository.get_start_billing_days_payment_methods()
-        interval_filter = []
-        for payment_method in payment_methods:
-            if (payment_method['start_billing_day'] == 1):
-                continue
-            for month_num, month_name in month_list:
-                previous_month = int(month_num) - \
-                    1 if int(month_num) > 1 else 12
-                current_month_start = datetime(
-                    year, previous_month, payment_method['start_billing_day'])
-                current_month_end = datetime(
-                    year, month_num, payment_method['start_billing_day'])
-                interval_filter.append(
-                    (month_name, current_month_start, current_month_end))
-        return interval_filter
-
-    def get_total_expenses_amount_by_payment_method_and_month(self, month_list: list[tuple[str, str]], year: int):
-
-        interval_filter = self.calculate_time_interval_for_custom_start_billing_day(
-            month_list, year)
-
-        for interval in interval_filter:
-            previous_month_24th = interval[1]
-            current_month_24th = interval[2]
-            credit_expenses = ExpenseRepository.get_expenses_by_filter({
-                'start_date': previous_month_24th,
-                'end_date': current_month_24th,
-                'values': 'category__name'
-            })
-            expense_by_category = {}
-            for credit_expense in credit_expenses:
-                category = credit_expense['category__name']
-                total_amount = credit_expense['total_amount']
-                if category in expense_by_category:
-                    expense_by_category[category] += total_amount
-                else:
-                    expense_by_category[category] = total_amount
-
     def monthly_payment_method_expense_totals(self, year: int):
-        payments_data = self.expense_repository.get_total_expenses_amount_by_payment_method_and_month(
+        payments_data = self.expense_repository.get_monthly_expenses_by_payment_method(
             year)
 
         payments_data.sort(key=itemgetter('month'))
@@ -195,3 +157,22 @@ class ExpenseService:
         #               ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
 
         return transformed_payments
+
+    def get_monthly_category_payment_method_total_expenses(self, year: int):
+        data = self.expense_repository.get_monthly_category_payment_method_total_expenses(
+            year)
+
+        full_formatted_data = defaultdict(
+            lambda: defaultdict(lambda: defaultdict(Decimal)))
+
+        # for item in data:
+        #     category = item["category__name"]
+        #     month = item["month"].strftime("%B")
+        #     payment_method = item["payment_method__name"]
+        #     total_amount = item["total_amount"]
+        #     full_formatted_data[category][month][payment_method] += total_amount
+        with open('expenses_by_category_payment.json', 'w', encoding='utf-8') as file:
+            json.dump(data, file,
+                      ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
+
+        return full_formatted_data

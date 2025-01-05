@@ -57,7 +57,7 @@ def expense_report(request):
     monthy_payment_method_expense_totals = expense_service.monthly_payment_method_expense_totals(
         current_year)
 
-    calculated_monthy_payment_method_expense_totals = expense_service.calculate_monthly_payment_method_total_expense(
+    calculated_monthy_payment_method_expense_totals = expense_service.calculate_monthly_payment_method_total_expense_datasets(
     )
 
     monthy_expense_total = expense_service.calculate_monthly_expenses_total()
