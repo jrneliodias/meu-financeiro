@@ -11,33 +11,140 @@ from django.db.models import Sum
 import json
 import calendar
 from decimal import Decimal
-from .utils import convert_values_to_float
+from .utils import convert_values_to_float, debug_to_json
 from collections import defaultdict
+from datetime import timedelta
+from dataclasses import dataclass
+from typing import Dict, List
+
+
+@dataclass
+class BillingPeriod:
+    start_date: date
+    end_date: date
+    billing_month: str
+
+
+class BillingPeriodCalculator:
+    def __init__(self, year: int):
+        self.year = year
+
+    def calculate_period(self, month: int, billing_day: int) -> BillingPeriod:
+        """Calculate billing period for a given month and billing day."""
+        if billing_day == 1:
+            return self._calculate_calendar_month_period(month)
+        return self._calculate_custom_billing_period(month, billing_day)
+
+    def _calculate_calendar_month_period(self, month: int) -> BillingPeriod:
+        """Calculate period for billing_day = 1 (calendar month)."""
+        start_date = date(self.year, month, 1)
+        last_day = calendar.monthrange(self.year, month)[1]
+        end_date = date(self.year, month, last_day)
+        billing_month = start_date.strftime('%B')
+
+        return BillingPeriod(start_date, end_date, billing_month)
+
+    def _calculate_custom_billing_period(self, month: int, billing_day: int) -> BillingPeriod:
+        """Calculate period for custom billing day."""
+        # For month M, the period is from M-1/billing_day to M/billing_day-1
+        # The expenses are attributed to month M
+
+        # Calculate end date first (this determines the billing month)
+        if month == 12:
+            end_date = date(self.year, 12, billing_day - 1)
+        else:
+            end_date = date(self.year, month, billing_day - 1)
+
+        # Calculate start date
+        if month == 1:
+            start_date = date(self.year - 1, 12, billing_day)
+        else:
+            start_date = date(self.year, month - 1, billing_day)
+
+        # The billing month is the month containing the end date
+        billing_month = end_date.strftime('%B')
+
+        return BillingPeriod(start_date, end_date, billing_month)
+
+
+class ExpenseCalculator:
+    def __init__(self, expense_repository, year: int):
+        self.expense_repository = expense_repository
+        self.billing_calculator = BillingPeriodCalculator(year)
+
+    def calculate_monthly_expenses(self, payment_method, billing_day: int) -> Dict[str, float]:
+        """Calculate monthly expenses for a payment method."""
+        monthly_expenses = {month: 0 for month in calendar.month_name[1:]}
+
+        for month in range(1, 13):
+            period = self.billing_calculator.calculate_period(
+                month, billing_day)
+
+            total_expenses = self._get_period_expenses(
+                payment_method,
+                period.start_date,
+                period.end_date
+            )
+
+            monthly_expenses[period.billing_month] += total_expenses
+
+            self._debug_period_calculation(
+                payment_method, period, total_expenses)
+
+        return monthly_expenses
+
+    def _get_period_expenses(self, payment_method, start_date: date, end_date: date) -> float:
+        """Get total expenses for a period."""
+        return float(
+            self.expense_repository.get_total_payment_method_expenses_by_filter(
+                payment_method, start_date, end_date
+            ) or 0
+        )
+
+    def _debug_period_calculation(self, payment_method, period: BillingPeriod, total_expenses: float):
+        """Log debug information for period calculation."""
+        debug_to_json(
+            data={
+                'payment_method': payment_method.name,
+                'period': {
+                    'start_date': str(period.start_date),
+                    'end_date': str(period.end_date),
+                    'billing_month': period.billing_month,
+                },
+                'total_expenses': total_expenses
+            },
+            filename_prefix=f'period_calculation_{payment_method.name.replace("/", "_")}'
+        )
 
 
 class ExpenseService:
     def __init__(self, expense_repository, income_repository, year=2024):
-
         self.expense_repository = expense_repository
         self.income_repository = income_repository
         self.year = year
+        self.expense_calculator = ExpenseCalculator(expense_repository, year)
 
-    def calculate_monthly_payment_method_total_expense_datasets(self, ):
+    def calculate_monthly_payment_method_total_expense_datasets(self):
+        """Calculate monthly expenses datasets for all payment methods."""
         payment_methods = PaymentMethod.objects.all()
-        labels = [month for month in calendar.month_name if month]
+        labels = list(calendar.month_name)[1:]  # Skip empty first item
         datasets = []
-        for payment_method in payment_methods:
-            monthly_expenses = {month: 0 for month in labels}
-            start_billing_day = payment_method.start_billing_day
 
-            monthly_expenses = self.calculate_total_expense_for_payment_method(
-                monthly_expenses, payment_method, start_billing_day
+        for payment_method in payment_methods:
+            monthly_expenses = self.expense_calculator.calculate_monthly_expenses(
+                payment_method,
+                payment_method.start_billing_day
             )
 
             datasets.append({
                 "label": payment_method.name,
                 "data": [monthly_expenses[month] for month in labels],
             })
+
+        debug_to_json(
+            data={'labels': labels, 'datasets': datasets},
+            filename_prefix='payment_method_datasets'
+        )
 
         return {
             "labels": labels,
@@ -46,13 +153,33 @@ class ExpenseService:
 
     def calculate_monthly_expenses_total(self):
         monthly_payment_method_expense_totals = self.calculate_monthly_payment_method_total_expense_datasets()
-        datasets = monthly_payment_method_expense_totals["datasets"]
 
+        # Debug input
+        debug_to_json(
+            data=monthly_payment_method_expense_totals,
+            filename_prefix='monthly_expenses_total_input'
+        )
+
+        datasets = monthly_payment_method_expense_totals["datasets"]
         total_sum = [0]*len(datasets[0]["data"])
 
+        # Debug calculation process
+        calculation_steps = []
         for dataset in datasets:
             if dataset['label'] != 'Investimento':
                 total_sum = [sum(x) for x in zip(total_sum, dataset["data"])]
+                calculation_steps.append({
+                    'payment_method': dataset['label'],
+                    'data': dataset["data"],
+                    'running_total': total_sum.copy()
+                })
+
+        # Debug output
+        with open('debug_monthly_expenses_total_calculation.json', 'w', encoding='utf-8') as f:
+            json.dump({
+                'calculation_steps': calculation_steps,
+                'final_total': total_sum
+            }, f, cls=DjangoJSONEncoder, indent=2)
 
         return {
             "labels": monthly_payment_method_expense_totals["labels"],
@@ -85,12 +212,23 @@ class ExpenseService:
         return monthly_expenses_total
 
     def get_total_expenses_amount_by_payment_method(self, payment_method, start_date, end_date):
-        return (
+        total_expenses = (
             self.expense_repository
             .get_total_payment_method_expenses_by_filter(
                 payment_method, start_date, end_date
             )
         ) or Decimal('0')
+
+        debug_to_json(
+            data={
+                'payment_method': payment_method.name,
+                'start_date': start_date,
+                'end_date': end_date,
+                'total_expenses': total_expenses
+            },
+            filename_prefix=f'get_{payment_method.name}_total_expenses_amount_start_date_{start_date}_end_date_{end_date}'
+        )
+        return total_expenses
 
     def get_billing_month(self, day, start_date, end_date):
         return (
@@ -100,36 +238,83 @@ class ExpenseService:
         )
 
     def calculate_end_date(self, billing_day, month, year):
-
-        if month == 12:
-            last_month_day = calendar.monthrange(year, 12)[1]
-            # Last day of December
-            return date(self.year, month, last_month_day)
-
         if billing_day == 1:
             last_month_day = calendar.monthrange(year, month)[1]
-            return date(
-                year,
-                month,
-                last_month_day
-            )
+            return date(year, month, last_month_day)
 
-        return date(year, month + 1, billing_day-1)
+        if month == 12:
+            # Handle transition to next year for December
+            return date(year + 1, 1, billing_day - 1)
+
+        return date(year, month + 1, billing_day - 1)
 
     def calculate_total_expense_for_payment_method(self, expenses_by_month, payment_method, billing_day):
+        safe_filename = payment_method.name.replace(
+            '/', '_').replace('\\', '_')
+        debug_monthly_calculations = []
+
+        # Debug input parameters
+        debug_to_json(
+            data={
+                'initial_expenses_by_month': expenses_by_month,
+                'payment_method': payment_method.name,
+                'billing_day': billing_day,
+            },
+            filename_prefix=f'expense_calc_{safe_filename}'
+        )
+
         for month in range(1, 13):
-            start_date = date(self.year, month, billing_day)
-            end_date = self.calculate_end_date(
-                billing_day, month, self.year)
+            # Calculate start date
+            if month == 1:
+                # January starts from December of previous year
+                start_date = date(self.year - 1, 12, billing_day)
+            else:
+                start_date = date(self.year, month - 1, billing_day)
+
+            # Calculate end date
+            if billing_day == 1:
+                # If billing day is 1, end date should be last day of the same month
+                if month == 12:
+                    end_date = date(self.year, 12, 31)  # December 31st
+                else:
+                    # Last day of the current month
+                    next_month = month + 1
+                    end_date = date(self.year, next_month,
+                                    1) - timedelta(days=1)
+            else:
+                # Normal case: end date is the day before billing day
+                if month == 12:
+                    # December should end in the same year
+                    end_date = date(self.year, 12, billing_day - 1)
+                else:
+                    end_date = date(self.year, month, billing_day - 1)
+
             total_expenses = self.get_total_expenses_amount_by_payment_method(
                 payment_method, start_date, end_date)
 
-            billing_month = self.get_billing_month(
-                billing_day, start_date, end_date)
+            # The billing month is the current month
+            billing_month = date(self.year, month, 1).strftime('%B')
             expenses_by_month[billing_month] += total_expenses
-        monthy_payment_method_expense_float = convert_values_to_float(
-            expenses_by_month)
-        return monthy_payment_method_expense_float
+
+            # Debug each month's calculation
+            debug_monthly_calculations.append({
+                'month': month,
+                'start_date': str(start_date),
+                'end_date': str(end_date),
+                'total_expenses': float(total_expenses),
+                'billing_month': billing_month
+            })
+
+        # Debug final results
+        debug_to_json(
+            data={
+                'monthly_calculations': debug_monthly_calculations,
+                'final_expenses_by_month': expenses_by_month
+            },
+            filename_prefix=f'expense_calc_result_{safe_filename}'
+        )
+
+        return convert_values_to_float(expenses_by_month)
 
     def monthly_payment_method_expense_totals(self, year: int):
         payments_data = self.expense_repository.get_monthly_expenses_by_payment_method(
@@ -152,9 +337,9 @@ class ExpenseService:
             }
             transformed_payments.append(month_entry)
 
-        # with open('expenses_by_payment.json', 'w', encoding='utf-8') as file:
-        #     json.dump(transformed_payments, file,
-        #               ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
+        with open('expenses_by_payment.json', 'w', encoding='utf-8') as file:
+            json.dump(transformed_payments, file,
+                      ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
 
         return transformed_payments
 
