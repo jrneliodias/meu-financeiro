@@ -8,6 +8,7 @@ from reports.services import ExpenseService
 from django.views.generic import UpdateView
 from registers.models import Expense
 from registers.forms import ExpenseForm
+from reports.utils import debug_to_json
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
@@ -34,25 +35,42 @@ def expense_report(request):
         request, current_year, current_month)
 
     expense_service = ExpenseService(
-        expense_repository, income_repository, year=selected_year)
+        expense_repository, income_repository, year=selected_year
+    )
 
-    # Get expenses grouped by month and category for the current year
-    expenses_by_category_by_month, total_expense_by_month, total_expense_by_month_list = get_expenses_by_month_and_category(
-        selected_year)
+    monthly_reports = expense_service.get_expenses_by_category_and_payment_method()
 
-    # Get expenses for the selected month
-    expenses_by_category = get_expenses_by_selected_month(
-        selected_year, selected_month)
+    # Get all months of the year
+    all_months = list(calendar.month_name)[1:]  # Skip empty first item
 
-    # Get distinct category names
-    categories = get_distinct_categories()
+    # Initialize data structures with all months
+    expenses_by_category_by_month = defaultdict(
+        lambda: {month: 0.0 for month in all_months})
+    total_expense_by_month = {month: 0.0 for month in all_months}
+    total_expense_by_month_list = {month: 'R$ 0,00' for month in all_months}
+
+    # Fill in the actual values from reports
+    for report in monthly_reports:
+        # Format categories
+        for category in report.categories:
+            expenses_by_category_by_month[category['name']
+                                          ][report.month] = category['total_amount']
+
+        # Format totals
+        total_expense_by_month[report.month] = float(report.total)
+        total_expense_by_month_list[report.month] = format_brl(report.total)
 
     # Get incomes by month
     incomes_by_month = get_incomes_by_month(selected_year)
 
+    # Ensure formatted_expenses follows the same order as distinct_months
     formatted_expenses = [
-        total_expense_by_month_list.get(month_name, 'R$ 0,00') for _, month_name in distinct_months
+        total_expense_by_month_list.get(month_name, 'R$ 0,00')
+        for _, month_name in distinct_months
     ]
+
+    # Convert defaultdict to regular dict for template
+    expenses_by_category_by_month = dict(expenses_by_category_by_month)
 
     monthy_payment_method_expense_totals = expense_service.monthly_payment_method_expense_totals(
         current_year)
@@ -66,20 +84,33 @@ def expense_report(request):
         selected_year, selected_month
     )
 
+    # Pre-format all the category data with proper currency formatting
+    formatted_expenses_by_category = {}
+    for category, month_totals in expenses_by_category_by_month.items():
+        formatted_expenses_by_category[category] = [
+            format_brl(month_totals.get(month, 0.0))
+            for month in all_months
+        ]
+
+    # Pre-format totals as a list in the same month order
+    formatted_totals = [
+        format_brl(total_expense_by_month.get(month, 0.0))
+        for month in all_months
+    ]
+
     # Prepare the context
     context = {
-        'expenses_by_category_by_month': expenses_by_category_by_month,
-        'total_expense_by_month': total_expense_by_month,
-        'total_expense_by_month_list': formatted_expenses,
+        'all_months': all_months,
+        'formatted_expenses_by_category': formatted_expenses_by_category,
+        'formatted_totals': formatted_totals,
         'incomes_by_month': incomes_by_month,
-        'categories': categories,
+        'categories': get_distinct_categories(),
         'current_year': current_year,
         'distinct_years': distinct_years,
         'distinct_months': distinct_months,
         'selected_month': selected_month,
         'selected_year': selected_year,
         'selected_month_name': selected_month_name,
-        'expenses_by_category': expenses_by_category,
         'monthy_payment_method_expense_totals': monthy_payment_method_expense_totals,
         'calculated_monthy_payment_method_expense_totals': calculated_monthy_payment_method_expense_totals,
         'monthly_expense_income_datasets': monthly_expense_income_datasets,
