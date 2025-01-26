@@ -157,3 +157,13 @@ class ExpenseRepository:
         )
 
         return list(expenses_by_payment)
+
+    def get_expenses_by_category_in_period(self, payment_method, start_date, end_date):
+        """Get expenses grouped by category for a specific period and payment method."""
+        return Expense.objects.filter(
+            payment_method=payment_method,
+            date__gte=start_date,
+            date__lte=end_date
+        ).values('category__name').annotate(
+            total_amount=Sum('amount')
+        ).order_by('category__name')

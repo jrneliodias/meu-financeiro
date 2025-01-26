@@ -1,13 +1,9 @@
 import json
-from datetime import datetime
 from itertools import groupby
 from operator import itemgetter
-from reports.repository import ExpenseRepository, PaymentMethodRepository
 from django.core.serializers.json import DjangoJSONEncoder
-from datetime import datetime
 from datetime import date
-from registers.models import Expense, PaymentMethod
-from django.db.models import Sum
+from registers.models import PaymentMethod
 import json
 import calendar
 from decimal import Decimal
@@ -15,7 +11,7 @@ from .utils import convert_values_to_float, debug_to_json
 from collections import defaultdict
 from datetime import timedelta
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, NamedTuple
 
 
 @dataclass
@@ -23,6 +19,20 @@ class BillingPeriod:
     start_date: date
     end_date: date
     billing_month: str
+
+
+@dataclass
+class CategoryExpense:
+    name: str
+    amount: Decimal
+    payment_method: str
+    month: str
+
+
+class MonthlyExpenseReport(NamedTuple):
+    month: str
+    categories: List[Dict[str, any]]
+    total: Decimal
 
 
 class BillingPeriodCalculator:
@@ -117,12 +127,48 @@ class ExpenseCalculator:
         )
 
 
+class CategoryExpenseCalculator:
+    def __init__(self, expense_repository, billing_calculator):
+        self.expense_repository = expense_repository
+        self.billing_calculator = billing_calculator
+
+    def calculate_monthly_expenses(self, payment_method, month: int, year: int) -> List[CategoryExpense]:
+        """Calculate expenses by category for a specific month and payment method."""
+        period = self.billing_calculator.calculate_period(
+            month, payment_method.start_billing_day)
+
+        expenses = self.expense_repository.get_expenses_by_category_in_period(
+            payment_method=payment_method,
+            start_date=period.start_date,
+            end_date=period.end_date
+        )
+
+        return [
+            CategoryExpense(
+                name=expense['category__name'],
+                amount=expense['total_amount'],
+                payment_method=payment_method.name,
+                month=period.billing_month
+            )
+            for expense in expenses
+        ]
+
+
 class ExpenseService:
     def __init__(self, expense_repository, income_repository, year=2024):
         self.expense_repository = expense_repository
         self.income_repository = income_repository
         self.year = year
-        self.expense_calculator = ExpenseCalculator(expense_repository, year)
+        self.billing_calculator = BillingPeriodCalculator(year)
+        self.category_calculator = CategoryExpenseCalculator(
+            expense_repository,
+            self.billing_calculator
+        )
+
+        self.expense_calculator = ExpenseCalculator(
+            expense_repository=self.expense_repository,
+            year=self.year
+        )
 
     def calculate_monthly_payment_method_total_expense_datasets(self):
         """Calculate monthly expenses datasets for all payment methods."""
@@ -175,11 +221,13 @@ class ExpenseService:
                 })
 
         # Debug output
-        with open('debug_monthly_expenses_total_calculation.json', 'w', encoding='utf-8') as f:
-            json.dump({
+        debug_to_json(
+            data={
                 'calculation_steps': calculation_steps,
                 'final_total': total_sum
-            }, f, cls=DjangoJSONEncoder, indent=2)
+            },
+            filename_prefix='monthly_expenses_total_calculation'
+        )
 
         return {
             "labels": monthly_payment_method_expense_totals["labels"],
@@ -337,9 +385,10 @@ class ExpenseService:
             }
             transformed_payments.append(month_entry)
 
-        with open('expenses_by_payment.json', 'w', encoding='utf-8') as file:
-            json.dump(transformed_payments, file,
-                      ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
+        debug_to_json(
+            data=transformed_payments,
+            filename_prefix='expenses_by_payment'
+        )
 
         return transformed_payments
 
@@ -361,3 +410,93 @@ class ExpenseService:
                       ensure_ascii=False, indent=4, cls=DjangoJSONEncoder)
 
         return full_formatted_data
+
+    def get_expenses_by_category_and_payment_method(self) -> List[MonthlyExpenseReport]:
+        """
+        Calculate and format expenses by category and payment method for each month.
+        Returns a list of MonthlyExpenseReport objects, each containing:
+        - month name
+        - list of categories with their expenses
+        - total expenses for the month
+        """
+        # Get all payment methods
+        payment_methods = PaymentMethod.objects.all()
+
+        # Initialize data structure to collect expenses
+        monthly_expenses = defaultdict(lambda: defaultdict(Decimal))
+        monthly_payment_methods = defaultdict(lambda: defaultdict(list))
+
+        # Calculate expenses for each month and payment method
+        for month in range(1, 13):
+            for payment_method in payment_methods:
+                category_expenses = self.category_calculator.calculate_monthly_expenses(
+                    payment_method, month, self.year
+                )
+
+                for expense in category_expenses:
+                    monthly_expenses[expense.month][expense.name] += expense.amount
+                    monthly_payment_methods[expense.month][expense.name].append({
+                        'payment_method': expense.payment_method,
+                        'amount': float(expense.amount)
+                    })
+
+                self._debug_category_calculation(
+                    payment_method, month, category_expenses)
+
+        # Format the results
+        formatted_results = []
+        for month in calendar.month_name[1:]:  # Skip empty first item
+            if month in monthly_expenses:
+                categories_data = []
+                month_total = Decimal('0')
+
+                for category, total in monthly_expenses[month].items():
+                    category_data = {
+                        'name': category,
+                        'total_amount': float(total),
+                        'payment_methods': monthly_payment_methods[month][category]
+                    }
+                    categories_data.append(category_data)
+                    month_total += total
+
+                formatted_results.append(MonthlyExpenseReport(
+                    month=month,
+                    categories=sorted(
+                        categories_data, key=lambda x: x['name']),
+                    total=month_total
+                ))
+
+        self._debug_final_results(formatted_results)
+        return formatted_results
+
+    def _debug_category_calculation(self, payment_method, month: int, expenses: List[CategoryExpense]):
+        """Debug logging for category calculations."""
+        debug_to_json(
+            data={
+                'payment_method': payment_method.name,
+                'month': calendar.month_name[month],
+                'expenses': [
+                    {
+                        'category': expense.name,
+                        'amount': float(expense.amount),
+                        'month': expense.month
+                    }
+                    for expense in expenses
+                ]
+            },
+            filename_prefix=f'category_calculation_{payment_method.name.replace("/", "_")}'
+        )
+
+    def _debug_final_results(self, results: List[MonthlyExpenseReport]):
+        """Debug logging for final formatted results."""
+        debug_to_json(
+            data=[
+                {
+                    'month': report.month,
+                    'total': float(report.total),
+                    'categories': report.categories
+                }
+                for report in results
+            ],
+            filename_prefix='monthly_category_expenses'
+        )
