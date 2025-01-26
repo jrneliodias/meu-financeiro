@@ -1,0 +1,23 @@
+<header class="flex justify-between">
+    <h1 class="text-3xl font-bold my-3">Dashboard</h1>
+    <form method="get" class="flex bg-slate-800/40 p-4 rounded-lg space-x-4 w-fit">
+        <select name="month" id="month" 
+                class="w-full min-w-[150px] px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900"
+                onchange="this.form.submit()">
+            {% for month_num, month_name in distinct_months %}
+                <option value="{{ month_num }}" {% if selected_month == month_num %}selected{% endif %}>
+                    {{ month_name }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="year" id="year"
+                class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900"
+                onchange="this.form.submit()">
+            {% for year_value, year_label in distinct_years %}
+                <option value="{{ year_value }}" {% if selected_year == year_value %}selected{% endif %}>
+                    {{ year_label }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+</header> 

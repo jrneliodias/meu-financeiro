@@ -1,0 +1,42 @@
+{% load currency_filters %}
+<div class="bg-slate-800/50 rounded-lg p-3 w-full space-y-6">
+    <h2 class="text-2xl font-bold">Monthly Expenses Details Table</h2>
+    <table border="1" class="w-full p-2">
+        <thead class="border-b border-slate-700">
+            <tr>
+                <th class="text-start">Description</th>
+                <th class="text-start">Amount</th>
+                <th class="text-start">Date</th>
+                <th class="text-start">Category</th>
+                <th class="text-start">Payment Method</th>
+                <th class="text-start">Created At</th>
+                <th class="text-start">Updated At</th>
+                <th class="text-start">Recurrence</th>
+                <th class="px-4 py-2 text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in monthly_expenses_queryset %}
+                <tr class="*:p-1 border-b border-slate-700">
+                    <td>{{ expense.description }}</td>
+                    <td class="amount">{{ expense.amount|format_brl }}</td>
+                    <td>{{ expense.date }}</td>
+                    <td>{{ expense.category.name }}</td>
+                    <td>{{ expense.payment_method.name }}</td>
+                    <td>{{ expense.created_at }}</td>
+                    <td>{{ expense.updated_at }}</td>
+                    <td>{{ expense.reccurring_expense.description }}</td>
+                    <td class="px-4 py-2 text-center">
+                        <a href="{% url 'expense_update' expense.id %}" class="text-blue-600 hover:underline">
+                            <i class="fa-solid fa-edit hover:text-blue-800"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center p-4">No expenses found for the selected month.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div> 

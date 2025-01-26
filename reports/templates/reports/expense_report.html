@@ -1,117 +1,23 @@
 {% extends "core/base.html" %}
 {% load currency_filters %}
 {% block content %}
-    <article class=" space-y-4">
-        <header class="flex justify-between">
-            <h1 class="text-3xl font-bold my-3">Dashboard</h1>
-            <form method="get"
-                  class=" flex bg-slate-800/40 p-4 rounded-lg  space-x-4 w-fit">
-                <select name="month"
-                        id="month"
-                        class="w-full min-w-[150px] px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900"
-                        onchange="this.form.submit()">
-                    {% for month_num, month_name in distinct_months %}
-                        <option value="{{ month_num }}"
-                                {% if selected_month == month_num %}selected{% endif %}>{{ month_name }}</option>
-                    {% endfor %}
-                </select>
-                <select name="year"
-                        id="year"
-                        onchange="this.form.submit()"
-                        defaultvalue="{{ selected_year }}"
-                        class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900">
-                    {% for year_value, year_label in distinct_years %}
-                        <option value="{{ year_value }}"
-                                {% if selected_year == year_value %}selected{% endif %}>{{ year_label }}</option>
-                    {% endfor %}
-                </select>
-            </form>
-        </header>
-        <section class="flex flex-col space-y-4">
-            <div class="bg-slate-800/50 rounded-lg p-3">
-                <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
-                <div class="h-[320px] mt-2 p-3 px-0">
-                    <canvas id="expenseIncomeTotalChart" class="w-full"></canvas>
-                </div>
-            </div>
-            <div class="bg-slate-800/50 rounded-lg p-3">
-                <h2 class="text-2xl font-bold">Calculated Monthly Expenses by Payment Method</h2>
-                <div class="h-[320px] mt-2 p-3 px-0 w-full">
-                    <canvas id="calculatedPaymentMethodExpenseChart" class="w-full"></canvas>
-                </div>
-            </div>
-            <div class="bg-slate-800/50 rounded-lg p-3 w-full space-y-6">
-                <h2 class="text-2xl font-bold">Monthly Expenses Table</h2>
-                <table border="1" class="w-full p-2">
-                    <thead class="border-b border-slate-700">
-                        <tr>
-                            <th class="text-start">Description</th>
-                            <th class="text-start">Amount</th>
-                            <th class="text-start">Date</th>
-                            <th class="text-start">Category</th>
-                            <th class="text-start">Payment Method</th>
-                            <th class="text-start">Created At</th>
-                            <th class="text-start">Updated At</th>
-                            <th class="text-start">Recurrence</th>
-                            <th class="px-4 py-2 text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for expense in monthly_expenses_queryset %}
-                            <tr class="*:p-1 border-b border-slate-700">
-                                <td>{{ expense.description }}</td>
-                                <td class="amount">{{ expense.amount|format_brl }}</td>
-                                <td>{{ expense.date }}</td>
-                                <td>{{ expense.category.name }}</td>
-                                <td>{{ expense.payment_method.name }}</td>
-                                <td>{{ expense.created_at }}</td>
-                                <td>{{ expense.updated_at }}</td>
-                                <td>{{ expense.reccurring_expense.description }}</td>
-                                <td class="px-4 py-2 text-center">
-                                    <a href="{% url 'expense_update' expense.id %}"
-                                       class="text-blue-600 hover:underline">
-                                        <i class="fa-solid fa-edit hover:text-blue-800"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="7">No expenses found for the selected month.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="my-3 space-y-4 bg-slate-800/50 rounded-lg p-3">
-                <h2 class="text-2xl font-bold">Expenses by Category</h2>
-                <table class="p-2" border="1">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            {% for month_num,month_name in distinct_months %}<th class="text-left">{{ month_name }}</th>{% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category,month_total in expenses_by_category_by_month.items %}
-                            <tr class="*:p-1 border-b border-slate-700">
-                                <td>{{ category }}</td>
-                                {% for month,value in month_total.items %}
-                                    <td class="text-left {% if value == 0.0 %}text-slate-600{% endif %}">{{ value }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                        <tr class="*:p-1 border-b border-slate-700">
-                            <td class="font-bold">Total</td>
-                            {% for value in total_expense_by_month_list %}<td class="text-left font-bold">{{ value }}</td>{% endfor %}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </article>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <script>
+  <article class="space-y-4">
+    {# Filter Form Component #}
+    {% include "reports/components/filter_form.html" with distinct_months=distinct_months distinct_years=distinct_years selected_month=selected_month selected_year=selected_year %}
+    <section class="flex flex-col space-y-4">
+      {# Expense and Income Chart Component #}
+      {% include "reports/components/expense_income_chart.html" %}
+      {# Payment Method Chart Component #}
+      {% include "reports/components/payment_method_chart.html" %}
+      {# Expense Category Table Component #}
+      {% include "reports/components/expense_category_table.html" with all_months=all_months formatted_expenses_by_category=formatted_expenses_by_category formatted_totals=formatted_totals %}
+      {# Expense Details Table Component #}
+      {% include "reports/components/expense_details_table.html" with monthly_expenses_queryset=monthly_expenses_queryset %}
+    </section>
+  </article>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script>
     const PaymentMethodcolors = [
    
     {
@@ -296,5 +202,5 @@ new Chart(calculatedExpenseIncomeTotalCtx, {
     plugins: [ChartDataLabels]
 });
 
-    </script>
+  </script>
 {% endblock content %}
