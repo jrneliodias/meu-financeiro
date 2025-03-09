@@ -22,6 +22,7 @@ def debug_to_json(data, filename_prefix, subfolder='debug_logs'):
     Returns:
         str: Path to the created debug file
     """
+    return None
     try:
         # Create timestamp for subfolder
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -52,7 +53,7 @@ def debug_to_json(data, filename_prefix, subfolder='debug_logs'):
                 'data': data
             }, f, cls=DjangoJSONEncoder, indent=2)
 
-        print(f"Successfully wrote debug file to: {filepath}")
+        # print(f"Successfully wrote debug file to: {filepath}")
         return filepath
     except Exception as e:
         print(f"Error saving debug file: {str(e)}")
