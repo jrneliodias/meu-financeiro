@@ -31,9 +31,9 @@ def register_expense(request):
                 request, f"{expense_data['installments']} installments have been registered.")
         else:
             expense = expense_service.create_single_expense(user, expense_data)
-            messages.success(request, "Expense has been registered.")
+            messages.success(
+                request, f"Expense {expense.__str__()} has been registered.")
 
-        return redirect('expense_success')
     else:
         # Handle quick fill parameter
         quick_fill = request.GET.get('quick_fill')
