@@ -19,11 +19,12 @@ from typing import List
 
 
 class ExpenseService:
-    def __init__(self, expense_repository, income_repository, year=2024):
+    def __init__(self, expense_repository, income_repository, billing_calculator=None, year=2024):
         self.expense_repository = expense_repository
         self.income_repository = income_repository
         self.year = year
-        self.billing_calculator = BillingPeriodCalculator(year)
+        self.billing_calculator = billing_calculator or BillingPeriodCalculator(
+            year)
         self.category_calculator = CategoryExpenseCalculator(
             expense_repository,
             self.billing_calculator
