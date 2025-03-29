@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.db.models.functions import TruncMonth, TruncYear
 from collections import defaultdict
 import calendar
 from datetime import datetime
@@ -8,7 +7,6 @@ from reports.services import ExpenseService
 from django.views.generic import UpdateView
 from registers.models import Expense
 from registers.forms import ExpenseForm
-from reports.utils import debug_to_json
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()

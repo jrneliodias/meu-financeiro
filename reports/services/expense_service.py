@@ -7,151 +7,15 @@ from registers.models import PaymentMethod
 import json
 import calendar
 from decimal import Decimal
-from .utils import convert_values_to_float, debug_to_json
+
+from reports.services.billing_period_calculator import BillingPeriodCalculator
+from reports.services.category_calculator import CategoryExpenseCalculator
+from reports.services.expense_calculator import ExpenseCalculator
+from reports.utils import convert_values_to_float, debug_to_json
 from collections import defaultdict
 from datetime import timedelta
-from dataclasses import dataclass
-from typing import Dict, List, NamedTuple
-
-
-@dataclass
-class BillingPeriod:
-    start_date: date
-    end_date: date
-    billing_month: str
-
-
-@dataclass
-class CategoryExpense:
-    name: str
-    amount: Decimal
-    payment_method: str
-    month: str
-
-
-class MonthlyExpenseReport(NamedTuple):
-    month: str
-    categories: List[Dict[str, any]]
-    total: Decimal
-
-
-class BillingPeriodCalculator:
-    def __init__(self, year: int):
-        self.year = year
-
-    def calculate_period(self, month: int, billing_day: int) -> BillingPeriod:
-        """Calculate billing period for a given month and billing day."""
-        if billing_day == 1:
-            return self._calculate_calendar_month_period(month)
-        return self._calculate_custom_billing_period(month, billing_day)
-
-    def _calculate_calendar_month_period(self, month: int) -> BillingPeriod:
-        """Calculate period for billing_day = 1 (calendar month)."""
-        start_date = date(self.year, month, 1)
-        last_day = calendar.monthrange(self.year, month)[1]
-        end_date = date(self.year, month, last_day)
-        billing_month = start_date.strftime('%B')
-
-        return BillingPeriod(start_date, end_date, billing_month)
-
-    def _calculate_custom_billing_period(self, month: int, billing_day: int) -> BillingPeriod:
-        """Calculate period for custom billing day."""
-        # For month M, the period is from M-1/billing_day to M/billing_day-1
-        # The expenses are attributed to month M
-
-        # Calculate end date first (this determines the billing month)
-        if month == 12:
-            end_date = date(self.year, 12, billing_day - 1)
-        else:
-            end_date = date(self.year, month, billing_day - 1)
-
-        # Calculate start date
-        if month == 1:
-            start_date = date(self.year - 1, 12, billing_day)
-        else:
-            start_date = date(self.year, month - 1, billing_day)
-
-        # The billing month is the month containing the end date
-        billing_month = end_date.strftime('%B')
-
-        return BillingPeriod(start_date, end_date, billing_month)
-
-
-class ExpenseCalculator:
-    def __init__(self, expense_repository, year: int):
-        self.expense_repository = expense_repository
-        self.billing_calculator = BillingPeriodCalculator(year)
-
-    def calculate_monthly_expenses(self, payment_method, billing_day: int) -> Dict[str, float]:
-        """Calculate monthly expenses for a payment method."""
-        monthly_expenses = {month: 0 for month in calendar.month_name[1:]}
-
-        for month in range(1, 13):
-            period = self.billing_calculator.calculate_period(
-                month, billing_day)
-
-            total_expenses = self._get_period_expenses(
-                payment_method,
-                period.start_date,
-                period.end_date
-            )
-
-            monthly_expenses[period.billing_month] += total_expenses
-
-            self._debug_period_calculation(
-                payment_method, period, total_expenses)
-
-        return monthly_expenses
-
-    def _get_period_expenses(self, payment_method, start_date: date, end_date: date) -> float:
-        """Get total expenses for a period."""
-        return float(
-            self.expense_repository.get_total_payment_method_expenses_by_filter(
-                payment_method, start_date, end_date
-            ) or 0
-        )
-
-    def _debug_period_calculation(self, payment_method, period: BillingPeriod, total_expenses: float):
-        """Log debug information for period calculation."""
-        debug_to_json(
-            data={
-                'payment_method': payment_method.name,
-                'period': {
-                    'start_date': str(period.start_date),
-                    'end_date': str(period.end_date),
-                    'billing_month': period.billing_month,
-                },
-                'total_expenses': total_expenses
-            },
-            filename_prefix=f'period_calculation_{payment_method.name.replace("/", "_")}'
-        )
-
-
-class CategoryExpenseCalculator:
-    def __init__(self, expense_repository, billing_calculator):
-        self.expense_repository = expense_repository
-        self.billing_calculator = billing_calculator
-
-    def calculate_monthly_expenses(self, payment_method, month: int, year: int) -> List[CategoryExpense]:
-        """Calculate expenses by category for a specific month and payment method."""
-        period = self.billing_calculator.calculate_period(
-            month, payment_method.start_billing_day)
-
-        expenses = self.expense_repository.get_expenses_by_category_in_period(
-            payment_method=payment_method,
-            start_date=period.start_date,
-            end_date=period.end_date
-        )
-
-        return [
-            CategoryExpense(
-                name=expense['category__name'],
-                amount=expense['total_amount'],
-                payment_method=payment_method.name,
-                month=period.billing_month
-            )
-            for expense in expenses
-        ]
+from reports.dataclasses import CategoryExpense, MonthlyExpenseReport
+from typing import List
 
 
 class ExpenseService:
