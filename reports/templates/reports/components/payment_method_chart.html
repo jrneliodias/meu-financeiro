@@ -53,9 +53,18 @@ new Chart(calculatedPaymentMethodExpenseChartCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 100,    // Add more padding at the top
+            right: 50,  // Add more padding at the right for labels
+            bottom: 10,
+            left: 10
+          }
+        },
         plugins: {
             legend: {
-                position: 'top', // Position the legend at the top
+              display: false,
+
             },
             tooltip: {
                 enabled: true,
