@@ -47,20 +47,25 @@
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 100,    // Add more padding at the top
+            right: 50,  // Add more padding at the right for labels
+            bottom: 10,
+            left: 10
+          }
+        },
         plugins: {
-            legend: {
-                position: 'top', // Position the legend at the top
-            },
+                legend: {
+                    display: false,
+                },
             tooltip: {
                 enabled: true,
             },
             // Custom plugin to draw values above the bars
             datalabels: {
                 anchor: 'end',
-                align: function(context) {
-                    const value = context.dataset.data[context.dataIndex]; // Get the current data value
-                    return value > 3000 ? 'start' : 'end';  // Dynamic alignment based on value
-                },
+                align: 'end',
                 rotation: -90,
                 formatter: function(value, context) {
                     return value > 0
