@@ -3,7 +3,7 @@ from collections import defaultdict
 import calendar
 from datetime import datetime
 from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
-from reports.services import ExpenseService
+from reports.services import ExpenseService, BalanceService
 from django.views.generic import UpdateView
 from registers.models import Expense
 from registers.forms import ExpenseForm
@@ -11,6 +11,7 @@ from registers.forms import ExpenseForm
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
 category_repository = CategoryRepository()
+balance_service = BalanceService()
 
 
 def index(request):
@@ -54,6 +55,8 @@ def expense_report(request):
     # Format data for template
     formatted_data = format_data_for_template(expenses_data, all_months)
 
+    global_balance = balance_service.calculate_global_balance()
+
     # Prepare the context
     context = {
         'all_months': all_months,
@@ -70,7 +73,8 @@ def expense_report(request):
         'monthy_payment_method_expense_totals': payment_method_data['totals'],
         'calculated_monthy_payment_method_expense_totals': payment_method_data['calculated_totals'],
         'monthly_expense_income_datasets': monthly_data['expense_income_datasets'],
-        'monthly_expenses_queryset': monthly_data['expenses_queryset']
+        'monthly_expenses_queryset': monthly_data['expenses_queryset'],
+        'global_balance': global_balance
     }
 
     return render(request, 'reports/expense_report.html', context)
