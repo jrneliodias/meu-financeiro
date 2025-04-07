@@ -6,9 +6,11 @@
     {% include "reports/components/filter_form.html" with distinct_months=distinct_months distinct_years=distinct_years selected_month=selected_month selected_year=selected_year global_balance=global_balance  %}
     <section class="flex flex-col space-y-4">
       {# Expense and Income Chart Component #}
-      {% include "reports/components/expense_income_chart.html" %}
-      {# Payment Method Chart Component #}
-      {% include "reports/components/payment_method_chart.html" %}
+      <div class="flex flex-col lg:flex-row gap-4 items-start">
+        {% include "reports/components/expense_income_chart.html" %}
+        {# Payment Method Chart Component #}
+        {% include "reports/components/payment_method_chart.html" %}
+      </div>
       {# Expense Category Table Component #}
       {% include "reports/components/expense_category_table.html" with all_months=all_months formatted_expenses_by_category=formatted_expenses_by_category formatted_totals=formatted_totals %}
       {# Expense Details Table Component #}

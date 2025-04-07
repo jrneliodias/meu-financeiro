@@ -1,6 +1,6 @@
-<div class="bg-slate-800/50 rounded-lg p-3">
+<div class="bg-slate-800/50 rounded-lg p-3 w-full lg:w-1/2">
   <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
-  <div class="h-[320px] mt-2 p-3 px-0">
+  <div class=" min-h-[800px] mt-2 p-3 px-0">
     <canvas id="expenseIncomeTotalChart" class="w-full"></canvas>
   </div>
 </div>
@@ -39,7 +39,7 @@
 
 
   new Chart(calculatedExpenseIncomeTotalCtx, {
-    type: 'bar', // Change to 'line' for line charts
+    type: 'bar',
     data: {
         labels: calculatedExpenseIncomeTotal.labels, // Months
         datasets: calculatedExpenseIncomeTotalDatasets, // Payment method datasets
@@ -49,55 +49,64 @@
         maintainAspectRatio: false,
         layout: {
           padding: {
-            top: 100,    // Add more padding at the top
-            right: 50,  // Add more padding at the right for labels
+            top: 20,
+            right: 100,  // Increased right padding for labels
             bottom: 10,
             left: 10
           }
         },
+        indexAxis: 'y', // This makes the bars horizontal with y-axis categories
         plugins: {
-                legend: {
-                    display: false,
-                },
+            legend: {
+                display: false,
+                position: 'right', // Legend on the right
+                align: 'start',
+                labels: {
+                    color: 'white',
+                    font: {
+                        size: 8
+                    }
+                }
+            },
             tooltip: {
                 enabled: true,
             },
-            // Custom plugin to draw values above the bars
             datalabels: {
                 anchor: 'end',
-                align: 'end',
-                rotation: -90,
+                align: 'right', // Position labels at the end of bars
                 formatter: function(value, context) {
                     return value > 0
-                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-                    : ''; // Hide labels for values <= 0
+                        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+                        : ''; // Hide labels for values <= 0
                 },
-                color: 'white',  // Color of the text above the bars
+                color: 'white',
                 font: {
                     weight: 'bold',
                     size: 12
                 }
             }
-
         },
         scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Month',
-                },
-            },
             y: {
-                display:false,
-                beginAtZero: true,
                 title: {
-                    display: true,
-                    text: 'Total Expenses',
+                    display: false, // No need for title on y-axis as it's obvious these are months
                 },
+              
+            
             },
-        },
-
-
+            x: {
+                beginAtZero: false,
+                title: {
+                    display: false,
+                    text: 'Amount (R$)',
+                    color: 'white'
+                },
+                ticks: {
+                    display: false,
+                },
+            
+            }
+        }
     },
     plugins: [ChartDataLabels]
   });

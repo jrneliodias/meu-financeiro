@@ -1,6 +1,6 @@
-<div class="bg-slate-800/50 rounded-lg p-3">
+<div class="bg-slate-800/50 rounded-lg p-3 w-full lg:w-1/2">
   <h2 class="text-2xl font-bold">Calculated Monthly Expenses by Payment Method</h2>
-  <div class="h-[320px] mt-2 p-3 px-0 w-full">
+  <div class="min-h-[800px] mt-2 p-3 px-0 w-full">
     <canvas id="calculatedPaymentMethodExpenseChart" class="w-full"></canvas>
   </div>
 </div>
@@ -49,37 +49,45 @@ new Chart(calculatedPaymentMethodExpenseChartCtx, {
     data: {
         labels: calculatedPaymentMethodLabels, // Months
         datasets: calculatedPaymentMethodLabelsDatasets, // Payment method datasets
+        
     },
+   
     options: {
         responsive: true,
         maintainAspectRatio: false,
         layout: {
           padding: {
-            top: 100,    // Add more padding at the top
-            right: 50,  // Add more padding at the right for labels
-            bottom: 10,
+            top: 20,    // Add more padding at the top
+            right: 100,  // Add more padding at the right for labels
+            bottom: 2,
             left: 10
           }
         },
-        plugins: {
-            legend: {
-              display: false,
+        indexAxis: 'y',
+        barPercentage: 0.4,     // Reduced from default (0.9) to create more space
+        categoryPercentage: 0.1,
 
-            },
+     barThickness:12,
+        plugins: {
+          legend: {
+            display: false,
+            position: 'right', // Legend on the right
+            align: 'start',
+            labels: {
+                color: 'white',
+                font: {
+                    size: 8
+                }
+            }
+        },
             tooltip: {
                 enabled: true,
             },
             // Custom plugin to draw values above the bars
             datalabels: {
                 anchor: 'end',
-                align: function(context) {
-                    const data = context.dataset.data
-                    const minValue = Math.min(...data)
-                    const value = context.dataset.data[context.dataIndex]; // Get the current data value
-                    return  'end';  // Dynamic alignment based on value
-                },
-                rotation: -90,
-                formatter: function(value, context) {
+                align: 'right',
+                  formatter: function(value, context) {
                     return value > 0 
                     ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
                     : ''; // Hide labels for values <= 0
@@ -93,13 +101,12 @@ new Chart(calculatedPaymentMethodExpenseChartCtx, {
            
         },
         scales: {
-            x: {
+            y: {
                 title: {
-                    display: true,
-                    text: 'Month',
+                    display: false,
                 },
             },
-            y: {
+            x: {
                 display:false,
                 beginAtZero: true,
                 title: {
