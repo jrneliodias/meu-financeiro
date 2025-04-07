@@ -1,8 +1,8 @@
-<div class="my-3 space-y-4 bg-slate-800/50 rounded-lg p-3">
+<div class="my-3 space-y-4 bg-slate-800/50 rounded-lg p-3 ">
     <h2 class="text-2xl font-bold">Expenses by Category</h2>
-    <table class="p-2 w-full" border="1">
+    <table class="hidden md:table w-full p-2" border="1">
         <thead>
-            <tr class="*:p-2 border-b border-slate-700">
+            <tr class="*:p-2 border-b border-slate-700 ">
                 <th class="text-left">Category</th>
                 {% for month in all_months %}
                     <th class="text-left">{{ month }}</th>
@@ -29,4 +29,93 @@
             
         </tbody>
     </table>
+    <div class="md:hidden">
+      <!-- Mobile selector for months -->
+      <div class="mb-4">
+          <select id="monthSelector" class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-slate-900">
+              {% for month in all_months %}
+                  <option value="{{ forloop.counter0 }}">{{ month }}</option>
+              {% endfor %}
+          </select>
+      </div>
+      
+      <!-- Mobile table with just category and selected month -->
+      <table class="p-2 w-full" border="1">
+          <thead>
+              <tr class="*:p-2 border-b border-slate-700">
+                  <th class="text-left">Category</th>
+                  <th class="text-left" id="selectedMonthHeader">Month</th>
+              </tr>
+          </thead>
+          <tbody id="mobileCategoryTableBody">
+              <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
+                  <td class="font-bold">Total</td>
+                  <td class="text-left font-bold" id="selectedMonthTotal"></td>
+              </tr>
+              <!-- Category rows will be dynamically populated -->
+          </tbody>
+      </table>
+  </div>
 </div> 
+
+
+<script>
+  // JavaScript to handle the mobile view functionality
+  document.addEventListener('DOMContentLoaded', function() {
+      // Only run on mobile screens
+      if (window.innerWidth < 768) {
+          const monthSelector = document.getElementById('monthSelector');
+          const selectedMonthHeader = document.getElementById('selectedMonthHeader');
+          const mobileCategoryTableBody = document.getElementById('mobileCategoryTableBody');
+          const mobileMonthTotal = document.getElementById('selectedMonthTotal');
+          
+          // Format data for JavaScript
+          const allMonths = [{% for month in all_months %}"{{ month }}",{% endfor %}];
+          const categoryData = {
+              {% for category, values in formatted_expenses_by_category.items %}
+                  "{{ category }}": [{% for value in values %}"{{ value }}",{% endfor %}],
+              {% endfor %}
+          };
+          const totalsByMonth = [{% for value in formatted_totals %}"{{ value }}",{% endfor %}];
+          
+          // Function to update the table based on selected month
+          function updateMobileTable() {
+              const selectedMonthIndex = parseInt(monthSelector.value);
+              
+              // Update header
+              selectedMonthHeader.textContent = allMonths[selectedMonthIndex];
+              
+              // Update total
+              mobileMonthTotal.textContent = totalsByMonth[selectedMonthIndex];
+              
+              // Clear existing category rows (except the total row)
+              const totalRow = mobileCategoryTableBody.querySelector('tr');
+              mobileCategoryTableBody.innerHTML = '';
+              mobileCategoryTableBody.appendChild(totalRow);
+              
+              // Add category rows for selected month
+              for (const [category, values] of Object.entries(categoryData)) {
+                  const value = values[selectedMonthIndex];
+                  const row = document.createElement('tr');
+                  row.className = "*:p-2 border-b border-slate-700 hover:bg-slate-800/30";
+                  
+                  const categoryCell = document.createElement('td');
+                  categoryCell.className = "font-medium";
+                  categoryCell.textContent = category;
+                  
+                  const valueCell = document.createElement('td');
+                  valueCell.className = value === 'R$ 0,00' ? "text-left text-slate-600" : "text-left";
+                  valueCell.textContent = value;
+                  
+                  row.appendChild(categoryCell);
+                  row.appendChild(valueCell);
+                  mobileCategoryTableBody.appendChild(row);
+              }
+          }
+          
+          // Initialize table and add event listener
+          monthSelector.addEventListener('change', updateMobileTable);
+          updateMobileTable(); // Initial load
+      }
+  });
+  </script>

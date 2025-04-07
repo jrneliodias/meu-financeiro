@@ -1,50 +1,117 @@
 {% load currency_filters %}
 <div class="bg-slate-800/50 rounded-lg p-3 w-full space-y-6">
   <h2 class="text-2xl font-bold">Monthly Expenses Details Table</h2>
-  <table border="1" class="w-full p-2">
-    <thead class="border-b border-slate-700">
-      <tr>
-        <th class="text-start">Description</th>
-        <th class="text-start">Amount</th>
-        <th class="text-start">Date</th>
-        <th class="text-start">Category</th>
-        <th class="text-start">Payment Method</th>
-        <th class="text-start">Created At</th>
-        <th class="text-start">Updated At</th>
-        <th class="text-start">Recurrence</th>
-        <th class="px-4 py-2 text-end">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+  
+  <!-- Desktop table (hidden on mobile) -->
+  <div class="hidden md:block ">
+    <table border="1" class="w-full p-2">
+      <thead class="border-b border-slate-700">
+        <tr>
+          <th class="text-start">Description</th>
+          <th class="text-start">Amount</th>
+          <th class="text-start">Date</th>
+          <th class="text-start">Category</th>
+          <th class="text-start">Payment Method</th>
+          <th class="text-start">Created At</th>
+          <th class="text-start">Updated At</th>
+          <th class="text-start">Recurrence</th>
+          <th class="px-4 py-2 text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for expense in monthly_expenses_queryset %}
+        <tr class="*:p-1 border-b border-slate-700">
+          <td>{{ expense.description }}</td>
+          <td class="amount">{{ expense.amount|format_brl }}</td>
+          <td>{{ expense.date }}</td>
+          <td>{{ expense.category.name }}</td>
+          <td>{{ expense.payment_method.name }}</td>
+          <td>{{ expense.created_at }}</td>
+          <td>{{ expense.updated_at }}</td>
+          <td>
+            {% if expense.reccurring_expense %} {{ expense.reccurring_expense }}
+            {% endif %}
+          </td>
+          <td class="px-4 py-2 text-center">
+            <a
+              href="{% url 'expense_update' expense.id %}"
+              class="text-blue-600 hover:underline"
+            >
+              <i class="fa-solid fa-edit hover:text-blue-800"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center p-4">
+            No expenses found for the selected month.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="md:hidden grid grid-cols-1 gap-4">
+    {% if monthly_expenses_queryset %}
       {% for expense in monthly_expenses_queryset %}
-      <tr class="*:p-1 border-b border-slate-700">
-        <td>{{ expense.description }}</td>
-        <td class="amount">{{ expense.amount|format_brl }}</td>
-        <td>{{ expense.date }}</td>
-        <td>{{ expense.category.name }}</td>
-        <td>{{ expense.payment_method.name }}</td>
-        <td>{{ expense.created_at }}</td>
-        <td>{{ expense.updated_at }}</td>
-        <td>
-          {% if expense.reccurring_expense %} {{ expense.reccurring_expense }}
-          {% endif %}
-        </td>
-        <td class="px-4 py-2 text-center">
-          <a
-            href="{% url 'expense_update' expense.id %}"
-            class="text-blue-600 hover:underline"
-          >
-            <i class="fa-solid fa-edit hover:text-blue-800"></i>
+        <div class="bg-slate-700/30 rounded-lg p-4 grid grid-cols-1 gap-3 relative">
+          <!-- Edit button positioned top right -->
+          
+          
+          <!-- Header with description and amount using grid -->
+          <div class="grid grid-cols-[1fr_auto] items-start gap-2">
+            <h3 class="font-bold text-lg pr-6">{{ expense.description }}</h3>
+            <span class="font-bold text-lg text-right">{{ expense.amount|format_brl }}</span>
+          </div>
+          
+          <!-- Primary details in 2x2 grid -->
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm border-t border-slate-600 pt-3">
+            <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+              <span class="text-gray-400">Date:</span>
+              <span>{{ expense.date }}</span>
+            </div>
+            <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+              <span class="text-gray-400">Category:</span>
+              <span>{{ expense.category.name }}</span>
+            </div>
+            <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+              <span class="text-gray-400">Payment:</span>
+              <span>{{ expense.payment_method.name }}</span>
+            </div>
+            {% if expense.reccurring_expense %}
+            <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+              <span class="text-gray-400">Recurrence:</span>
+              <span>{{ expense.reccurring_expense }}</span>
+            </div>
+            {% endif %}
+          </div>
+          
+          <!-- Expandable section for additional details -->
+          <details class="mt-1">
+            <summary class="text-sm text-gray-400 cursor-pointer hover:text-white py-1">
+              More details
+            </summary>
+            <div class="grid grid-cols-1 gap-y-2 pt-2 pl-2 text-sm border-t border-slate-600/50">
+              <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                <span class="text-gray-400">Created:</span>
+                <span>{{ expense.created_at }}</span>
+              </div>
+              <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                <span class="text-gray-400">Updated:</span>
+                <span>{{ expense.updated_at }}</span>
+              </div>
+            </div>
+          </details>
+          <a href="{% url 'expense_update' expense.id %}" 
+             class="text-blue-400 hover:text-blue-300 ">
+            <i class="fa-solid fa-edit"></i>
           </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="9" class="text-center p-4">
-          No expenses found for the selected month.
-        </td>
-      </tr>
+        </div>
       {% endfor %}
-    </tbody>
-  </table>
+    {% else %}
+      <div class="text-center p-6 bg-slate-700/30 rounded-lg">
+        No expenses found for the selected month.
+      </div>
+    {% endif %}
+  </div>
 </div>
