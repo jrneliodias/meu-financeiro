@@ -3,7 +3,7 @@
 {% block content %}
   <article class="space-y-4">
     {# Filter Form Component #}
-    {% include "reports/components/filter_form.html" with distinct_months=distinct_months distinct_years=distinct_years selected_month=selected_month selected_year=selected_year %}
+    {% include "reports/components/filter_form.html" with distinct_months=distinct_months distinct_years=distinct_years selected_month=selected_month selected_year=selected_year global_balance=global_balance  %}
     <section class="flex flex-col space-y-4">
       {# Expense and Income Chart Component #}
       {% include "reports/components/expense_income_chart.html" %}

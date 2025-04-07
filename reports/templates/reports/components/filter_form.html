@@ -1,7 +1,12 @@
+{% load currency_filters %}
 <header class="flex justify-between">
     <h1 class="text-3xl font-bold my-3">Dashboard</h1>
-    <form method="get" class="flex bg-slate-800/40 p-4 rounded-lg space-x-4 w-fit">
-        <select name="month" id="month" 
+    <div class="flex flex-col items-start space-x-4 bg-slate-800/40 p-4 py-2 rounded-lg">
+        <p  class="text-white text-sm">Saldo:</p>
+        <span id="balanceDisplay" class="text-white text-2xl font-bold">Saldo: {{ global_balance  }}</span>
+    </div>
+        <form method="get" class="flex bg-slate-800/40 p-4 rounded-lg space-x-4 w-fit">
+            <select name="month" id="month" 
                 class="w-full min-w-[150px] px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900"
                 onchange="this.form.submit()">
             {% for month_num, month_name in distinct_months %}
@@ -10,6 +15,7 @@
                 </option>
             {% endfor %}
         </select>
+        
         <select name="year" id="year"
                 class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-fit *:bg-slate-900"
                 onchange="this.form.submit()">
@@ -21,3 +27,19 @@
         </select>
     </form>
 </header> 
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the balance value
+    const balanceValue = {{ global_balance }};
+    
+    // Format as BRL currency
+    const formattedBalance = new Intl.NumberFormat('pt-BR', { 
+      style: 'currency', 
+      currency: 'BRL' 
+    }).format(balanceValue);
+    
+    // Display the formatted value
+    document.getElementById('balanceDisplay').textContent = formattedBalance;
+  });
+</script>
