@@ -1,85 +1,86 @@
 date,description,amount,category,type,payment_method
-2025-03-24,Uber Uber *Trip Help.U,3.53,Uber,expense,Crédito - Nubank
-2025-03-24,99app *99app,13.3,Uber,expense,Crédito - Nubank
-2025-03-24,Supermercado Formosa,40.03,Supermercado,expense,Crédito - Nubank
-2025-03-24,Uber* Trip,7.9,Uber,expense,Crédito - Nubank
-2025-03-23,Uber Uber *Trip Help.U,17.99,Uber,expense,Crédito - Nubank
-2025-03-23,Uber* Trip,13.91,Uber,expense,Crédito - Nubank
-2025-03-23,Drogaria Modena,33.96,Farmácia,expense,Crédito - Nubank
-2025-03-23,Uber* Trip,14.95,Uber,expense,Crédito - Nubank
-2025-03-22,Uber Uber *Trip Help.U,12.94,Uber,expense,Crédito - Nubank
-2025-03-22,Boi D'Ouro- Tamandare,79.8,Jantar,expense,Crédito - Nubank
-2025-03-21,Uber* Trip,11.98,Uber,expense,Crédito - Nubank
-2025-03-20,Uber Uber *Trip Help.U,10.9,Uber,expense,Crédito - Nubank
-2025-03-20,Ifd*Empreendimentos Pa,41.06,Outros,expense,Crédito - Nubank
-2025-03-20,Uber* Trip,14.95,Uber,expense,Crédito - Nubank
-2025-03-19,Uber Uber *Trip Help.U,15.99,Uber,expense,Crédito - Nubank
-2025-03-19,Uber Uber *Trip Help.U,12.91,Uber,expense,Crédito - Nubank
-2025-03-19,Mp *Melimais,24.9,Outros,expense,Crédito - Nubank
-2025-03-18,Uber Uber *Trip Help.U,12.93,Uber,expense,Crédito - Nubank
-2025-03-18,Uber* Trip,10.93,Uber,expense,Crédito - Nubank
-2025-03-18,Uber* Trip,12.09,Uber,expense,Crédito - Nubank
-2025-03-16,Drogaria Modena,19.99,Farmácia,expense,Crédito - Nubank
-2025-03-16,Uber* Trip,17.02,Uber,expense,Crédito - Nubank
-2025-03-16,Uber* Trip,20.96,Uber,expense,Crédito - Nubank
-2025-03-16,Uber Uber *Trip Help.U,13.96,Uber,expense,Crédito - Nubank
-2025-03-15,Uber* Trip,11.94,Uber,expense,Crédito - Nubank
-2025-03-15,Lider Supermercado e M,68.49,Supermercado,expense,Crédito - Nubank
-2025-03-15,Uber* Trip,14.92,Uber,expense,Crédito - Nubank
-2025-03-15,Amazon,19.93,Amazon,expense,Crédito - Nubank
-2025-03-15,Extrafarma Duque de Ca,29.68,Farmácia,expense,Crédito - Nubank
-2025-03-15,Lider Supermercado e M,12.5,Supermercado,expense,Crédito - Nubank
-2025-03-14,Sprint Assessoria,109,Academia,expense,Crédito - Nubank
-2025-03-14,Uber* Trip,10.99,Uber,expense,Crédito - Nubank
-2025-03-14,Uber* Trip,6.91,Uber,expense,Crédito - Nubank
-2025-03-14,Uber Uber *Trip Help.U,8.99,Uber,expense,Crédito - Nubank
-2025-03-13,"IOF de ""Contabo Com""",1.11,Software,expense,Crédito - Nubank
-2025-03-13,Contabo Com,33,Software,expense,Crédito - Nubank
-2025-03-11,Uber Uber *Trip Help.U,13.9,Uber,expense,Crédito - Nubank
-2025-03-10,Spoleto Grao-para,39.5,Almoço,expense,Crédito - Nubank
-2025-03-10,Uber Uber *Trip Help.U,19.9,Uber,expense,Crédito - Nubank
-2025-03-10,Uber Uber *Trip Help.U,18.96,Uber,expense,Crédito - Nubank
-2025-03-09,Burger King,69.96,Lanche,expense,Crédito - Nubank
-2025-03-09,Uber* Trip,12.98,Uber,expense,Crédito - Nubank
-2025-03-09,Uber* Trip,14.95,Uber,expense,Crédito - Nubank
-2025-03-08,Uber Uber *Trip Help.U,13.97,Uber,expense,Crédito - Nubank
-2025-03-08,Uber* Trip,15.93,Uber,expense,Crédito - Nubank
-2025-03-07,Uber Uber *Trip Help.U,9.94,Uber,expense,Crédito - Nubank
-2025-03-07,Uber* Trip,6.9,Uber,expense,Crédito - Nubank
-2025-03-07,Uber Uber *Trip Help.U,9.97,Uber,expense,Crédito - Nubank
-2025-03-07,Lider Supermercado e M,40.72,Supermercado,expense,Crédito - Nubank
-2025-03-07,Uber* Trip,2.1,Uber,expense,Crédito - Nubank
-2025-03-06,Uber* Trip,11.83,Uber,expense,Crédito - Nubank
-2025-03-06,Ice Club,30,Lazer,expense,Crédito - Nubank
-2025-03-06,Uber* Trip,9.96,Uber,expense,Crédito - Nubank
-2025-03-06,Uber* Trip,20.31,Uber,expense,Crédito - Nubank
-2025-03-06,Capriciosa,115,Jantar,expense,Crédito - Nubank
-2025-03-05,Lider Supermercado e M,93.41,Supermercado,expense,Crédito - Nubank
-2025-03-04,Lider Supermercado e M,60.49,Supermercado,expense,Crédito - Nubank
-2025-03-04,Dm *Helpmaxcom,39.9,Outros,expense,Crédito - Nubank
-2025-03-04,Uber* Trip,24.99,Uber,expense,Crédito - Nubank
-2025-03-03,Capriciosa,16,Jantar,expense,Crédito - Nubank
-2025-03-03,Saito Distribuidora Ei,25,Outros,expense,Crédito - Nubank
-2025-03-03,Uber Uber *Trip Help.U,17.97,Uber,expense,Crédito - Nubank
-2025-03-03,Bio Mundo,21.88,Supermercado,expense,Crédito - Nubank
-2025-03-03,Burger King,27.9,Lanche,expense,Crédito - Nubank
-2025-03-03,Divelli Comercio de Al,18,Outros,expense,Crédito - Nubank
-2025-03-03,L. A. Alves,17.45,Outros,expense,Crédito - Nubank
-2025-03-03,Bom Mini,15.98,Supermercado,expense,Crédito - Nubank
-2025-03-03,Uber* Trip,20.97,Uber,expense,Crédito - Nubank
-2025-03-02,Uber Uber *Trip Help.U,7.91,Uber,expense,Crédito - Nubank
-2025-03-02,Sprint Assessoria,89,Academia,expense,Crédito - Nubank
-2025-02-25,Uber* Trip,12.9,Uber,expense,Crédito - Nubank
-2025-02-25,Uber Uber *Trip Help.U,10.29,Uber,expense,Crédito - Nubank
-2025-02-25,Uber* Trip,6.98,Uber,expense,Crédito - Nubank
-2025-02-24,Burger King,71.8,Lanche,expense,Crédito - Nubank
-2025-02-24,Centauro Ce250,54.99,Vestuario,expense,Crédito - Nubank
-2025-02-24,Livraria Leitura,18.9,Livro,expense,Crédito - Nubank
-2025-02-24,Uber Uber *Trip Help.U,14.93,Uber,expense,Crédito - Nubank
-2025-02-24,Burger King,14.9,Lanche,expense,Crédito - Nubank
-2025-02-24,Uber Uber *Trip Help.U,12.91,Uber,expense,Crédito - Nubank
-2025-02-23,Uber* Trip,2.1,Uber,expense,Crédito - Nubank
-2025-02-23,Uber Uber *Trip Help.U,13.92,Uber,expense,Crédito - Nubank
-2025-02-23,Uber Uber *Trip Help.U,7.97,Uber,expense,Crédito - Nubank
-2025-02-22,Uber* Trip,14.92,Uber,expense,Crédito - Nubank
-2025-02-22,Extrafarma Sacramenta,41.16,Farmácia,expense,Crédito - Nubank
+2025-04-23,Uber Uber Trip Help.U,27.14,Uber,expense,Crédito - Nubank
+2025-04-23,Uber Uber Trip Help.U,10.99,Uber,expense,Crédito - Nubank
+2025-04-22,Supermercado Lider Can,69.39,Supermercado,expense,Crédito - Nubank
+2025-04-22,Supermercado Lider Can,29.9,Supermercado,expense,Crédito - Nubank
+2025-04-22,Uber Uber Trip Help.U,8.95,Uber,expense,Crédito - Nubank
+2025-04-22,Google Ellation,19.99,Streaming,expense,Crédito - Nubank
+2025-04-22,Uber Uber Trip Help.U,6.69,Uber,expense,Crédito - Nubank
+2025-04-21,Uber Trip,9.94,Uber,expense,Crédito - Nubank
+2025-04-21,Uber Uber Trip Help.U,6.96,Uber,expense,Crédito - Nubank
+2025-04-20,Uber Uber Trip Help.U,7.95,Uber,expense,Crédito - Nubank
+2025-04-20,Uber Uber Trip Help.U,7.95,Uber,expense,Crédito - Nubank
+2025-04-20,Lider Supermercado e M,62.17,Supermercado,expense,Crédito - Nubank
+2025-04-20,Uber Uber Trip Help.U,7.18,Uber,expense,Crédito - Nubank
+2025-04-20,Uber Trip,9.93,Uber,expense,Crédito - Nubank
+2025-04-20,Uber Uber Trip Help.U,7.98,Uber,expense,Crédito - Nubank
+2025-04-20,Uber Trip,12.91,Uber,expense,Crédito - Nubank
+2025-04-19,Uber Uber Trip Help.U,7.91,Uber,expense,Crédito - Nubank
+2025-04-19,Uber Uber Trip Help.U,7.07,Uber,expense,Crédito - Nubank
+2025-04-19,Supermercado Lider Canudos,464.2,Supermercado,expense,Crédito - Nubank
+2025-04-19,Extrafarma Braz de Agu,22.45,Farmácia,expense,Crédito - Nubank
+2025-04-19,Uber Trip,6.99,Uber,expense,Crédito - Nubank
+2025-04-18,Uber Uber Trip Help.U,8.97,Uber,expense,Crédito - Nubank
+2025-04-18,Google Youtube Member,7.99,Streaming,expense,Crédito - Nubank
+2025-04-18,Uber Uber Trip Help.U,6.91,Uber,expense,Crédito - Nubank
+2025-04-18,Uber Trip,13.94,Uber,expense,Crédito - Nubank
+2025-04-17,Uber Trip,10.95,Uber,expense,Crédito - Nubank
+2025-04-17,Uber Uber Trip Help.U,15.96,Uber,expense,Crédito - Nubank
+2025-04-16,Uber Trip,8.91,Uber,expense,Crédito - Nubank
+2025-04-16,Uber Trip,7.91,Uber,expense,Crédito - Nubank
+2025-04-16,Uber Uber Trip Help.U,12.96,Uber,expense,Crédito - Nubank
+2025-04-15,Uber Uber Trip Help.U,13.94,Uber,expense,Crédito - Nubank
+2025-04-14,Supermercado Lider Canudos,180,Supermercado,expense,Crédito - Nubank
+2025-04-14,Supermercado Lider Canudos,169.65,Supermercado,expense,Crédito - Nubank
+2025-04-13,Uber Trip,7.98,Uber,expense,Crédito - Nubank
+2025-04-13,Uber Trip,4.72,Uber,expense,Crédito - Nubank
+2025-04-13,Uber Trip,9.92,Uber,expense,Crédito - Nubank
+2025-04-13,253mateus Supermercado,34.48,Supermercado,expense,Crédito - Nubank
+2025-04-13,Uber Uber Trip Help.U,12,Uber,expense,Crédito - Nubank
+2025-04-13,G I Variedades,45.11,Outros,expense,Crédito - Nubank
+2025-04-13,Posto Gasolina,21.92,Carro,expense,Crédito - Nubank
+2025-04-12,Uber Trip,9.98,Uber,expense,Crédito - Nubank
+2025-04-12,Cerveja Uriboca,49,Lazer,expense,Crédito - Nubank
+2025-04-12,Barbadeurso,65,Lazer,expense,Crédito - Nubank
+2025-04-11,Uber Uber Trip Help.U,7.92,Uber,expense,Crédito - Nubank
+2025-04-11,Netflix.Com,59.9,Streaming,expense,Crédito - Nubank
+2025-04-11,Uber Trip,12.91,Uber,expense,Crédito - Nubank
+2025-04-11,Uber Trip,13.91,Uber,expense,Crédito - Nubank
+2025-04-11,Uber Trip,6.08,Uber,expense,Crédito - Nubank
+2025-04-11,Drogasil,325.94,Farmácia,expense,Crédito - Nubank
+2025-04-10,Amazon Filtro do Bebedouro,124.9,Amazon,expense,Crédito - Nubank
+2025-04-10,Google Youtube,6.99,Streaming,expense,Crédito - Nubank
+2025-04-10,Uber Trip,22.99,Uber,expense,Crédito - Nubank
+2025-04-10,Uber Uber Trip Help.U,10.93,Uber,expense,Crédito - Nubank
+2025-04-10,Uber Trip,32.9,Uber,expense,Crédito - Nubank
+2025-04-07,Uber Trip,11.94,Uber,expense,Crédito - Nubank
+2025-04-07,Uber Trip,12.91,Uber,expense,Crédito - Nubank
+2025-04-06,Uber Uber Trip Help.U,11.96,Uber,expense,Crédito - Nubank
+2025-04-06,Uber Uber Trip Help.U,14.9,Uber,expense,Crédito - Nubank
+2025-04-06,Uber Uber Trip Help.U,12.9,Uber,expense,Crédito - Nubank
+2025-04-04,Uber Uber Trip Help.U,9.02,Uber,expense,Crédito - Nubank
+2025-04-04,Dm Helpmaxcom,39.9,Software,expense,Crédito - Nubank
+2025-04-04,Drogasil,66.46,Farmácia,expense,Crédito - Nubank
+2025-04-04,Uber Trip,13.97,Uber,expense,Crédito - Nubank
+2025-04-03,Uber Uber Trip Help.U,12.98,Uber,expense,Crédito - Nubank
+2025-04-03,Uber Trip,7.97,Uber,expense,Crédito - Nubank
+2025-04-03,Uber Trip,11.9,Uber,expense,Crédito - Nubank
+2025-04-03,Uber Uber Trip Help.U,6.98,Uber,expense,Crédito - Nubank
+2025-04-02,Dm Twitch,9.9,Streaming,expense,Crédito - Nubank
+2025-04-01,Uber Uber Trip Help.U,12.94,Uber,expense,Crédito - Nubank
+2025-03-31,Uber Trip,11.91,Uber,expense,Crédito - Nubank
+2025-03-31,Uber Uber Trip Help.U,12.96,Uber,expense,Crédito - Nubank
+2025-03-31,Uber Uber Trip Help.U,13.56,Uber,expense,Crédito - Nubank
+2025-03-31,R A C Buteco,133,Lazer,expense,Crédito - Nubank
+2025-03-30,Uber Uber Trip Help.U,11.96,Uber,expense,Crédito - Nubank
+2025-03-30,Uber Uber Trip Help.U,12.96,Uber,expense,Crédito - Nubank
+2025-03-27,Uber Trip,12.98,Uber,expense,Crédito - Nubank
+2025-03-27,Uber Trip,6.98,Uber,expense,Crédito - Nubank
+2025-03-27,Uber Trip,7.96,Uber,expense,Crédito - Nubank
+2025-03-27,Lider Duque,35.47,Supermercado,expense,Crédito - Nubank
+2025-03-27,Uber Trip,9.98,Uber,expense,Crédito - Nubank
+2025-03-27,Lider Duque,28.9,Supermercado,expense,Crédito - Nubank
+2025-03-26,Uber Trip,14.92,Uber,expense,Crédito - Nubank
+2025-03-26,Uber Uber Trip Help.U,14.07,Uber,expense,Crédito - Nubank
+2025-03-25,Uber Uber Trip Help.U,7.91,Uber,expense,Crédito - Nubank
+2025-03-25,Amazon,19.8,Amazon,expense,Crédito - Nubank
