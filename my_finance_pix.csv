@@ -1,24 +1,30 @@
-date,amount,description,category,payment_method
-2025-03-09,400,EVPA,Educação,Débito/PIX - Nubank
-2025-03-09,10, LOCALPAY DO BRASIL SERVICOS DE PAGAMENTOS LTDA ,Outros,Débito/PIX - Nubank
-2025-03-11,27, Mellos Lanches,Lanche,Débito/PIX - Nubank
-2025-03-12,20, SOPHIA LEAL ,Sophia,Débito/PIX - Nubank
-2025-03-13,70, NAYLA JESKE ,Outros,Débito/PIX - Nubank
-2025-03-13,0.4, Coimbrasil,Outros,Débito/PIX - Nubank
-2025-03-14,61.99, WEST BOI ,Jantar,Débito/PIX - Nubank
-2025-03-15,100, Danielle Alves de Freitas ,Outros,Débito/PIX - Nubank
-2025-03-15,88.83, Resto Montenegro,Jantar,Débito/PIX - Nubank
-2025-03-15,24.9, d.local ,Outros,Débito/PIX - Nubank
-2025-03-15,9, Fruto do Rio,Almoço,Débito/PIX - Nubank
-2025-03-16,24, Ana Claudia Silva ,Outros,Débito/PIX - Nubank
-2025-03-17,50, Vinicius augusto saavedra neno ,Outros,Débito/PIX - Nubank
-2025-03-19,264.66, SOPHIA LEAL ,Sophia,Débito/PIX - Nubank
-2025-03-20,70, NAYLA JESKE ,Outros,Débito/PIX - Nubank
-2025-03-20,7, Rodrigo Antonio Pimentel Melo ,Outros,Débito/PIX - Nubank
-2025-03-21,10.54, Zp*Multimarcas Vitrine,Vestuario,Débito/PIX - Nubank
-2025-03-21,2, Débito/PIX - NubankMAQ ,Outros,Débito/PIX - Nubank
-2025-03-22,10, Saopedro,Supermercado,Débito/PIX - Nubank
-2025-03-22,2.8, Saopedro,Supermercado,Débito/PIX - Nubank
-2025-03-24,10, SOPHIA LEAL ,Sophia,Débito/PIX - Nubank
-2025-03-27,70, NAYLA JESKE ,Outros,Débito/PIX - Nubank
-2025-03-27,12, MIRA REFEICOES ,Almoço,Débito/PIX - Nubank
+date,amount,description,category,type
+2025-04-01,50.00,SOPHIA LEAL,Sophia,Débito/PIX - Nubank
+2025-04-02,70.00,David Costa de Carvalho,Maria,Débito/PIX - Nubank
+2025-04-05,85.00,SOPHIA LEAL,Sophia,Débito/PIX - Nubank
+2025-04-06,8.00,Rosana Tavares,Outros,Débito/PIX - Nubank
+2025-04-08,50.00,LOBATO,Outros,Débito/PIX - Nubank
+2025-04-08,23.70,Comercial dos Plastico - Formas,Sophia,Débito/PIX - Nubank
+2025-04-10,2000.00,Aplicação RDB,Investimento,Débito/PIX - Nubank
+2025-04-12,20.00,SOPHIA LEAL,Sophia,Débito/PIX - Nubank
+2025-04-12,4.00,G I Variedades,Outros,Débito/PIX - Nubank
+2025-04-12,18.00,Selma do Socorro Silve,Outros,Débito/PIX - Nubank
+2025-04-13,1000.00,SOPHIA DE OLIVEIRA LEAL,Sophia,Débito/PIX - Nubank
+2025-04-13,17.00,Lavepegue,Outros,Débito/PIX - Nubank
+2025-04-13,5.01,Tudo Conveniencia,Lanche,Débito/PIX - Nubank
+2025-04-14,24.00,Edmilson Coelho Antonio,Outros,Débito/PIX - Nubank
+2025-04-14,4.00,Sulivanhenriquesi,Outros,Débito/PIX - Nubank
+2025-04-14,70.00,Nayla Jeske,Psicologa,Débito/PIX - Nubank
+2025-04-15,51.98,IFOOD.COM AGENCIA DE RESTAURANTES ONLINE S.A.,Lanche,Débito/PIX - Nubank
+2025-04-16,60.50,TUNA PAGAMENTOS,Outros,Débito/PIX - Nubank
+2025-04-18,6.00,SOPHIA LEAL,Outros,Débito/PIX - Nubank
+2025-04-19,31.34,VELOX TICKETS,Lazer,Débito/PIX - Nubank
+2025-04-19,11.20,VELOX TICKETS,Lazer,Débito/PIX - Nubank
+2025-04-19,60.97,BK Lanches,Lanche,Débito/PIX - Nubank
+2025-04-20,100.00,Peixariadogarcia,Supermercado,Débito/PIX - Nubank
+2025-04-21,6.00,Ayanelarissasousa,Outros,Débito/PIX - Nubank
+2025-04-22,10.00,Anderson Soares Almeida,Outros,Débito/PIX - Nubank
+2025-04-23,70.00,William Taylor Pontes da Costa,Outros,Débito/PIX - Nubank
+2025-04-24,70.00,NAYLA JESKE,Psicologa,Débito/PIX - Nubank
+2025-04-25,3.61,Jurunense Home Center,Casa,Débito/PIX - Nubank
+2025-04-26,20.00,SOPHIA LEAL,Sophia,Débito/PIX - Nubank
