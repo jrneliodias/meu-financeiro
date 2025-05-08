@@ -13,14 +13,15 @@
           <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
             <td class="font-bold">Total</td>
             {% for value in formatted_totals %}
-                <td class="text-left font-bold">{{ value }}</td>
+                <td class="text-left font-bold heatmap-cell" data-value="{{ value|stringformat:'f' }}">{{ value }}</td>
             {% endfor %}
           </tr>
             {% for category, values in formatted_expenses_by_category.items %}
-                <tr class="*:p-2 border-b border-slate-700 hover:bg-slate-800/30">
+                <tr class="*:p-2 border-b border-slate-700">
                     <td class="font-medium">{{ category }}</td>
                     {% for value in values %}
-                        <td class="text-left {% if value == 'R$ 0,00' %}text-slate-600{% endif %}">
+                        <td class="text-left heatmap-cell {% if value == 'R$ 0,00' %}text-slate-600{% endif %}" 
+                            data-value="{{ value|stringformat:'f' }}">
                             {{ value }}
                         </td>
                     {% endfor %}
@@ -50,7 +51,7 @@
           <tbody id="mobileCategoryTableBody">
               <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
                   <td class="font-bold">Total</td>
-                  <td class="text-left font-bold" id="selectedMonthTotal"></td>
+                  <td class="text-left font-bold heatmap-cell" id="selectedMonthTotal"></td>
               </tr>
               <!-- Category rows will be dynamically populated -->
           </tbody>
@@ -60,62 +61,192 @@
 
 
 <script>
-  // JavaScript to handle the mobile view functionality
+  // JavaScript to handle the mobile view functionality and heatmap
   document.addEventListener('DOMContentLoaded', function() {
-      // Only run on mobile screens
-      if (window.innerWidth < 768) {
-          const monthSelector = document.getElementById('monthSelector');
-          const selectedMonthHeader = document.getElementById('selectedMonthHeader');
-          const mobileCategoryTableBody = document.getElementById('mobileCategoryTableBody');
-          const mobileMonthTotal = document.getElementById('selectedMonthTotal');
+      // Utility functions
+      const utils = {
+          // Convert currency string to number
+          currencyToNumber: function(currencyStr) {
+              return parseFloat(currencyStr.replace('R$ ', '').replace('.', '').replace(',', '.'));
+          },
           
-          // Format data for JavaScript
-          const allMonths = [{% for month in all_months %}"{{ month }}",{% endfor %}];
-          const categoryData = {
-              {% for category, values in formatted_expenses_by_category.items %}
-                  "{{ category }}": [{% for value in values %}"{{ value }}",{% endfor %}],
-              {% endfor %}
-          };
-          const totalsByMonth = [{% for value in formatted_totals %}"{{ value }}",{% endfor %}];
+          // Get min, max and range from an array of values
+          getDataRange: function(values) {
+              if (values.length === 0) return { min: 0, max: 0, range: 0 };
+              
+              const min = Math.min(...values);
+              const max = Math.max(...values);
+              const range = max - min;
+              
+              return { min, max, range };
+          },
           
-          // Function to update the table based on selected month
-          function updateMobileTable() {
-              const selectedMonthIndex = parseInt(monthSelector.value);
+          // Calculate intensity based on value and range
+          calculateIntensity: function(value, min, range) {
+              return range > 0 ? (value - min) / range : 0;
+          }
+      };
+      
+      // Heatmap configuration
+      const heatmapConfig = {
+          color: {
+              r: 255,
+              g: 193,
+              b: 7
+          },
+          maxOpacity: 0.6,
+          intensityThreshold: 0.7
+      };
+      
+      // Heatmap generator object
+      const heatmap = {
+          // Apply color to a single cell
+          applyColorToCell: function(cell, intensity) {
+              const { r, g, b } = heatmapConfig.color;
+              const opacity = intensity * heatmapConfig.maxOpacity;
+              
+              // Apply background color with appropriate opacity
+              cell.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+              
+              // Adjust text color for better contrast
+              cell.style.color = intensity > heatmapConfig.intensityThreshold ? '#000' : 'inherit';
+          },
+          
+          // Process cells for heatmap generation
+          processCells: function(cells) {
+              // Extract and filter values
+              const values = Array.from(cells)
+                  .map(cell => utils.currencyToNumber(cell.textContent))
+                  .filter(value => value > 0);
+                  
+              if (values.length === 0) return; // No valid values to create a heatmap
+              
+              const { min, max, range } = utils.getDataRange(values);
+              if (range === 0) return; // All values are the same, no heatmap needed
+              
+              // Apply color to each cell
+              cells.forEach(cell => {
+                  const value = utils.currencyToNumber(cell.textContent);
+                  if (value === 0) return; // Skip zero values
+                  
+                  const intensity = utils.calculateIntensity(value, min, range);
+                  this.applyColorToCell(cell, intensity);
+              });
+          },
+          
+          // Apply heatmap to desktop view (excluding totals row)
+          applyToDesktop: function() {
+              const cells = document.querySelectorAll('tr:not(:first-child) .heatmap-cell');
+              this.processCells(cells);
+          },
+          
+          // Apply heatmap to mobile view (excluding totals row)
+          applyToMobile: function() {
+              const cells = document.querySelectorAll('#mobileCategoryTableBody tr:not(:first-child) .heatmap-cell');
+              this.processCells(cells);
+          }
+      };
+      
+      // Mobile view manager
+      const mobileView = {
+          // DOM elements
+          elements: {
+              selector: null,
+              header: null,
+              tableBody: null,
+              totalCell: null
+          },
+          
+          // Data storage
+          data: {
+              months: [],
+              categories: {},
+              totals: []
+          },
+          
+          // Initialize mobile view
+          init: function() {
+              // Only run on mobile screens
+              if (window.innerWidth >= 768) return false;
+              
+              // Get DOM elements
+              this.elements.selector = document.getElementById('monthSelector');
+              this.elements.header = document.getElementById('selectedMonthHeader');
+              this.elements.tableBody = document.getElementById('mobileCategoryTableBody');
+              this.elements.totalCell = document.getElementById('selectedMonthTotal');
+              
+              // Format data for JavaScript
+              this.data.months = [{% for month in all_months %}"{{ month }}",{% endfor %}];
+              this.data.categories = {
+                  {% for category, values in formatted_expenses_by_category.items %}
+                      "{{ category }}": [{% for value in values %}"{{ value }}",{% endfor %}],
+                  {% endfor %}
+              };
+              this.data.totals = [{% for value in formatted_totals %}"{{ value }}",{% endfor %}];
+              
+              // Add event listeners
+              this.elements.selector.addEventListener('change', () => this.updateTable());
+              
+              // Initial load
+              this.updateTable();
+              return true;
+          },
+          
+          // Update the table based on selected month
+          updateTable: function() {
+              const selectedIndex = parseInt(this.elements.selector.value);
               
               // Update header
-              selectedMonthHeader.textContent = allMonths[selectedMonthIndex];
+              this.elements.header.textContent = this.data.months[selectedIndex];
               
               // Update total
-              mobileMonthTotal.textContent = totalsByMonth[selectedMonthIndex];
+              this.elements.totalCell.textContent = this.data.totals[selectedIndex];
+              this.elements.totalCell.setAttribute('data-value', this.data.totals[selectedIndex]);
               
               // Clear existing category rows (except the total row)
-              const totalRow = mobileCategoryTableBody.querySelector('tr');
-              mobileCategoryTableBody.innerHTML = '';
-              mobileCategoryTableBody.appendChild(totalRow);
+              const totalRow = this.elements.tableBody.querySelector('tr');
+              this.elements.tableBody.innerHTML = '';
+              this.elements.tableBody.appendChild(totalRow);
               
               // Add category rows for selected month
-              for (const [category, values] of Object.entries(categoryData)) {
-                  const value = values[selectedMonthIndex];
-                  const row = document.createElement('tr');
-                  row.className = "*:p-2 border-b border-slate-700 hover:bg-slate-800/30";
-                  
-                  const categoryCell = document.createElement('td');
-                  categoryCell.className = "font-medium";
-                  categoryCell.textContent = category;
-                  
-                  const valueCell = document.createElement('td');
-                  valueCell.className = value === 'R$ 0,00' ? "text-left text-slate-600" : "text-left";
-                  valueCell.textContent = value;
-                  
-                  row.appendChild(categoryCell);
-                  row.appendChild(valueCell);
-                  mobileCategoryTableBody.appendChild(row);
+              for (const [category, values] of Object.entries(this.data.categories)) {
+                  const value = values[selectedIndex];
+                  this.addCategoryRow(category, value);
               }
-          }
+              
+              // Apply heatmap
+              heatmap.applyToMobile();
+          },
           
-          // Initialize table and add event listener
-          monthSelector.addEventListener('change', updateMobileTable);
-          updateMobileTable(); // Initial load
+          // Add a new category row to the table
+          addCategoryRow: function(category, value) {
+              const row = document.createElement('tr');
+              row.className = "*:p-2 border-b border-slate-700";
+              
+              // Create category cell
+              const categoryCell = document.createElement('td');
+              categoryCell.className = "font-medium";
+              categoryCell.textContent = category;
+              
+              // Create value cell
+              const valueCell = document.createElement('td');
+              valueCell.className = value === 'R$ 0,00' ? "text-left text-slate-600 heatmap-cell" : "text-left heatmap-cell";
+              valueCell.textContent = value;
+              valueCell.setAttribute('data-value', value);
+              
+              // Add cells to row
+              row.appendChild(categoryCell);
+              row.appendChild(valueCell);
+              
+              // Add row to table
+              this.elements.tableBody.appendChild(row);
+          }
+      };
+      
+      // Initialize views based on screen size
+      if (!mobileView.init()) {
+          // Desktop view - apply heatmap directly
+          heatmap.applyToDesktop();
       }
   });
-  </script>
+</script>
