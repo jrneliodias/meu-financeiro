@@ -5,121 +5,121 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-  <script>
-    const PaymentMethodcolors = [
-   
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+  const PaymentMethodcolors = [
+
     {
-        backgroundColor: 'rgba(167, 139, 250, 0.2)',   // Darker purple with opacity
-        borderColor: 'rgba(167, 139, 250, 1)',         // Lighter purple for border
-        borderWidth: 1
+      backgroundColor: 'rgba(167, 139, 250, 0.2)',   // Darker purple with opacity
+      borderColor: 'rgba(167, 139, 250, 1)',         // Lighter purple for border
+      borderWidth: 1
     },
-    
+
     {
-        backgroundColor: 'rgba(52, 211, 153, 0.2)',    // Darker green with opacity
-        borderColor: 'rgba(52, 211, 153, 1)',          // Lighter green for border
-        borderWidth: 1
-    },
-    {
-        backgroundColor: 'rgba(253, 186, 116, 0.2)',   // Darker orange with opacity
-        borderColor: 'rgba(253, 186, 116, 1)',         // Lighter orange for border
-        borderWidth: 1
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Red with opacity
+      borderColor: 'rgba(255, 99, 132, 1)',          // Solid red        // Lighter green for border
+      borderWidth: 1
     },
     {
-        backgroundColor: 'rgba(96, 165, 250, 0.2)',    // Darker light blue with opacity
-        borderColor: 'rgba(96, 165, 250, 1)',          // Lighter light blue for border
-        borderWidth: 1
+      backgroundColor: 'rgba(253, 186, 116, 0.2)',   // Darker orange with opacity
+      borderColor: 'rgba(253, 186, 116, 1)',         // Lighter orange for border
+      borderWidth: 1
+    },
+    {
+      backgroundColor: 'rgba(96, 165, 250, 0.2)',    // Darker light blue with opacity
+      borderColor: 'rgba(96, 165, 250, 1)',          // Lighter light blue for border
+      borderWidth: 1
     }
-    ]
+  ]
 
-   
-    const calculatedPaymentMethodRawData = {{ calculated_monthy_payment_method_expense_totals|safe }};
-    const calculatedPaymentMethodLabels = calculatedPaymentMethodRawData.labels; // Extract the months
-    const calculatedPaymentMethodLabelsDatasets = calculatedPaymentMethodRawData.datasets.map((dataset, index) => ({
-        label: dataset.label, // Payment method name
-        data: dataset.data,   // Monthly expenses for this payment method
-        backgroundColor: PaymentMethodcolors[index % PaymentMethodcolors.length].backgroundColor, // Rotate through colors
-        borderColor: PaymentMethodcolors[index % PaymentMethodcolors.length].borderColor,
-        borderWidth: PaymentMethodcolors[index % PaymentMethodcolors.length].borderWidth,
-    }));
 
-const calculatedPaymentMethodExpenseChartCtx = document.getElementById('calculatedPaymentMethodExpenseChart').getContext('2d');
-new Chart(calculatedPaymentMethodExpenseChartCtx, {
+  const calculatedPaymentMethodRawData = {{ calculated_monthy_payment_method_expense_totals| safe }};
+  const calculatedPaymentMethodLabels = calculatedPaymentMethodRawData.labels; // Extract the months
+  const calculatedPaymentMethodLabelsDatasets = calculatedPaymentMethodRawData.datasets.map((dataset, index) => ({
+    label: dataset.label, // Payment method name
+    data: dataset.data,   // Monthly expenses for this payment method
+    backgroundColor: PaymentMethodcolors[index % PaymentMethodcolors.length].backgroundColor, // Rotate through colors
+    borderColor: PaymentMethodcolors[index % PaymentMethodcolors.length].borderColor,
+    borderWidth: PaymentMethodcolors[index % PaymentMethodcolors.length].borderWidth,
+  }));
+
+  const calculatedPaymentMethodExpenseChartCtx = document.getElementById('calculatedPaymentMethodExpenseChart').getContext('2d');
+  new Chart(calculatedPaymentMethodExpenseChartCtx, {
     type: 'bar', // Change to 'line' for line charts
     data: {
-        labels: calculatedPaymentMethodLabels, // Months
-        datasets: calculatedPaymentMethodLabelsDatasets, // Payment method datasets
-        
+      labels: calculatedPaymentMethodLabels, // Months
+      datasets: calculatedPaymentMethodLabelsDatasets, // Payment method datasets
+
     },
-   
+
     options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        layout: {
-          padding: {
-            top: 20,    // Add more padding at the top
-            right: 100,  // Add more padding at the right for labels
-            bottom: 2,
-            left: 10
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 20,    // Add more padding at the top
+          right: 100,  // Add more padding at the right for labels
+          bottom: 2,
+          left: 10
+        }
+      },
+      indexAxis: 'y',
+      barPercentage: 0.4,     // Reduced from default (0.9) to create more space
+      categoryPercentage: 0.1,
+
+      barThickness: 12,
+      plugins: {
+        legend: {
+          display: false,
+          position: 'right', // Legend on the right
+          align: 'start',
+          labels: {
+            color: 'white',
+            font: {
+              size: 8
+            }
           }
         },
-        indexAxis: 'y',
-        barPercentage: 0.4,     // Reduced from default (0.9) to create more space
-        categoryPercentage: 0.1,
+        tooltip: {
+          enabled: true,
+        },
+        // Custom plugin to draw values above the bars
+        datalabels: {
+          anchor: 'end',
+          align: 'right',
+          formatter: function (value, context) {
+            return value > 0
+              ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+              : ''; // Hide labels for values <= 0
+          },
+          color: 'white',  // Color of the text above the bars
+          font: {
+            weight: 'bold',
+            size: 12
+          }
+        }
 
-     barThickness:12,
-        plugins: {
-          legend: {
+      },
+      scales: {
+        y: {
+          title: {
             display: false,
-            position: 'right', // Legend on the right
-            align: 'start',
-            labels: {
-                color: 'white',
-                font: {
-                    size: 8
-                }
-            }
+          },
         },
-            tooltip: {
-                enabled: true,
-            },
-            // Custom plugin to draw values above the bars
-            datalabels: {
-                anchor: 'end',
-                align: 'right',
-                  formatter: function(value, context) {
-                    return value > 0 
-                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-                    : ''; // Hide labels for values <= 0
-                },
-                color: 'white',  // Color of the text above the bars
-                font: {
-                    weight: 'bold',
-                    size: 12
-                }
-            }
-           
+        x: {
+          display: false,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Total Expenses',
+          },
         },
-        scales: {
-            y: {
-                title: {
-                    display: false,
-                },
-            },
-            x: {
-                display:false,
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Total Expenses',
-                },
-            },
-        },
-        
-        
+      },
+
+
     },
     plugins: [ChartDataLabels]
-});
+  });
 
 
-  </script>
+</script>

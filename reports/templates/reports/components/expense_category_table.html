@@ -1,65 +1,57 @@
 <div class="my-3 space-y-4 bg-slate-800/50 rounded-lg p-3 ">
-    <h2 class="text-2xl font-bold">Expenses by Category</h2>
-    <table class="hidden md:table w-full p-2" border="1">
-        <thead>
-            <tr class="*:p-2 border-b border-slate-700 ">
-                <th class="text-left">Category</th>
-                {% for month in all_months %}
-                    <th class="text-left">{{ month }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-          <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
-            <td class="font-bold">Total</td>
-            {% for value in formatted_totals %}
-                <td class="text-left font-bold heatmap-cell" data-value="{{ value|stringformat:'f' }}">{{ value }}</td>
-            {% endfor %}
-          </tr>
-            {% for category, values in formatted_expenses_by_category.items %}
-                <tr class="*:p-2 border-b border-slate-700">
-                    <td class="font-medium">{{ category }}</td>
-                    {% for value in values %}
-                        <td class="text-left heatmap-cell {% if value == 'R$ 0,00' %}text-slate-600{% endif %}" 
-                            data-value="{{ value|stringformat:'f' }}">
-                            {{ value }}
-                        </td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-            
-        </tbody>
+  <h2 class="text-2xl font-bold">Expenses by Category</h2>
+  <table class="hidden md:table w-full p-2" border="1">
+    <thead>
+      <tr class="*:p-2 border-b border-slate-700 ">
+        <th class="text-left">Category</th>
+        {% for month in all_months %}<th class="text-left">{{ month }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
+        <td class="font-bold">Total</td>
+        {% for value in formatted_totals %}
+          <td class="text-left font-bold heatmap-cell"
+              data-value="{{ value|stringformat:'f' }}">{{ value }}</td>
+        {% endfor %}
+      </tr>
+      {% for category, values in formatted_expenses_by_category.items %}
+        <tr class="*:p-2 border-b border-slate-700">
+          <td class="font-medium">{{ category }}</td>
+          {% for value in values %}
+            <td class="text-left heatmap-cell {% if value == 'R$ 0,00' %}text-slate-600{% endif %}"
+                data-value="{{ value|stringformat:'f' }}">{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="md:hidden">
+    <!-- Mobile selector for months -->
+    <div class="mb-4">
+      <select id="monthSelector"
+              class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-slate-900">
+        {% for month in all_months %}<option value="{{ forloop.counter0 }}">{{ month }}</option>{% endfor %}
+      </select>
+    </div>
+    <!-- Mobile table with just category and selected month -->
+    <table class="p-2 w-full" border="1">
+      <thead>
+        <tr class="*:p-2 border-b border-slate-700">
+          <th class="text-left">Category</th>
+          <th class="text-left" id="selectedMonthHeader">Month</th>
+        </tr>
+      </thead>
+      <tbody id="mobileCategoryTableBody">
+        <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
+          <td class="font-bold">Total</td>
+          <td class="text-left font-bold heatmap-cell" id="selectedMonthTotal"></td>
+        </tr>
+        <!-- Category rows will be dynamically populated -->
+      </tbody>
     </table>
-    <div class="md:hidden">
-      <!-- Mobile selector for months -->
-      <div class="mb-4">
-          <select id="monthSelector" class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-slate-900">
-              {% for month in all_months %}
-                  <option value="{{ forloop.counter0 }}">{{ month }}</option>
-              {% endfor %}
-          </select>
-      </div>
-      
-      <!-- Mobile table with just category and selected month -->
-      <table class="p-2 w-full" border="1">
-          <thead>
-              <tr class="*:p-2 border-b border-slate-700">
-                  <th class="text-left">Category</th>
-                  <th class="text-left" id="selectedMonthHeader">Month</th>
-              </tr>
-          </thead>
-          <tbody id="mobileCategoryTableBody">
-              <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
-                  <td class="font-bold">Total</td>
-                  <td class="text-left font-bold heatmap-cell" id="selectedMonthTotal"></td>
-              </tr>
-              <!-- Category rows will be dynamically populated -->
-          </tbody>
-      </table>
   </div>
-</div> 
-
-
+</div>
 <script>
   // JavaScript to handle the mobile view functionality and heatmap
   document.addEventListener('DOMContentLoaded', function() {
