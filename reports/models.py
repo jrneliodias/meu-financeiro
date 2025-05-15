@@ -2,8 +2,6 @@ from django.db import models
 
 from registers.models import PaymentMethod
 
-# Create your models here.
-
 
 class BillingPeriod(models.Model):
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
