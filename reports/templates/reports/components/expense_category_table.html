@@ -53,7 +53,7 @@
   </div>
 </div>
 <script>
-  // JavaScript to handle the mobile view functionality and heatmap
+  // JavaScript to handle the mobile view functionality and enhanced statistics heatmap
   document.addEventListener('DOMContentLoaded', function() {
       // Utility functions
       const utils = {
@@ -62,46 +62,113 @@
               return parseFloat(currencyStr.replace('R$ ', '').replace('.', '').replace(',', '.'));
           },
           
-          // Get min, max and range from an array of values
-          getDataRange: function(values) {
-              if (values.length === 0) return { min: 0, max: 0, range: 0 };
+          // Get statistical metrics from an array of values
+          getStatistics: function(values) {
+              if (values.length === 0) return { min: 0, max: 0, range: 0, mean: 0, stdDev: 0, q1: 0, q3: 0, iqr: 0 };
               
+              // Basic stats
               const min = Math.min(...values);
               const max = Math.max(...values);
               const range = max - min;
               
-              return { min, max, range };
+              // Mean calculation
+              const sum = values.reduce((acc, val) => acc + val, 0);
+              const mean = sum / values.length;
+              
+              // Standard deviation
+              const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+              const stdDev = Math.sqrt(variance);
+              
+              // Quartiles for IQR (Interquartile Range)
+              const sortedValues = [...values].sort((a, b) => a - b);
+              const q1Index = Math.floor(sortedValues.length * 0.25);
+              const q3Index = Math.floor(sortedValues.length * 0.75);
+              const q1 = sortedValues[q1Index];
+              const q3 = sortedValues[q3Index];
+              const iqr = q3 - q1;
+              
+              return { min, max, range, mean, stdDev, q1, q3, iqr };
           },
           
-          // Calculate intensity based on value and range
-          calculateIntensity: function(value, min, range) {
-              return range > 0 ? (value - min) / range : 0;
+          // Detect if a value is an outlier using IQR method
+          isOutlier: function(value, stats) {
+              if (stats.iqr === 0) return false;
+              const lowerBound = stats.q1 - 1.5 * stats.iqr;
+              const upperBound = stats.q3 + 1.5 * stats.iqr;
+              return value < lowerBound || value > upperBound;
+          },
+          
+          // Calculate intensity based on statistical position
+          calculateIntensity: function(value, stats) {
+              // Z-score based intensity (how many standard deviations from the mean)
+              if (stats.stdDev === 0) return 0;
+              
+              const zScore = (value - stats.mean) / stats.stdDev;
+              // Normalize z-score to a 0-1 scale for intensity
+              // Using sigmoid function to transform z-score
+              return 1 / (1 + Math.exp(-zScore));
           }
       };
       
       // Heatmap configuration
       const heatmapConfig = {
-          color: {
-              r: 255,
-              g: 193,
-              b: 7
+          colors: {
+              normal: {
+                  r: 255,
+                  g: 193,
+                  b: 7
+              },
+              outlier: {
+                  r: 220,
+                  g: 53,
+                  b: 69
+              },
+              belowMean: {
+                  r: 40,
+                  g: 167,
+                  b: 69
+              }
           },
-          maxOpacity: 0.6,
-          intensityThreshold: 0.7
+          maxOpacity: 0.7,
+          intensityThreshold: 0.6
       };
       
       // Heatmap generator object
       const heatmap = {
           // Apply color to a single cell
-          applyColorToCell: function(cell, intensity) {
-              const { r, g, b } = heatmapConfig.color;
-              const opacity = intensity * heatmapConfig.maxOpacity;
+          applyColorToCell: function(cell, value, stats) {
+              // Determine if this is an outlier
+              const isOutlier = utils.isOutlier(value, stats);
+              
+              // Choose appropriate color based on value and outlier status
+              let color;
+              if (isOutlier) {
+                  color = heatmapConfig.colors.outlier;
+              } else if (value < stats.mean) {
+                  color = heatmapConfig.colors.belowMean;
+              } else {
+                  color = heatmapConfig.colors.normal;
+              }
+              
+              // Calculate intensity
+              const intensity = utils.calculateIntensity(value, stats);
               
               // Apply background color with appropriate opacity
-              cell.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+              const opacity = Math.min(intensity * heatmapConfig.maxOpacity, heatmapConfig.maxOpacity);
+              cell.style.backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
+              
+              // Add data attributes for tooltip/explanation
+              cell.setAttribute('data-is-outlier', isOutlier);
+              cell.setAttribute('data-z-score', ((value - stats.mean) / stats.stdDev).toFixed(2));
+              cell.setAttribute('data-vs-mean', value > stats.mean ? 'above' : 'below');
               
               // Adjust text color for better contrast
               cell.style.color = intensity > heatmapConfig.intensityThreshold ? '#000' : 'inherit';
+              
+              // Add outlier indicator
+              if (isOutlier) {
+                  cell.style.fontWeight = 'bold';
+              }
           },
           
           // Process cells for heatmap generation
@@ -113,16 +180,19 @@
                   
               if (values.length === 0) return; // No valid values to create a heatmap
               
-              const { min, max, range } = utils.getDataRange(values);
-              if (range === 0) return; // All values are the same, no heatmap needed
+              // Get statistical metrics
+              const stats = utils.getStatistics(values);
+              if (stats.range === 0) return; // All values are the same, no heatmap needed
+              
+              // Display statistics in console for debugging
+              console.log('Expense Statistics:', stats);
               
               // Apply color to each cell
               cells.forEach(cell => {
                   const value = utils.currencyToNumber(cell.textContent);
                   if (value === 0) return; // Skip zero values
                   
-                  const intensity = utils.calculateIntensity(value, min, range);
-                  this.applyColorToCell(cell, intensity);
+                  this.applyColorToCell(cell, value, stats);
               });
           },
           
@@ -136,6 +206,42 @@
           applyToMobile: function() {
               const cells = document.querySelectorAll('#mobileCategoryTableBody tr:not(:first-child) .heatmap-cell');
               this.processCells(cells);
+          },
+          
+          // Add a legend to explain the coloring
+          addLegend: function() {
+              const legend = document.createElement('div');
+              legend.className = "mt-4 text-xs bg-slate-800 p-3 rounded";
+              legend.innerHTML = `
+                  <p class="font-semibold mb-2">Color Legend:</p>
+                  <div class="flex flex-wrap gap-3">
+                      <div>
+                          <span class="inline-block w-3 h-3 mr-1" style="background-color: rgba(255, 193, 7, 0.6);"></span>
+                          Above average expense
+                      </div>
+                      <div>
+                          <span class="inline-block w-3 h-3 mr-1" style="background-color: rgba(40, 167, 69, 0.6);"></span>
+                          Below average expense
+                      </div>
+                      <div>
+                          <span class="inline-block w-3 h-3 mr-1" style="background-color: rgba(220, 53, 69, 0.6);"></span>
+                          Outlier (unusual value)
+                      </div>
+                  </div>
+                  <p class="mt-2">Intensity indicates how far from the average.</p>
+              `;
+              
+              // Add to both desktop and mobile views
+              const desktopTable = document.querySelector('.expense-category-table');
+              const mobileTable = document.getElementById('mobileCategoryTable');
+              
+              if (desktopTable) {
+                  desktopTable.parentNode.insertBefore(legend.cloneNode(true), desktopTable.nextSibling);
+              }
+              
+              if (mobileTable) {
+                  mobileTable.parentNode.insertBefore(legend, mobileTable.nextSibling);
+              }
           }
       };
       
@@ -146,7 +252,8 @@
               selector: null,
               header: null,
               tableBody: null,
-              totalCell: null
+              totalCell: null,
+              statsDisplay: null
           },
           
           // Data storage
@@ -179,9 +286,56 @@
               // Add event listeners
               this.elements.selector.addEventListener('change', () => this.updateTable());
               
+              // Create stats display area
+              this.createStatsDisplay();
+              
               // Initial load
               this.updateTable();
               return true;
+          },
+          
+          // Create statistics display
+          createStatsDisplay: function() {
+              const statsDisplay = document.createElement('div');
+              statsDisplay.id = 'mobileStatsDisplay';
+              statsDisplay.className = 'mt-3 text-xs bg-slate-800 p-2 rounded';
+              statsDisplay.innerHTML = '<h4 class="font-semibold">Monthly Statistics</h4><div id="statsContent"></div>';
+              
+              this.elements.statsDisplay = statsDisplay;
+              this.elements.selector.parentNode.insertBefore(statsDisplay, this.elements.selector.nextSibling);
+          },
+          
+          // Update statistics display
+          updateStats: function(selectedIndex) {
+              // Collect all values for the selected month
+              const values = Object.values(this.data.categories)
+                  .map(categoryValues => utils.currencyToNumber(categoryValues[selectedIndex]))
+                  .filter(value => value > 0);
+              
+              if (values.length === 0) {
+                  this.elements.statsDisplay.style.display = 'none';
+                  return;
+              }
+              
+              // Calculate statistics
+              const stats = utils.getStatistics(values);
+              
+              // Format currency values
+              const formatCurrency = (value) => 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+              
+              // Update stats display
+              const statsContent = document.getElementById('statsContent');
+              statsContent.innerHTML = `
+                  <div class="grid grid-cols-2 gap-1">
+                      <div>Média: ${formatCurrency(stats.mean)}</div>
+                      <div>Mediana: ${formatCurrency(values.sort((a,b) => a-b)[Math.floor(values.length/2)])}</div>
+                      <div>Mínimo: ${formatCurrency(stats.min)}</div>
+                      <div>Máximo: ${formatCurrency(stats.max)}</div>
+                      <div>Total: ${this.data.totals[selectedIndex]}</div>
+                  </div>
+              `;
+              
+              this.elements.statsDisplay.style.display = 'block';
           },
           
           // Update the table based on selected month
@@ -194,6 +348,9 @@
               // Update total
               this.elements.totalCell.textContent = this.data.totals[selectedIndex];
               this.elements.totalCell.setAttribute('data-value', this.data.totals[selectedIndex]);
+              
+              // Update statistics
+              this.updateStats(selectedIndex);
               
               // Clear existing category rows (except the total row)
               const totalRow = this.elements.tableBody.querySelector('tr');
@@ -239,6 +396,42 @@
       if (!mobileView.init()) {
           // Desktop view - apply heatmap directly
           heatmap.applyToDesktop();
+          
+          // Create stats display for desktop
+          const desktopTable = document.querySelector('.expense-category-table');
+          if (desktopTable) {
+              // Calculate stats for desktop view (all visible cells)
+              const cells = document.querySelectorAll('tr:not(:first-child) .heatmap-cell');
+              const values = Array.from(cells)
+                  .map(cell => utils.currencyToNumber(cell.textContent))
+                  .filter(value => value > 0);
+              
+              if (values.length > 0) {
+                  const stats = utils.getStatistics(values);
+                  
+                  // Format currency values
+                  const formatCurrency = (value) => 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                  
+                  // Create stats display
+                  const statsDisplay = document.createElement('div');
+                  statsDisplay.className = 'mt-3 text-xs bg-slate-800 p-2 rounded';
+                  statsDisplay.innerHTML = `
+                      <h4 class="font-semibold">Estatísticas Gerais</h4>
+                      <div class="grid grid-cols-5 gap-2 mt-1">
+                          <div>Média: ${formatCurrency(stats.mean)}</div>
+                          <div>Mediana: ${formatCurrency(values.sort((a,b) => a-b)[Math.floor(values.length/2)])}</div>
+                          <div>Mínimo: ${formatCurrency(stats.min)}</div>
+                          <div>Máximo: ${formatCurrency(stats.max)}</div>
+                          <div>Desvio Padrão: ${formatCurrency(stats.stdDev)}</div>
+                      </div>
+                  `;
+                  
+                  desktopTable.parentNode.insertBefore(statsDisplay, desktopTable);
+              }
+          }
       }
+      
+      // Add legend to explain colors
+      heatmap.addLegend();
   });
 </script>
