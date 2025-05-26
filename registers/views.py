@@ -23,7 +23,8 @@ def register_expense(request):
         user = request.user
 
         if not user.is_authenticated:
-            return messages.error(request, "User isn't logged in")
+            messages.error(request, "User isn't logged in")
+            # or wherever you want to redirect unauthenticated users
 
         if expense_data['installments'] > 1:
             installment_service.create_installments(user, expense_data)
@@ -33,6 +34,9 @@ def register_expense(request):
             expense = expense_service.create_single_expense(user, expense_data)
             messages.success(
                 request, f"Expense {expense.__str__()} has been registered.")
+
+        # Redirect after successful POST
+        return redirect('register_expense')
 
     else:
         # Handle quick fill parameter
@@ -52,7 +56,7 @@ def register_income(request):
     if (request.method == 'POST'):
         form = IncomeForm(request.POST)
         if not form.is_valid():
-            return
+            return render(request, 'register/income_form.html', {'form': form})
         income_data = form.cleaned_data
 
         user = request.user
