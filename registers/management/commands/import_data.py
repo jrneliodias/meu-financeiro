@@ -56,9 +56,11 @@ class Command(BaseCommand):
                     name=category_name, type='expense')
 
                 # Verificar ou criar o método de pagamento
-                payment_method_name = row['type']
+                payment_method_name = row['payment_method']
                 payment_method, created = PaymentMethod.objects.get_or_create(
-                    name=payment_method_name)
+                    name=payment_method_name,
+                    defaults={'start_billing_day': 1}
+                )
 
                 # Criar a despesa
                 expense = Expense(
