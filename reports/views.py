@@ -7,6 +7,7 @@ from reports.services import ExpenseService, BalanceService
 from django.views.generic import UpdateView
 from registers.models import Expense
 from registers.forms import ExpenseForm
+from utils.dates import get_all_months, get_current_date
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
@@ -85,17 +86,6 @@ class ExpenseUpdateView(UpdateView):
     form_class = ExpenseForm
     template_name = 'reports/expense_update.html'
     success_url = '/'
-
-
-def get_current_date():
-    """Get current year and month."""
-    current = datetime.now()
-    return current.year, current.month
-
-
-def get_all_months():
-    """Get list of all months."""
-    return list(calendar.month_name)[1:]  # Skip empty first item
 
 
 def process_monthly_expenses(monthly_reports, all_months):
