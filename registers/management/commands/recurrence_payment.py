@@ -7,10 +7,32 @@ from registers.models import RecurringExpense, Expense
 class Command(BaseCommand):
     help = 'Create monthly expenses from RecurringExpense'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--month',
+            type=int,
+            default=None,
+            help='Month number (1-12) to process recurring expenses for (default: current month)'
+        )
+
     def handle(self, *args, **kwargs):
+        # Get the month to process
+        month_to_process = kwargs.get('month')
+        if month_to_process is None:
+            month_to_process = now().date().month
+
+        # Validate month range
+        if month_to_process < 1 or month_to_process > 12:
+            self.stdout.write(self.style.ERROR(
+                'Month must be between 1 and 12'))
+            return
+
         # Get today's date
         today = now().date().replace(day=1)
-        today_month = today.month
+        current_year = today.year
+
+        self.stdout.write(self.style.SUCCESS(
+            f'Processing recurring expenses for month {month_to_process} ({datetime.date(current_year, month_to_process, 1).strftime("%B")})'))
 
         # Get all recurring expenses that need to be added for this month or previous months
         recurring_expenses = RecurringExpense.objects.all()
@@ -22,16 +44,21 @@ class Command(BaseCommand):
             print(
                 f"Processing recurring expense: {recurring_expense.description}")
 
-            expense_date = today.replace(
-                month=today_month, day=recurring_expense.start_date.day)
+            try:
+                expense_date = datetime.date(
+                    current_year, month_to_process, recurring_expense.start_date.day)
+            except ValueError as e:
+                self.stdout.write(self.style.WARNING(
+                    f"Invalid date for {recurring_expense.description}: {e}. Skipping."))
+                continue
 
             print(f"Expense date set to: {expense_date}")
 
             # Check if an expense for this recurring expense already exists for this month
             last_expense = Expense.objects.filter(
                 reccurring_expense=recurring_expense,
-                date__year=today.year,
-                date__month=today_month,
+                date__year=current_year,
+                date__month=month_to_process,
                 date__day=expense_date.day
             ).first()
 
