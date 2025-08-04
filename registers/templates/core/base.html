@@ -46,6 +46,13 @@
         <span class="text-sm hidden lg:block">Register Income</span>
       </a>
       <a
+        href="{% url 'csv_import' %}"
+        class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg {% if 'csv-import' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
+      >
+        <i class="fa-solid fa-file-csv text-xs"></i>
+        <span class="text-sm hidden lg:block">CSV Import</span>
+      </a>
+      <a
         href="/admin"
         class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg"
       >

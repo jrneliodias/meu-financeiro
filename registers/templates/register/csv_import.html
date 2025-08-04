@@ -1,0 +1,170 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">CSV Import</h1>
+        <p class="text-gray-400">Import your financial data from CSV files with validation and preview options.</p>
+    </div>
+
+    <!-- Import Form -->
+    <div class="bg-slate-800 rounded-lg p-6 mb-6">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- File Upload Section -->
+            <div class="space-y-4">
+                <div>
+                    <label for="{{ form.csv_file.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                        {{ form.csv_file.label }}
+                    </label>
+                    {{ form.csv_file }}
+                    {% if form.csv_file.help_text %}
+                        <p class="mt-1 text-sm text-gray-400">{{ form.csv_file.help_text }}</p>
+                    {% endif %}
+                    {% if form.csv_file.errors %}
+                        <div class="mt-1 text-red-400 text-sm">
+                            {% for error in form.csv_file.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Configuration Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- CSV Settings -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-white">CSV Settings</h3>
+                    
+                    <div>
+                        <label for="{{ form.separator.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                            {{ form.separator.label }}
+                        </label>
+                        {{ form.separator }}
+                        {% if form.separator.help_text %}
+                            <p class="mt-1 text-sm text-gray-400">{{ form.separator.help_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center">
+                        {{ form.skip_header }}
+                        <label for="{{ form.skip_header.id_for_label }}" class="ml-2 text-sm text-white">
+                            {{ form.skip_header.label }}
+                        </label>
+                    </div>
+                    {% if form.skip_header.help_text %}
+                        <p class="mt-1 text-sm text-gray-400">{{ form.skip_header.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Import Options -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-white">Import Options</h3>
+                    
+                    <div class="flex items-center">
+                        {{ form.auto_create_categories }}
+                        <label for="{{ form.auto_create_categories.id_for_label }}" class="ml-2 text-sm text-white">
+                            {{ form.auto_create_categories.label }}
+                        </label>
+                    </div>
+                    {% if form.auto_create_categories.help_text %}
+                        <p class="mt-1 text-sm text-gray-400">{{ form.auto_create_categories.help_text }}</p>
+                    {% endif %}
+
+                    <div class="flex items-center">
+                        {{ form.auto_create_payment_methods }}
+                        <label for="{{ form.auto_create_payment_methods.id_for_label }}" class="ml-2 text-sm text-white">
+                            {{ form.auto_create_payment_methods.label }}
+                        </label>
+                    </div>
+                    {% if form.auto_create_payment_methods.help_text %}
+                        <p class="mt-1 text-sm text-gray-400">{{ form.auto_create_payment_methods.help_text }}</p>
+                    {% endif %}
+
+                    <div class="flex items-center">
+                        {{ form.preview_mode }}
+                        <label for="{{ form.preview_mode.id_for_label }}" class="ml-2 text-sm text-white">
+                            {{ form.preview_mode.label }}
+                        </label>
+                    </div>
+                    {% if form.preview_mode.help_text %}
+                        <p class="mt-1 text-sm text-gray-400">{{ form.preview_mode.help_text }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end pt-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-upload mr-2"></i>
+                    Import CSV
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- CSV Format Guide -->
+    <div class="bg-slate-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">CSV Format Guide</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-medium text-white mb-2">Required Columns</h4>
+                <ul class="text-sm text-gray-400 space-y-1">
+                    <li><code class="bg-slate-700 px-1 rounded">date</code> - Date in YYYY-MM-DD format</li>
+                    <li><code class="bg-slate-700 px-1 rounded">description</code> - Transaction description</li>
+                    <li><code class="bg-slate-700 px-1 rounded">amount</code> - Transaction amount (numeric)</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-medium text-white mb-2">Optional Columns</h4>
+                <ul class="text-sm text-gray-400 space-y-1">
+                    <li><code class="bg-slate-700 px-1 rounded">category</code> - Expense category</li>
+                    <li><code class="bg-slate-700 px-1 rounded">type</code> - Transaction type (default: expense)</li>
+                    <li><code class="bg-slate-700 px-1 rounded">payment_method</code> - Payment method</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-4 p-4 bg-slate-700 rounded-lg">
+            <h5 class="font-medium text-white mb-2">Example CSV Format:</h5>
+            <pre class="text-sm text-gray-300 overflow-x-auto"><code>date,description,amount,category,type,payment_method
+2025-01-15,Grocery Store,45.67,Supermercado,expense,Crédito - Nubank
+2025-01-16,Uber Trip,12.50,Uber,expense,Crédito - Nubank</code></pre>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    {% if messages %}
+        <div class="mt-6 space-y-2">
+            {% for message in messages %}
+                <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-900 text-red-200{% elif message.tags == 'warning' %}bg-yellow-900 text-yellow-200{% elif message.tags == 'success' %}bg-green-900 text-green-200{% else %}bg-blue-900 text-blue-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+// File upload preview
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileLabel = fileInput.nextElementSibling;
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Update the label to show selected file
+            const label = fileInput.parentElement.querySelector('label');
+            if (label) {
+                label.textContent = `Selected: ${file.name}`;
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 
