@@ -1,0 +1,115 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">CSV Import Preview</h1>
+        <p class="text-gray-400">Review your data before importing. {{ preview_data.total_rows }} records found.</p>
+    </div>
+
+    <!-- Import Summary -->
+    <div class="bg-slate-800 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Import Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-700 p-4 rounded-lg">
+                <div class="text-2xl font-bold text-blue-400">{{ preview_data.total_rows }}</div>
+                <div class="text-sm text-gray-400">Total Records</div>
+            </div>
+            <div class="bg-slate-700 p-4 rounded-lg">
+                <div class="text-2xl font-bold text-green-400">{{ preview_data.columns|length }}</div>
+                <div class="text-sm text-gray-400">Columns Found</div>
+            </div>
+            <div class="bg-slate-700 p-4 rounded-lg">
+                <div class="text-2xl font-bold text-yellow-400">{{ preview_data.sample_data|length }}</div>
+                <div class="text-sm text-gray-400">Preview Records</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Preview -->
+    <div class="bg-slate-800 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Data Preview (First {{ preview_data.sample_data|length }} records)</h3>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300">
+                <thead class="text-xs text-gray-400 uppercase bg-slate-700">
+                    <tr>
+                        {% for column in preview_data.columns %}
+                            <th scope="col" class="px-6 py-3">{{ column }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in preview_data.sample_data %}
+                        <tr class="bg-slate-800 border-b border-slate-700 hover:bg-slate-700">
+                            {% for column in preview_data.columns %}
+                                <td class="px-6 py-4">
+                                    {% if column == 'amount' %}
+                                        <span class="font-mono">R$ {{ row.amount|floatformat:2 }}</span>
+                                    {% elif column == 'date' %}
+                                        <span class="font-mono">{{ row.date|date:"Y-m-d" }}</span>
+                                    {% elif column == 'description' %}
+                                        {{ row.description|default:"-" }}
+                                    {% elif column == 'category' %}
+                                        {{ row.category|default:"-" }}
+                                    {% elif column == 'payment_method' %}
+                                        {{ row.payment_method|default:"-" }}
+                                    {% elif column == 'type' %}
+                                        {{ row.type|default:"-" }}
+                                    {% else %}
+                                        {{ row|get_item:column|default:"-" }}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between items-center">
+        <a href="{% url 'csv_import' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Upload
+        </a>
+        
+        <div class="flex space-x-4">
+            <form method="post" action="{% url 'csv_import_confirm' %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-check mr-2"></i>
+                    Confirm Import
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Settings -->
+    <div class="mt-6 bg-slate-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Import Settings</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-gray-400">Auto-create Categories:</span>
+                <span class="text-white ml-2">{{ form.auto_create_categories.value|yesno:"Yes,No" }}</span>
+            </div>
+            <div>
+                <span class="text-gray-400">Auto-create Payment Methods:</span>
+                <span class="text-white ml-2">{{ form.auto_create_payment_methods.value|yesno:"Yes,No" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add confirmation dialog
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to import {{ preview_data.total_rows }} records? This action cannot be undone.')) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %} 

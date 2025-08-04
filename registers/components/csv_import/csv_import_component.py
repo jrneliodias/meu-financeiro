@@ -1,106 +1,18 @@
-import pandas as pd
-from django.contrib.auth.models import User
-from django.core.files.uploadedfile import UploadedFile
-from django.contrib import messages
+"""
+CSV Import Component for handling CSV file imports with validation and processing
+"""
 from typing import Dict, List, Tuple, Optional
+import pandas as pd
+from django.core.files.uploadedfile import UploadedFile
+from django.contrib.auth.models import User
+from ..models import Category, PaymentMethod, Expense
 import logging
-import io
 
 logger = logging.getLogger(__name__)
 
-from .models import Expense, Installment, Income, Category, PaymentMethod
-from dateutil.relativedelta import relativedelta
 
-
-class ExpenseService:
-    """ Expense service"""
-
-    def create_single_expense(self, user, expense_data):
-        """_summary_
-
-        Args:
-            user (_type_): _description_
-            expense_data (_type_): _description_
-        """
-        expense = Expense(
-            user=user,
-            description=expense_data['description'],
-            amount=expense_data['amount'],
-            date=expense_data['date'],
-            category=expense_data['category'],
-            payment_method=expense_data['payment_method'],
-            installment_plan=None,
-        )
-        expense.save()
-        return expense
-
-
-class InstallmentService:
-    """ Service class to handle Installment creation """
-
-    def create_installments(self, user, installment_data):
-        """
-        Handles the creation of an Installment plan and its related expenses.
-        """
-        total_amount = installment_data['amount']
-        total_installments = installment_data['installments']
-
-        installment = Installment(
-            user=user,
-            description=installment_data['description'],
-            start_date=installment_data['date'],
-            total_amount=total_amount,
-            total_installments=total_installments,
-            category=installment_data['category'],
-            payment_method=installment_data['payment_method'],
-        )
-
-        # Save the Installment object before creating related expenses
-        installment.save()
-
-        installment_amount = total_amount / total_installments
-        expenses = []
-
-        for i in range(total_installments):
-            due_date = installment_data['date'] + relativedelta(months=i)
-
-            expense = Expense.objects.create(
-                user=user,
-                description=f"{installment_data['description']} - {i+1}/{total_installments}",
-                amount=installment_amount,
-                date=due_date,
-                category=installment_data['category'],
-                payment_method=installment_data['payment_method'],
-                installment_plan=installment
-            )
-            expenses.append(expense)
-
-        return installment, expenses
-
-
-class IncomeService:
-    """ Expense service"""
-
-    def create_income(self, user, income_data):
-        """_summary_
-
-        Args:
-            user (_type_): _description_
-            income_data (_type_): _description_
-        """
-        income = Income(
-            user=user,
-            description=income_data['description'],
-            amount=income_data['amount'],
-            date=income_data['date'],
-            category=income_data['category'],
-        )
-        income.save()
-        return income
-
-
-class CSVImportService:
-    """Service for handling CSV file imports with validation and error handling"""
+class CSVImportComponent:
+    """Component for handling CSV file imports with validation and error handling"""
     
     REQUIRED_COLUMNS = ['date', 'description', 'amount']
     OPTIONAL_COLUMNS = ['category', 'type', 'payment_method']
@@ -158,36 +70,6 @@ class CSVImportService:
             
         except Exception as e:
             errors.append(f"Error reading CSV file: {str(e)}")
-            logger.error(f"CSV parsing error: {e}")
-            return None, errors
-    
-    def parse_csv_file_from_string(self, csv_string: str, separator: str = ',', 
-                                 skip_header: bool = True) -> Tuple[Optional[pd.DataFrame], List[str]]:
-        """Parse CSV string and return DataFrame with errors (for testing)"""
-        errors = []
-        
-        try:
-            # Read CSV from string
-            df = pd.read_csv(io.StringIO(csv_string), sep=separator)
-            
-            # Skip header if requested
-            if skip_header and not df.empty:
-                df = df.iloc[1:].reset_index(drop=True)
-            
-            # Validate structure
-            is_valid, structure_errors = self.validate_csv_structure(df)
-            if not is_valid:
-                errors.extend(structure_errors)
-                return None, errors
-            
-            # Clean and validate data
-            df, data_errors = self._clean_dataframe(df)
-            errors.extend(data_errors)
-            
-            return df, errors
-            
-        except Exception as e:
-            errors.append(f"Error reading CSV string: {str(e)}")
             logger.error(f"CSV parsing error: {e}")
             return None, errors
     
@@ -331,4 +213,4 @@ class CSVImportService:
             'success_rate': (self.import_stats['imported'] / self.import_stats['total_rows'] * 100) if self.import_stats['total_rows'] > 0 else 0,
             'errors': self.error_log,
             'warnings': self.warning_log
-        }
+        } 
