@@ -58,6 +58,7 @@ class RecurringExpense(models.Model):
         Category, on_delete=models.SET_NULL, null=True, limit_choices_to={'type': 'expense'})
     payment_method = models.ForeignKey(
         PaymentMethod, on_delete=models.SET_NULL, null=True)
+    generate_debit = models.BooleanField(default=True )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -80,7 +81,7 @@ class Expense(models.Model):
     installment_plan = models.ForeignKey(
         Installment, on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
     reccurring_expense = models.ForeignKey(
-        RecurringExpense, on_delete=models.CASCADE, null=True, blank=True, related_name='recurring_expenses')
+        RecurringExpense, on_delete=models.SET_NULL, null=True, blank=True, related_name='recurring_expenses')
 
     def __str__(self):
         return f"{self.description} - {self.category} - {str(self.amount)}"
