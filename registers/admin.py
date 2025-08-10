@@ -58,8 +58,9 @@ class InstallmentAdmin(admin.ModelAdmin):
 
 class RecurringExpenseAdmin(admin.ModelAdmin):
     list_display = ('description', 'total_amount', 'start_date',
-                    'category', 'payment_method', 'created_at', 'updated_at')
+                    'category', 'payment_method', 'generate_debit', 'created_at', 'updated_at')
     search_fields = ('name',)
+    ordering=['-generate_debit']
 
 
 class IncomeAdmin(admin.ModelAdmin):

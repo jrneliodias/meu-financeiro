@@ -40,6 +40,10 @@ class Command(BaseCommand):
             f"Number of recurring expenses to process: {recurring_expenses.count()}")
 
         for recurring_expense in recurring_expenses:
+          
+            if not recurring_expense.generate_debit:
+              continue
+            
             # Set the day and month from the recurring expense's start_date, and use the current year
             print(
                 f"Processing recurring expense: {recurring_expense.description}")
