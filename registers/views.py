@@ -93,16 +93,22 @@ def csv_import(request):
         form = CSVImportForm(request.POST, request.FILES)
         if form.is_valid():
             csv_file = form.cleaned_data['csv_file']
+            csv_text = form.cleaned_data['csv_text']
             separator = form.cleaned_data['separator']
             skip_header = form.cleaned_data['skip_header']
             auto_create_categories = form.cleaned_data['auto_create_categories']
             auto_create_payment_methods = form.cleaned_data['auto_create_payment_methods']
             preview_mode = form.cleaned_data['preview_mode']
             
-            # Parse CSV file
-            df, errors = csv_import_service.parse_csv_file(
-                csv_file, separator, skip_header
-            )
+            # Parse CSV data - either from file or text input
+            if csv_file:
+                df, errors = csv_import_service.parse_csv_file(
+                    csv_file, separator, skip_header
+                )
+            else:
+                df, errors = csv_import_service.parse_csv_file_from_string(
+                    csv_text, separator, skip_header
+                )
             
             if df is None:
                 for error in errors:
