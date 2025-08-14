@@ -52,10 +52,22 @@ class CSVImportForm(forms.Form):
     
     csv_file = forms.FileField(
         label='CSV File',
+        required=False,
         help_text='Select a CSV file to import. Supported formats: .csv',
         widget=forms.FileInput(attrs={
             'class': 'block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400',
             'accept': '.csv'
+        })
+    )
+    
+    csv_text = forms.CharField(
+        label='CSV Text',
+        required=False,
+        help_text='Paste your CSV data directly here. Use this as an alternative to file upload.',
+        widget=forms.Textarea(attrs={
+            'class': 'block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 font-mono p-3',
+            'rows': 10,
+            'placeholder': 'date,description,amount,category,type,payment_method\n2025-01-15,Grocery Store,45.67,Supermercado,expense,Crédito - Nubank\n2025-01-16,Uber Trip,12.50,Uber,expense,Crédito - Nubank'
         })
     )
     
@@ -118,15 +130,44 @@ class CSVImportForm(forms.Form):
         """Validate the uploaded CSV file"""
         csv_file = self.cleaned_data.get('csv_file')
         
-        if not csv_file:
-            raise forms.ValidationError('Please select a CSV file.')
-        
-        # Check file extension
-        if not csv_file.name.endswith('.csv'):
-            raise forms.ValidationError('Please upload a valid CSV file.')
-        
-        # Check file size (limit to 10MB)
-        if csv_file.size > 10 * 1024 * 1024:  # 10MB
-            raise forms.ValidationError('File size must be less than 10MB.')
+        if csv_file:
+            # Check file extension
+            if not csv_file.name.endswith('.csv'):
+                raise forms.ValidationError('Please upload a valid CSV file.')
+            
+            # Check file size (limit to 10MB)
+            if csv_file.size > 10 * 1024 * 1024:  # 10MB
+                raise forms.ValidationError('File size must be less than 10MB.')
         
         return csv_file
+    
+    def clean_csv_text(self):
+        """Validate the CSV text input"""
+        csv_text = self.cleaned_data.get('csv_text')
+        
+        if csv_text:
+            # Basic validation - check if it has at least one line with commas
+            lines = csv_text.strip().split('\n')
+            if len(lines) < 2:  # At least header + one data row
+                raise forms.ValidationError('CSV text must contain at least 2 lines (header and data).')
+            
+            # Check if it looks like CSV (has separators)
+            first_line = lines[0]
+            if ',' not in first_line and ';' not in first_line and '\t' not in first_line:
+                raise forms.ValidationError('CSV text does not appear to contain valid separators.')
+        
+        return csv_text
+    
+    def clean(self):
+        """Validate that either file or text is provided, but not both"""
+        cleaned_data = super().clean()
+        csv_file = cleaned_data.get('csv_file')
+        csv_text = cleaned_data.get('csv_text')
+        
+        if not csv_file and not csv_text:
+            raise forms.ValidationError('Please provide either a CSV file or CSV text.')
+        
+        if csv_file and csv_text:
+            raise forms.ValidationError('Please provide either a CSV file OR CSV text, not both.')
+        
+        return cleaned_data

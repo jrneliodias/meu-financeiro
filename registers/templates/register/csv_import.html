@@ -14,8 +14,20 @@
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             
+            <!-- Input Method Toggle -->
+            <div class="mb-6">
+                <div class="flex space-x-4">
+                    <button type="button" id="fileToggle" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-file mr-2"></i>Upload File
+                    </button>
+                    <button type="button" id="textToggle" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-paste mr-2"></i>Paste Text
+                    </button>
+                </div>
+            </div>
+
             <!-- File Upload Section -->
-            <div class="space-y-4">
+            <div id="fileUploadSection" class="space-y-4">
                 <div>
                     <label for="{{ form.csv_file.id_for_label }}" class="block text-sm font-medium text-white mb-2">
                         {{ form.csv_file.label }}
@@ -27,6 +39,26 @@
                     {% if form.csv_file.errors %}
                         <div class="mt-1 text-red-400 text-sm">
                             {% for error in form.csv_file.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Text Input Section -->
+            <div id="textInputSection" class="space-y-4" style="display: none;">
+                <div>
+                    <label for="{{ form.csv_text.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                        {{ form.csv_text.label }}
+                    </label>
+                    {{ form.csv_text }}
+                    {% if form.csv_text.help_text %}
+                        <p class="mt-1 text-sm text-gray-400">{{ form.csv_text.help_text }}</p>
+                    {% endif %}
+                    {% if form.csv_text.errors %}
+                        <div class="mt-1 text-red-400 text-sm">
+                            {% for error in form.csv_text.errors %}
                                 <p>{{ error }}</p>
                             {% endfor %}
                         </div>
@@ -150,21 +182,78 @@
 </div>
 
 <script>
-// File upload preview
 document.addEventListener('DOMContentLoaded', function() {
+    // Get toggle buttons and sections
+    const fileToggle = document.getElementById('fileToggle');
+    const textToggle = document.getElementById('textToggle');
+    const fileUploadSection = document.getElementById('fileUploadSection');
+    const textInputSection = document.getElementById('textInputSection');
     const fileInput = document.querySelector('input[type="file"]');
-    const fileLabel = fileInput.nextElementSibling;
+    const textInput = document.querySelector('textarea[name="csv_text"]');
     
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Update the label to show selected file
+    // Toggle functionality
+    fileToggle.addEventListener('click', function() {
+        // Show file upload section, hide text input section
+        fileUploadSection.style.display = 'block';
+        textInputSection.style.display = 'none';
+        
+        // Update button styles
+        fileToggle.classList.remove('bg-gray-600');
+        fileToggle.classList.add('bg-blue-600');
+        textToggle.classList.remove('bg-blue-600');
+        textToggle.classList.add('bg-gray-600');
+        
+        // Clear text input and make file input required
+        if (textInput) {
+            textInput.value = '';
+        }
+    });
+    
+    textToggle.addEventListener('click', function() {
+        // Show text input section, hide file upload section
+        textInputSection.style.display = 'block';
+        fileUploadSection.style.display = 'none';
+        
+        // Update button styles
+        textToggle.classList.remove('bg-gray-600');
+        textToggle.classList.add('bg-blue-600');
+        fileToggle.classList.remove('bg-blue-600');
+        fileToggle.classList.add('bg-gray-600');
+        
+        // Clear file input
+        if (fileInput) {
+            fileInput.value = '';
+            // Reset file label if it was changed
             const label = fileInput.parentElement.querySelector('label');
-            if (label) {
-                label.textContent = `Selected: ${file.name}`;
+            if (label && label.textContent.startsWith('Selected:')) {
+                label.textContent = fileInput.getAttribute('data-original-label') || 'CSV File';
             }
         }
     });
+    
+    // File upload preview
+    if (fileInput) {
+        // Store original label text
+        const label = fileInput.parentElement.querySelector('label');
+        if (label) {
+            fileInput.setAttribute('data-original-label', label.textContent);
+        }
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && label) {
+                label.textContent = `Selected: ${file.name}`;
+            } else if (label) {
+                label.textContent = fileInput.getAttribute('data-original-label') || 'CSV File';
+            }
+        });
+    }
+    
+    // Initialize with file upload section visible
+    if (fileUploadSection && textInputSection) {
+        fileUploadSection.style.display = 'block';
+        textInputSection.style.display = 'none';
+    }
 });
 </script>
 {% endblock %} 
