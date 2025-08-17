@@ -1,0 +1,420 @@
+<div class="bg-slate-800/50 rounded-lg p-3 w-full">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Daily Spending Chart</h2>
+    <div class="flex space-x-2">
+      <select id="dailyChartPeriod" class="bg-slate-700 text-white rounded px-3 py-1">
+        <option value="7">Last 7 Days</option>
+        <option value="30" selected>Last 30 Days</option>
+        <option value="60">Last 60 Days</option>
+        <option value="90">Last 90 Days</option>
+      </select>
+      <select id="dailyChartType" class="bg-slate-700 text-white rounded px-3 py-1">
+        <option value="bar">Bar Chart</option>
+        <option value="line" selected>Line Chart</option>
+      </select>
+    </div>
+  </div>
+  
+  <!-- Debug Information Display -->
+  <div id="debugInfo" class="mb-4 p-2 bg-slate-700 rounded text-sm text-white" style="display: none;">
+    <strong>Debug Information:</strong>
+    <div id="debugContent"></div>
+  </div>
+  
+  <div class="min-h-[400px] max-h-[400px]  mt-2 p-3 px-0 w-full">
+    <canvas id="dailySpendingChart" class="w-full"></canvas>
+  </div>
+</div>
+
+<!-- Django's json_script for safe data passing -->
+{{ daily_spending_data|json_script:"daily-spending-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+  // Debug function to show data information
+  function showDebugInfo(data, message) {
+    const debugDiv = document.getElementById('debugInfo');
+    const debugContent = document.getElementById('debugContent');
+    
+    debugDiv.style.display = 'block';
+    debugContent.innerHTML = `
+      <p><strong>Message:</strong> ${message}</p>
+      <p><strong>Data Type:</strong> ${typeof data}</p>
+      <p><strong>Data:</strong> <pre>${JSON.stringify(data, null, 2)}</pre></p>
+    `;
+  }
+
+  class DailySpendingChart {
+    constructor(canvasId, initialData) {
+      this.canvasId = canvasId;
+      this.chart = null;
+      this.data = initialData;
+      this.colors = {
+        primary: {
+          backgroundColor: 'rgba(96, 165, 250, 0.2)',
+          borderColor: 'rgba(96, 165, 250, 1)',
+          borderWidth: 2
+        },
+        trend: {
+          backgroundColor: 'rgba(255, 99, 132, 0.1)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        }
+      };
+      
+      this.initializeChart();
+      this.setupEventListeners();
+    }
+    
+    initializeChart() {
+      const ctx = document.getElementById(this.canvasId);
+      if (!ctx) {
+        console.error('Canvas element not found:', this.canvasId);
+        return;
+      }
+      
+      // Validate data
+      if (!this.data || !this.data.labels || !this.data.dailyExpenses) {
+        console.error('Invalid data structure:', this.data);
+        showDebugInfo(this.data, 'Invalid data structure');
+        return;
+      }
+      
+      // Store original labels for tooltip access
+      this.originalLabels = this.data.labels;
+      
+      // Format dates for better display
+      const formattedLabels = this.data.labels.map(dateStr => {
+        try {
+          const date = new Date(dateStr);
+          return date.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit' 
+          });
+        } catch (e) {
+          console.warn('Date formatting error for:', dateStr, e);
+          return dateStr;
+        }
+      });
+      
+      this.chart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: formattedLabels,
+          datasets: [{
+            label: 'Daily Spending',
+            data: this.data.dailyExpenses,
+            backgroundColor: this.colors.primary.backgroundColor,
+            borderColor: this.colors.primary.borderColor,
+            borderWidth: this.colors.primary.borderWidth,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 3,
+            pointHoverRadius: 6
+          }, {
+            label: '7-Day Average',
+            data: this.data.movingAverages || [],
+            backgroundColor: this.colors.trend.backgroundColor,
+            borderColor: this.colors.trend.borderColor,
+            borderWidth: this.colors.trend.borderWidth,
+            borderDash: [5, 5],
+            tension: 0.4,
+            fill: false,
+            pointRadius: 2,
+            pointHoverRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: 'white',
+                font: { size: 12 },
+                usePointStyle: true,
+                padding: 20
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleColor: 'white',
+              bodyColor: 'white',
+              borderColor: 'rgba(96, 165, 250, 1)',
+              borderWidth: 1,
+              callbacks: {
+                title: function(context) {
+                  // Simple approach: just show the formatted date from the chart
+                  return context[0].label || 'Date';
+                },
+                label: function(context) {
+                  return context.dataset.label + ': ' + 
+                    new Intl.NumberFormat('pt-BR', { 
+                      style: 'currency', 
+                      currency: 'BRL' 
+                    }).format(context.parsed.y);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Date',
+                color: 'white',
+                font: { size: 14, weight: 'bold' }
+              },
+              ticks: {
+                color: 'white',
+                maxTicksLimit: 10,
+                font: { size: 11 }
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            y: {
+              display: true,
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (R$)',
+                color: 'white',
+                font: { size: 14, weight: 'bold' }
+              },
+              ticks: {
+                color: 'white',
+                font: { size: 11 },
+                callback: function(value) {
+                  return new Intl.NumberFormat('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }).format(value);
+                }
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    setupEventListeners() {
+      const periodSelector = document.getElementById('dailyChartPeriod');
+      if (periodSelector) {
+        periodSelector.addEventListener('change', (e) => {
+          this.updateChartPeriod(parseInt(e.target.value));
+        });
+      }
+      
+      const typeSelector = document.getElementById('dailyChartType');
+      if (typeSelector) {
+        typeSelector.addEventListener('change', (e) => {
+          this.updateChartType(e.target.value);
+        });
+      }
+    }
+    
+    updateChartPeriod(days) {
+      // Show loading indicator without destroying the canvas
+      const canvas = document.getElementById('dailySpendingChart');
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'loadingIndicator';
+      loadingDiv.className = 'absolute inset-0 bg-slate-800 bg-opacity-90 flex items-center justify-center text-white z-10';
+      loadingDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>Loading new data...</div>';
+      
+      // Add loading overlay to the canvas container
+      const canvasContainer = canvas.parentElement;
+      canvasContainer.style.position = 'relative';
+      canvasContainer.appendChild(loadingDiv);
+      
+      // Make AJAX request to get new data
+      fetch(`/daily-spending-data/?days=${days}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(newData => {
+        // Remove loading indicator
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+          loadingIndicator.remove();
+        }
+        
+        // Update chart with new data
+        this.updateData(newData);
+      })
+      .catch(error => {
+        console.error('Error fetching new data:', error);
+        
+        // Remove loading indicator
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+          loadingIndicator.remove();
+        }
+        
+        // Show error message
+        alert('Error loading new data. Please try again.');
+      });
+    }
+    
+    updateChartType(type) {
+      if (!this.chart) return;
+      
+      this.chart.config.type = type;
+      
+      if (type === 'bar') {
+        this.chart.data.datasets[0].tension = 0;
+        this.chart.data.datasets[0].fill = false;
+        this.chart.data.datasets[0].pointRadius = 0;
+        this.chart.data.datasets[1].pointRadius = 0;
+      } else {
+        this.chart.data.datasets[0].tension = 0.4;
+        this.chart.data.datasets[0].fill = true;
+        this.chart.data.datasets[0].pointRadius = 3;
+        this.chart.data.datasets[1].pointRadius = 2;
+      }
+      
+      this.chart.update('active');
+    }
+    
+    updateData(newData) {
+      if (!this.chart) {
+        console.error('Chart not initialized - cannot update data');
+        return;
+      }
+      
+      if (!newData || !newData.labels || !newData.dailyExpenses) {
+        console.error('Invalid data structure received:', newData);
+        return;
+      }
+      
+      try {
+        this.data = newData;
+        this.originalLabels = newData.labels;
+        
+        // Format new labels
+        const formattedLabels = newData.labels.map(dateStr => {
+          try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('pt-BR', { 
+              day: '2-digit', 
+              month: '2-digit' 
+            });
+          } catch (e) {
+            console.warn('Date formatting error for:', dateStr, e);
+            return dateStr;
+          }
+        });
+        
+        // Update chart data
+        this.chart.data.labels = formattedLabels;
+        this.chart.data.datasets[0].data = newData.dailyExpenses;
+        this.chart.data.datasets[1].data = newData.movingAverages || [];
+        
+        // Force chart update
+        this.chart.update('active');
+        
+      } catch (error) {
+        console.error('Error updating chart data:', error);
+      }
+    }
+  }
+  
+  // Initialize the chart with proper JSON handling
+  try {
+    // Use Django's json_script filter for safe JSON handling
+    const dailySpendingDataElement = document.getElementById('daily-spending-data');
+    if (!dailySpendingDataElement) {
+      throw new Error('Daily spending data script element not found');
+    }
+    const dailySpendingData = JSON.parse(dailySpendingDataElement.textContent);
+    
+    // Show debug info on page (only in development)
+    // showDebugInfo(dailySpendingData, 'Data received from Django');
+    
+    // Validate data structure
+    if (!dailySpendingData) {
+      throw new Error('No data received from Django');
+    }
+    
+    if (typeof dailySpendingData !== 'object') {
+      throw new Error('Data is not an object: ' + typeof dailySpendingData);
+    }
+    
+    if (!dailySpendingData.labels) {
+      throw new Error('Missing labels in data');
+    }
+    
+    if (!dailySpendingData.dailyExpenses) {
+      throw new Error('Missing dailyExpenses in data');
+    }
+    
+    console.log('Data validation passed, initializing chart...');
+    const dailyChart = new DailySpendingChart('dailySpendingChart', dailySpendingData);
+    
+  } catch (error) {
+    console.error('Error initializing daily spending chart:', error);
+    
+    let chartInitialized = false;
+    
+    // Try fallback method if json_script fails
+    try {
+      console.log('Trying fallback data parsing method...');
+      const fallbackData = {{ daily_spending_data|safe }};
+      console.log('Fallback data:', fallbackData);
+      
+      if (fallbackData && typeof fallbackData === 'object') {
+        const dailyChart = new DailySpendingChart('dailySpendingChart', fallbackData);
+        chartInitialized = true; // Success with fallback
+      }
+    } catch (fallbackError) {
+      console.error('Fallback method also failed:', fallbackError);
+    }
+    
+    // Only show error message if both methods failed
+    if (!chartInitialized) {
+      showDebugInfo({
+        error: error.message, 
+        stack: error.stack,
+        elementFound: !!document.getElementById('daily-spending-data'),
+        elementContent: document.getElementById('daily-spending-data')?.textContent || 'No content'
+      }, 'Chart initialization error');
+      
+      // Show error message to user
+      const chartContainer = document.getElementById('dailySpendingChart').parentElement;
+      chartContainer.innerHTML = `
+        <div class="text-center text-red-400 p-8">
+          <h3 class="text-lg font-bold mb-2">Error loading daily spending chart</h3>
+          <p class="text-sm">${error.message}</p>
+          <p class="text-xs mt-2">Check browser console for more details</p>
+          <button onclick="document.getElementById('debugInfo').style.display='block'" 
+                  class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+            Show Debug Info
+          </button>
+        </div>
+      `;
+    }
+  }
+</script>

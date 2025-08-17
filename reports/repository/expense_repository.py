@@ -1,6 +1,6 @@
 from registers.models import Expense
 from django.db.models import Sum
-from django.db.models.functions import TruncMonth, TruncYear
+from django.db.models.functions import TruncMonth, TruncYear, TruncDate
 
 import calendar
 
@@ -167,3 +167,58 @@ class ExpenseRepository:
         ).values('category__name').annotate(
             total_amount=Sum('amount')
         ).order_by('category__name')
+
+    def get_daily_expenses_in_period(self, start_date, end_date, payment_method=None, category=None):
+        """
+        Get daily expense totals for a specific period with optional filters.
+        
+        Why this design?
+        1. Flexible filtering while maintaining performance
+        2. Database-level aggregation for efficiency
+        3. Consistent with existing repository patterns
+        4. Fixed SQLite compatibility issue with TruncDate by using date field directly
+        """
+        query = Expense.objects.filter(
+            date__gte=start_date,
+            date__lte=end_date
+        )
+        
+        # Apply optional filters
+        if payment_method:
+            query = query.filter(payment_method=payment_method)
+        if category:
+            query = query.filter(category=category)
+        
+        return (
+            query
+            .values('date')  # Use date field directly instead of TruncDate
+            .annotate(total_amount=Sum('amount'))
+            .order_by('date')
+        )
+
+    def get_daily_expenses_by_category_in_period(self, start_date, end_date):
+        """
+        Get daily expenses broken down by category.
+        Useful for stacked daily charts showing category breakdown.
+        """
+        return (
+            Expense.objects
+            .filter(date__gte=start_date, date__lte=end_date)
+            .annotate(date_only=TruncDate('date'))
+            .values('date_only', 'category__name')
+            .annotate(total_amount=Sum('amount'))
+            .order_by('date_only', 'category__name')
+        )
+
+    def get_daily_expenses_by_payment_method_in_period(self, start_date, end_date):
+        """
+        Get daily expenses broken down by payment method.
+        """
+        return (
+            Expense.objects
+            .filter(date__gte=start_date, date__lte=end_date)
+            .annotate(date_only=TruncDate('date'))
+            .values('date_only', 'payment_method__name')
+            .annotate(total_amount=Sum('amount'))
+            .order_by('date_only', 'payment_method__name')
+        )

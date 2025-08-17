@@ -57,29 +57,18 @@
       maintainAspectRatio: false,
       layout: {
         padding: {
-          top: 20,    // Add more padding at the top
+         // Add more padding at the top
           right: 100,  // Add more padding at the right for labels
           bottom: 2,
           left: 10
         }
       },
       indexAxis: 'y',
-      barPercentage: 0.4,     // Reduced from default (0.9) to create more space
-      categoryPercentage: 0.1,
-
-      barThickness: 12,
+      barThickness: 10,  // Reduced thickness to accommodate multiple bars
+      categoryPercentage: 0.9,  // Controls spacing between categories
+      barPercentage: 0.1,  // Controls spacing between bars within a category
       plugins: {
-        legend: {
-          display: false,
-          position: 'right', // Legend on the right
-          align: 'start',
-          labels: {
-            color: 'white',
-            font: {
-              size: 8
-            }
-          }
-        },
+        
         tooltip: {
           enabled: true,
         },
@@ -95,18 +84,20 @@
           color: 'white',  // Color of the text above the bars
           font: {
             weight: 'bold',
-            size: 12
+            size: 10
           }
         }
 
       },
       scales: {
         y: {
+          stacked: false,  // Disable stacking for y-axis
           title: {
             display: false,
           },
         },
         x: {
+          stacked: false,  // Disable stacking for x-axis
           display: false,
           beginAtZero: true,
           title: {
