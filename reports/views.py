@@ -8,6 +8,8 @@ from django.views.generic import UpdateView
 from registers.models import Expense
 from registers.forms import ExpenseForm
 from utils.dates import get_all_months, get_current_date
+from django.http import JsonResponse
+from reports.services.daily_expense_calculator import DailyExpenseCalculator
 
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
@@ -57,6 +59,10 @@ def expense_report(request):
     formatted_data = format_data_for_template(expenses_data, all_months)
 
     global_balance = balance_service.calculate_global_balance()
+    
+    daily_spending_data = get_daily_spending_data(
+        expense_repository, selected_year, selected_month
+    )
 
     # Prepare the context
     context = {
@@ -75,7 +81,8 @@ def expense_report(request):
         'calculated_monthy_payment_method_expense_totals': payment_method_data['calculated_totals'],
         'monthly_expense_income_datasets': monthly_data['expense_income_datasets'],
         'monthly_expenses_queryset': monthly_data['expenses_queryset'],
-        'global_balance': global_balance
+        'global_balance': global_balance,
+        'daily_spending_data': daily_spending_data,
     }
 
     return render(request, 'reports/expense_report.html', context)
@@ -290,3 +297,104 @@ def format_brl(value):
     formatted_value = "R$ {:,.2f}".format(value).replace(
         ",", "X").replace(".", ",").replace("X", ".")
     return formatted_value
+
+
+def get_daily_spending_data(expense_repository, year, month):
+    """
+    Get daily spending data for the chart.
+    
+    Why separate function? Maintains the modular approach of your existing code
+    and makes testing easier.
+    """
+    try:
+        print(f"DEBUG: Getting daily spending data for year={year}, month={month}")
+        
+        daily_calculator = DailyExpenseCalculator(expense_repository, year, month)
+        
+        # Get trend data for the last 30 days
+        trend_data = daily_calculator.get_daily_spending_trends(days=30)
+        
+        print(f"DEBUG: Trend data keys: {list(trend_data.keys())}")
+        print(f"DEBUG: Daily expenses count: {len(trend_data['daily_expenses'])}")
+        print(f"DEBUG: Total spending: {trend_data['total_spending']}")
+        
+        # Format data for Chart.js - ensure all values are JSON-serializable
+        sorted_dates = sorted(trend_data['daily_expenses'].keys())
+        
+        result = {
+            'labels': [str(date) for date in sorted_dates],  # Ensure strings
+            'dailyExpenses': [float(trend_data['daily_expenses'][date]) for date in sorted_dates],  # Ensure floats
+            'movingAverages': [float(trend_data['moving_averages'].get(date, 0)) for date in sorted_dates],  # Ensure floats
+            'totalSpending': float(trend_data['total_spending']),  # Ensure float
+            'averageDaily': float(trend_data['average_daily'])  # Ensure float
+        }
+        
+        print(f"DEBUG: Result labels count: {len(result['labels'])}")
+        print(f"DEBUG: Result daily expenses count: {len(result['dailyExpenses'])}")
+        print(f"DEBUG: First few labels: {result['labels'][:5]}")
+        print(f"DEBUG: First few expenses: {result['dailyExpenses'][:5]}")
+        
+        return result
+        
+    except Exception as e:
+        print(f"ERROR in get_daily_spending_data: {e}")
+        import traceback
+        print(f"ERROR traceback: {traceback.format_exc()}")
+        
+        # Return empty but valid data structure to prevent template errors
+        return {
+            'labels': [],
+            'dailyExpenses': [],
+            'movingAverages': [],
+            'totalSpending': 0.0,
+            'averageDaily': 0.0
+        }
+
+
+def daily_spending_data_ajax(request):
+    """
+    AJAX endpoint to get daily spending data for different periods.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+    try:
+        # Get the number of days from the request
+        days = int(request.GET.get('days', 30))
+        
+        # Validate days parameter
+        if days not in [7, 30, 60, 90]:
+            return JsonResponse({'error': 'Invalid days parameter'}, status=400)
+        
+        print(f"DEBUG AJAX: Requested {days} days of data")
+        
+        # Create daily calculator and get data
+        daily_calculator = DailyExpenseCalculator(expense_repository)
+        trend_data = daily_calculator.get_daily_spending_trends(days=days)
+        
+        print(f"DEBUG AJAX: Retrieved {len(trend_data['daily_expenses'])} days of data")
+        
+        # Format data for Chart.js
+        sorted_dates = sorted(trend_data['daily_expenses'].keys())
+        
+        result = {
+            'labels': [str(date) for date in sorted_dates],
+            'dailyExpenses': [float(trend_data['daily_expenses'][date]) for date in sorted_dates],
+            'movingAverages': [float(trend_data['moving_averages'].get(date, 0)) for date in sorted_dates],
+            'totalSpending': float(trend_data['total_spending']),
+            'averageDaily': float(trend_data['average_daily'])
+        }
+        
+        print(f"DEBUG AJAX: Returning data with {len(result['labels'])} labels")
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        print(f"ERROR in daily_spending_data_ajax: {e}")
+        import traceback
+        print(f"ERROR traceback: {traceback.format_exc()}")
+        
+        return JsonResponse({
+            'error': 'Failed to load daily spending data',
+            'message': str(e)
+        }, status=500)
