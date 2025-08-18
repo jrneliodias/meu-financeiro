@@ -29,13 +29,12 @@ def print_billing_periods_for_year(year):
             print(
                 f"  WARNING: Day count mismatch! Calculated: {period['days_between']}, Actual: {actual_days}")
 
-        print()
+     
 
 
 if __name__ == "__main__":
     # Test for 2024 (leap year)
     print_billing_periods_for_year(2024)
-    print()
 
     # Test for 2025 (non-leap year)
     print_billing_periods_for_year(2025)

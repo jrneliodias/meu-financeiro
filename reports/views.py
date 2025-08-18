@@ -307,16 +307,10 @@ def get_daily_spending_data(expense_repository, year, month):
     and makes testing easier.
     """
     try:
-        print(f"DEBUG: Getting daily spending data for year={year}, month={month}")
-        
         daily_calculator = DailyExpenseCalculator(expense_repository, year, month)
         
         # Get trend data for the last 30 days
         trend_data = daily_calculator.get_daily_spending_trends(days=30)
-        
-        print(f"DEBUG: Trend data keys: {list(trend_data.keys())}")
-        print(f"DEBUG: Daily expenses count: {len(trend_data['daily_expenses'])}")
-        print(f"DEBUG: Total spending: {trend_data['total_spending']}")
         
         # Format data for Chart.js - ensure all values are JSON-serializable
         sorted_dates = sorted(trend_data['daily_expenses'].keys())
@@ -328,11 +322,6 @@ def get_daily_spending_data(expense_repository, year, month):
             'totalSpending': float(trend_data['total_spending']),  # Ensure float
             'averageDaily': float(trend_data['average_daily'])  # Ensure float
         }
-        
-        print(f"DEBUG: Result labels count: {len(result['labels'])}")
-        print(f"DEBUG: Result daily expenses count: {len(result['dailyExpenses'])}")
-        print(f"DEBUG: First few labels: {result['labels'][:5]}")
-        print(f"DEBUG: First few expenses: {result['dailyExpenses'][:5]}")
         
         return result
         
@@ -366,13 +355,9 @@ def daily_spending_data_ajax(request):
         if days not in [7, 30, 60, 90]:
             return JsonResponse({'error': 'Invalid days parameter'}, status=400)
         
-        print(f"DEBUG AJAX: Requested {days} days of data")
-        
         # Create daily calculator and get data
         daily_calculator = DailyExpenseCalculator(expense_repository)
         trend_data = daily_calculator.get_daily_spending_trends(days=days)
-        
-        print(f"DEBUG AJAX: Retrieved {len(trend_data['daily_expenses'])} days of data")
         
         # Format data for Chart.js
         sorted_dates = sorted(trend_data['daily_expenses'].keys())
@@ -384,8 +369,6 @@ def daily_spending_data_ajax(request):
             'totalSpending': float(trend_data['total_spending']),
             'averageDaily': float(trend_data['average_daily'])
         }
-        
-        print(f"DEBUG AJAX: Returning data with {len(result['labels'])} labels")
         
         return JsonResponse(result)
         
