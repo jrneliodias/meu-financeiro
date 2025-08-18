@@ -12,6 +12,15 @@
         <option value="bar">Bar Chart</option>
         <option value="line" selected>Line Chart</option>
       </select>
+      <select id="dailyChartScale" class="bg-slate-700 text-white rounded px-3 py-1">
+        <option value="linear" selected>Linear Scale</option>
+        <option value="logarithmic">Log Scale (Better for Outliers)</option>
+      </select>
+      <select id="outlierHandling" class="bg-slate-700 text-white rounded px-3 py-1">
+        <option value="show" selected>Show All Data</option>
+        <option value="highlight">Highlight Outliers (>R$ 1,000)</option>
+        <option value="separate">Hide Outliers (>R$ 1,000)</option>
+      </select>
     </div>
   </div>
   
@@ -84,10 +93,12 @@
       // Store original labels for tooltip access
       this.originalLabels = this.data.labels;
       
-      // Format dates for better display
+      // Format dates for better display - fix timezone issues
       const formattedLabels = this.data.labels.map(dateStr => {
         try {
-          const date = new Date(dateStr);
+          // Parse date string directly to avoid timezone issues
+          const [year, month, day] = dateStr.split('-');
+          const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
           return date.toLocaleDateString('pt-BR', { 
             day: '2-digit', 
             month: '2-digit' 
@@ -226,6 +237,20 @@
           this.updateChartType(e.target.value);
         });
       }
+      
+      const scaleSelector = document.getElementById('dailyChartScale');
+      if (scaleSelector) {
+        scaleSelector.addEventListener('change', (e) => {
+          this.updateChartScale(e.target.value);
+        });
+      }
+      
+      const outlierSelector = document.getElementById('outlierHandling');
+      if (outlierSelector) {
+        outlierSelector.addEventListener('change', (e) => {
+          this.updateOutlierHandling(e.target.value);
+        });
+      }
     }
     
     updateChartPeriod(days) {
@@ -299,6 +324,122 @@
       this.chart.update('active');
     }
     
+    updateChartScale(scaleType) {
+      if (!this.chart) return;
+      
+      // Update the Y-axis scale type
+      this.chart.options.scales.y.type = scaleType;
+      
+      if (scaleType === 'logarithmic') {
+        // Configure logarithmic scale
+        this.chart.options.scales.y.min = 1; // Start from 1 to avoid log(0)
+        this.chart.options.scales.y.ticks.callback = function(value) {
+          // Format logarithmic scale labels
+          if (value === 1 || value === 10 || value === 100 || value === 1000 || value === 10000) {
+            return new Intl.NumberFormat('pt-BR', { 
+              style: 'currency', 
+              currency: 'BRL',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0
+            }).format(value);
+          }
+          return '';
+        };
+      } else {
+        // Reset to linear scale
+        this.chart.options.scales.y.min = 0;
+        this.chart.options.scales.y.ticks.callback = function(value) {
+          return new Intl.NumberFormat('pt-BR', { 
+            style: 'currency', 
+            currency: 'BRL',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(value);
+        };
+      }
+      
+      this.chart.update('active');
+    }
+    
+    updateOutlierHandling(outlierType) {
+      if (!this.chart || !this.data) return;
+      
+      // Fixed outlier threshold - change this value to adjust what's considered an outlier
+      const outlierThreshold = 1000; // R$ 1,000 and above are considered outliers
+      
+      if (outlierType === 'highlight') {
+        // Create separate datasets for normal and outlier data
+        const normalData = [];
+        const outlierData = [];
+        
+        this.data.dailyExpenses.forEach((value, index) => {
+          if (value > outlierThreshold) {
+            normalData.push(null);
+            outlierData.push(value);
+          } else {
+            normalData.push(value);
+            outlierData.push(null);
+          }
+        });
+        
+        // Update datasets
+        this.chart.data.datasets[0].data = normalData;
+        
+        // Add or update outlier dataset
+        if (this.chart.data.datasets.length < 3) {
+          this.chart.data.datasets.push({
+            label: 'Outliers (>R$ 1,000)',
+            data: outlierData,
+            backgroundColor: 'rgba(255, 99, 132, 0.3)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0,
+            fill: false
+          });
+        } else {
+          this.chart.data.datasets[2].data = outlierData;
+        }
+        
+      } else if (outlierType === 'separate') {
+        // Filter out outliers from main dataset (both expenses and moving averages)
+        const filteredData = this.data.dailyExpenses.map(value => 
+          value > outlierThreshold ? null : value
+        );
+        const filteredMovingAverages = this.data.dailyExpenses.map((value, index) => {
+          const movingAvgValue = (this.data.movingAverages || [])[index];
+          // Hide if either daily expense OR moving average is above threshold
+          return (value > outlierThreshold || movingAvgValue > outlierThreshold) ? null : movingAvgValue;
+        });
+        
+        this.chart.data.datasets[0].data = filteredData;
+        this.chart.data.datasets[1].data = filteredMovingAverages;
+        
+        // Remove outlier dataset if it exists
+        if (this.chart.data.datasets.length > 2) {
+          this.chart.data.datasets.splice(2, 1);
+        }
+        
+        // Show outlier info in chart title or subtitle
+        const outlierCount = this.data.dailyExpenses.filter(v => v > outlierThreshold).length;
+        const outlierSum = this.data.dailyExpenses.filter(v => v > outlierThreshold).reduce((a, b) => a + b, 0);
+        
+        // You could update a subtitle or add annotation here
+        
+      } else {
+        // Show all data normally
+        this.chart.data.datasets[0].data = this.data.dailyExpenses;
+        
+        // Remove outlier dataset if it exists
+        if (this.chart.data.datasets.length > 2) {
+          this.chart.data.datasets.splice(2, 1);
+        }
+      }
+      
+      this.chart.update('active');
+    }
+    
     updateData(newData) {
       if (!this.chart) {
         console.error('Chart not initialized - cannot update data');
@@ -314,10 +455,12 @@
         this.data = newData;
         this.originalLabels = newData.labels;
         
-        // Format new labels
+        // Format new labels - fix timezone issues
         const formattedLabels = newData.labels.map(dateStr => {
           try {
-            const date = new Date(dateStr);
+            // Parse date string directly to avoid timezone issues
+            const [year, month, day] = dateStr.split('-');
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
             return date.toLocaleDateString('pt-BR', { 
               day: '2-digit', 
               month: '2-digit' 
@@ -332,6 +475,12 @@
         this.chart.data.labels = formattedLabels;
         this.chart.data.datasets[0].data = newData.dailyExpenses;
         this.chart.data.datasets[1].data = newData.movingAverages || [];
+        
+        // Reapply current outlier handling after data update
+        const outlierSelect = document.getElementById('outlierHandling');
+        if (outlierSelect) {
+          this.updateOutlierHandling(outlierSelect.value);
+        }
         
         // Force chart update
         this.chart.update('active');
