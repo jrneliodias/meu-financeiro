@@ -222,3 +222,33 @@ class ExpenseRepository:
             .annotate(total_amount=Sum('amount'))
             .order_by('date_only', 'payment_method__name')
         )
+
+    def get_expenses_by_date(self, target_date):
+        """
+        Get all expenses for a specific date with related category and payment method data.
+        
+        Returns detailed expense information for modal display:
+        - Individual expense records (not aggregated)
+        - Category and payment method names via joins
+        - Ordered by amount (highest first) for better UX
+        
+        Why this design?
+        1. Single date focus - optimized for modal use case
+        2. Full expense details - description, amount, category, payment method
+        3. Efficient joins - avoid N+1 queries
+        4. User-friendly ordering - most expensive items first
+        """
+        return (
+            Expense.objects
+            .filter(date=target_date)
+            .select_related('category', 'payment_method')  # Efficient joins
+            .values(
+                'id',
+                'description', 
+                'amount',
+                'category__name',
+                'payment_method__name',
+                'created_at'
+            )
+            .order_by('-amount', 'description')  # Highest amounts first
+        )
