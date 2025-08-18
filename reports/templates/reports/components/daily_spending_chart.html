@@ -35,6 +35,82 @@
   </div>
 </div>
 
+<!-- Expense Details Modal - Tailwind CSS -->
+<div id="expenseDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-slate-700">
+      <h2 class="text-xl font-semibold text-white flex items-center">
+        <i class="fas fa-calendar-day mr-3 text-blue-400"></i>
+        Expense Details - <span id="modalDateTitle" class="ml-2 text-blue-300"></span>
+      </h2>
+      <button id="modalCloseBtn" class="text-gray-400 hover:text-white transition-colors duration-200">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+    
+    <!-- Modal Body -->
+    <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]" id="expenseDetailsContent">
+      <!-- Loading state -->
+      <div id="modalLoading" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
+        <p class="text-gray-300">Loading expense details...</p>
+      </div>
+      
+      <!-- Error state -->
+      <div id="modalError" class="hidden bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          <span id="modalErrorMessage">Failed to load expense details.</span>
+        </div>
+      </div>
+      
+      <!-- Success state -->
+      <div id="modalContent" class="hidden">
+        <!-- Summary section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-slate-700 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Total Amount</h3>
+            <p class="text-2xl font-bold text-blue-400" id="modalTotalAmount">R$ 0,00</p>
+          </div>
+          <div class="bg-slate-700 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Number of Expenses</h3>
+            <p class="text-2xl font-bold text-green-400" id="modalExpenseCount">0</p>
+          </div>
+        </div>
+        
+        <!-- Expenses list -->
+        <div class="bg-slate-700 rounded-lg overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-slate-600">
+                <tr class="text-left">
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Description</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Category</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Payment Method</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Time</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="expensesList" class="divide-y divide-slate-600">
+                <!-- Expenses will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal Footer -->
+    <div class="flex justify-end p-6 border-t border-slate-700">
+      <button id="modalCloseFooterBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+        <i class="fas fa-times mr-2"></i>
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Django's json_script for safe data passing -->
 {{ daily_spending_data|json_script:"daily-spending-data" }}
 
@@ -142,6 +218,14 @@
           interaction: {
             intersect: false,
             mode: 'index'
+          },
+          onClick: (event, elements) => {
+            // Handle chart point clicks for expense details modal
+            if (elements.length > 0) {
+              const pointIndex = elements[0].index;
+              const clickedDate = this.originalLabels[pointIndex]; // Use original date format (YYYY-MM-DD)
+              this.showExpenseDetails(clickedDate);
+            }
           },
           plugins: {
             legend: {
@@ -488,6 +572,202 @@
       } catch (error) {
         console.error('Error updating chart data:', error);
       }
+    }
+
+    showExpenseDetails(dateString) {
+      /**
+       * Show expense details modal for a specific date.
+       * Handles AJAX loading, error states, and modal population.
+       */
+      if (!dateString) {
+        console.error('No date provided to showExpenseDetails');
+        return;
+      }
+
+      // Show the modal with loading state
+      const modal = document.getElementById('expenseDetailsModal');
+      this.resetModalState();
+      modal.classList.remove('hidden');
+
+      // Set the date in the modal title
+      const formattedDate = this.formatDateForDisplay(dateString);
+      document.getElementById('modalDateTitle').textContent = formattedDate;
+
+      // Setup close button handlers
+      this.setupModalCloseHandlers();
+
+      // Fetch expense details via AJAX
+      fetch(`/expense-details/?date=${dateString}`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        this.populateModal(data);
+      })
+      .catch(error => {
+        console.error('Error fetching expense details:', error);
+        this.showModalError(error.message || 'Failed to load expense details');
+      });
+    }
+
+    resetModalState() {
+      /**
+       * Reset modal to initial loading state
+       */
+      document.getElementById('modalLoading').classList.remove('hidden');
+      document.getElementById('modalError').classList.add('hidden');
+      document.getElementById('modalContent').classList.add('hidden');
+    }
+
+    showModalError(message) {
+      /**
+       * Show error state in modal
+       */
+      document.getElementById('modalLoading').classList.add('hidden');
+      document.getElementById('modalContent').classList.add('hidden');
+      document.getElementById('modalError').classList.remove('hidden');
+      document.getElementById('modalErrorMessage').textContent = message;
+    }
+
+    populateModal(data) {
+      /**
+       * Populate modal with expense data
+       */
+      // Hide loading, show content
+      document.getElementById('modalLoading').classList.add('hidden');
+      document.getElementById('modalError').classList.add('hidden');
+      document.getElementById('modalContent').classList.remove('hidden');
+
+      // Update summary cards
+      document.getElementById('modalTotalAmount').textContent = 
+        new Intl.NumberFormat('pt-BR', { 
+          style: 'currency', 
+          currency: 'BRL' 
+        }).format(data.total_amount);
+      
+      document.getElementById('modalExpenseCount').textContent = data.count;
+
+      // Populate expenses table
+      const tableBody = document.getElementById('expensesList');
+      tableBody.innerHTML = ''; // Clear existing content
+
+      if (data.expenses.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-gray-400">
+              <i class="fas fa-info-circle mr-2"></i>
+              No expenses found for this date.
+            </td>
+          </tr>
+        `;
+      } else {
+        data.expenses.forEach(expense => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-slate-600 transition-colors duration-150';
+          row.innerHTML = `
+            <td class="px-4 py-3">
+              <div class="font-medium text-white">${this.escapeHtml(expense.description)}</div>
+            </td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-600 text-gray-200">
+                ${this.escapeHtml(expense.category)}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-blue-100">
+                ${this.escapeHtml(expense.payment_method)}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-gray-400 text-sm">
+              ${expense.created_at || '--:--'}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <span class="font-semibold text-green-400">
+                ${new Intl.NumberFormat('pt-BR', { 
+                  style: 'currency', 
+                  currency: 'BRL' 
+                }).format(expense.amount)}
+              </span>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+    }
+
+    formatDateForDisplay(dateString) {
+      /**
+       * Format date string for display in modal title
+       */
+      try {
+        const [year, month, day] = dateString.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return date.toLocaleDateString('pt-BR', { 
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long', 
+          day: 'numeric' 
+        });
+      } catch (e) {
+        return dateString;
+      }
+    }
+
+    setupModalCloseHandlers() {
+      /**
+       * Setup event listeners for modal close buttons
+       */
+      const modal = document.getElementById('expenseDetailsModal');
+      const closeBtn = document.getElementById('modalCloseBtn');
+      const closeFooterBtn = document.getElementById('modalCloseFooterBtn');
+      
+      // Close modal function
+      const closeModal = () => {
+        modal.classList.add('hidden');
+      };
+      
+      // Remove existing listeners to prevent duplicates
+      closeBtn.removeEventListener('click', closeModal);
+      closeFooterBtn.removeEventListener('click', closeModal);
+      
+      // Add click listeners
+      closeBtn.addEventListener('click', closeModal);
+      closeFooterBtn.addEventListener('click', closeModal);
+      
+      // Close on background click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+      
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+    }
+
+    escapeHtml(text) {
+      /**
+       * Simple HTML escaping for security
+       */
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
   }
   

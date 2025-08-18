@@ -381,3 +381,64 @@ def daily_spending_data_ajax(request):
             'error': 'Failed to load daily spending data',
             'message': str(e)
         }, status=500)
+
+
+def expense_details_ajax(request):
+    """
+    AJAX endpoint to get detailed expenses for a specific date.
+    
+    Used by the daily spending chart modal to show individual expenses
+    when a user clicks on a chart point.
+    
+    Returns:
+    - List of expenses for the date
+    - Total amount for the date
+    - Formatted data for modal display
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+    date_str = request.GET.get('date')
+    if not date_str:
+        return JsonResponse({'error': 'Date parameter is required'}, status=400)
+    
+    try:
+        # Parse date string (expected format: YYYY-MM-DD)
+        from datetime import datetime
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date format. Expected YYYY-MM-DD'}, status=400)
+    
+    try:
+        from reports.repository.expense_repository import ExpenseRepository
+        from decimal import Decimal
+        
+        expense_repo = ExpenseRepository()
+        expenses = expense_repo.get_expenses_by_date(target_date)
+        
+        # Convert QuerySet to list and ensure JSON serialization
+        expenses_list = []
+        total_amount = Decimal('0.00')
+        
+        for expense in expenses:
+            expense_data = {
+                'id': expense['id'],
+                'description': expense['description'],
+                'amount': float(expense['amount']),  # Convert Decimal to float for JSON
+                'category': expense['category__name'] or 'No Category',
+                'payment_method': expense['payment_method__name'] or 'No Payment Method',
+                'created_at': expense['created_at'].strftime('%H:%M') if expense['created_at'] else ''
+            }
+            expenses_list.append(expense_data)
+            total_amount += expense['amount']
+        
+        return JsonResponse({
+            'date': date_str,
+            'expenses': expenses_list,
+            'total_amount': float(total_amount),
+            'count': len(expenses_list),
+            'formatted_date': target_date.strftime('%d/%m/%Y')  # Brazilian format
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
