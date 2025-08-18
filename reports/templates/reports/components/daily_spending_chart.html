@@ -2,7 +2,8 @@
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-2xl font-bold">Daily Spending Chart</h2>
     <div class="flex space-x-2">
-      <select id="dailyChartPeriod" class="bg-slate-700 text-white rounded px-3 py-1">
+      <select id="dailyChartPeriod"
+              class="bg-slate-700 text-white rounded px-3 py-1">
         <option value="7">Last 7 Days</option>
         <option value="30" selected>Last 30 Days</option>
         <option value="60">Last 60 Days</option>
@@ -12,31 +13,33 @@
         <option value="bar">Bar Chart</option>
         <option value="line" selected>Line Chart</option>
       </select>
-      <select id="dailyChartScale" class="bg-slate-700 text-white rounded px-3 py-1">
+      <select id="dailyChartScale"
+              class="bg-slate-700 text-white rounded px-3 py-1">
         <option value="linear" selected>Linear Scale</option>
         <option value="logarithmic">Log Scale (Better for Outliers)</option>
       </select>
-      <select id="outlierHandling" class="bg-slate-700 text-white rounded px-3 py-1">
+      <select id="outlierHandling"
+              class="bg-slate-700 text-white rounded px-3 py-1">
         <option value="show" selected>Show All Data</option>
         <option value="highlight">Highlight Outliers (>R$ 1,000)</option>
         <option value="separate">Hide Outliers (>R$ 1,000)</option>
       </select>
     </div>
   </div>
-  
   <!-- Debug Information Display -->
-  <div id="debugInfo" class="mb-4 p-2 bg-slate-700 rounded text-sm text-white" style="display: none;">
+  <div id="debugInfo"
+       class="mb-4 p-2 bg-slate-700 rounded text-sm text-white"
+       style="display: none">
     <strong>Debug Information:</strong>
     <div id="debugContent"></div>
   </div>
-  
-  <div class="min-h-[400px] max-h-[400px]  mt-2 p-3 px-0 w-full">
+  <div class="min-h-[600px] max-h-[600px]  mt-2 p-3 px-0 w-full">
     <canvas id="dailySpendingChart" class="w-full"></canvas>
   </div>
 </div>
-
 <!-- Expense Details Modal - Tailwind CSS -->
-<div id="expenseDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+<div id="expenseDetailsModal"
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <div class="bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
     <!-- Modal Header -->
     <div class="flex items-center justify-between p-6 border-b border-slate-700">
@@ -44,27 +47,27 @@
         <i class="fas fa-calendar-day mr-3 text-blue-400"></i>
         Expense Details - <span id="modalDateTitle" class="ml-2 text-blue-300"></span>
       </h2>
-      <button id="modalCloseBtn" class="text-gray-400 hover:text-white transition-colors duration-200">
+      <button id="modalCloseBtn"
+              class="text-gray-400 hover:text-white transition-colors duration-200">
         <i class="fas fa-times text-xl"></i>
       </button>
     </div>
-    
     <!-- Modal Body -->
-    <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]" id="expenseDetailsContent">
+    <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]"
+         id="expenseDetailsContent">
       <!-- Loading state -->
       <div id="modalLoading" class="text-center py-8">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
         <p class="text-gray-300">Loading expense details...</p>
       </div>
-      
       <!-- Error state -->
-      <div id="modalError" class="hidden bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
+      <div id="modalError"
+           class="hidden bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
         <div class="flex items-center">
           <i class="fas fa-exclamation-triangle mr-2"></i>
           <span id="modalErrorMessage">Failed to load expense details.</span>
         </div>
       </div>
-      
       <!-- Success state -->
       <div id="modalContent" class="hidden">
         <!-- Summary section -->
@@ -78,7 +81,6 @@
             <p class="text-2xl font-bold text-green-400" id="modalExpenseCount">0</p>
           </div>
         </div>
-        
         <!-- Expenses list -->
         <div class="bg-slate-700 rounded-lg overflow-hidden">
           <div class="overflow-x-auto">
@@ -100,20 +102,18 @@
         </div>
       </div>
     </div>
-    
     <!-- Modal Footer -->
     <div class="flex justify-end p-6 border-t border-slate-700">
-      <button id="modalCloseFooterBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+      <button id="modalCloseFooterBtn"
+              class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
         <i class="fas fa-times mr-2"></i>
         Close
       </button>
     </div>
   </div>
 </div>
-
 <!-- Django's json_script for safe data passing -->
 {{ daily_spending_data|json_script:"daily-spending-data" }}
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
@@ -838,8 +838,7 @@
           <h3 class="text-lg font-bold mb-2">Error loading daily spending chart</h3>
           <p class="text-sm">${error.message}</p>
           <p class="text-xs mt-2">Check browser console for more details</p>
-          <button onclick="document.getElementById('debugInfo').style.display='block'" 
-                  class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+          <button onclick="document.getElementById('debugInfo').style.display='block'" class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
             Show Debug Info
           </button>
         </div>
