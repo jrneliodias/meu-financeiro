@@ -334,6 +334,142 @@ class ExpenseService:
         self._debug_final_results(formatted_results)
         return formatted_results
 
+    def get_optimized_expenses_data(self, all_months):
+        """
+        OPTIMIZED: Get expense data by category and month using single query.
+        
+        Replaces the previous N×12 queries with a single database query.
+        Performance: ~50+ queries reduced to 1 query
+        """
+        # Get data from repository
+        expenses_by_month_category = self.expense_repository.get_optimized_expenses_by_month_and_category(self.year)
+        
+        # Initialize data structures with all months
+        expenses_by_category_by_month = defaultdict(lambda: {month: 0.0 for month in all_months})
+        total_expense_by_month = {month: 0.0 for month in all_months}
+        
+        # Process the single query result
+        for item in expenses_by_month_category:
+            month_name = item['month'].strftime('%B')
+            category_name = item['category__name'] or 'No Category'
+            amount = float(item['total_amount'])
+            
+            expenses_by_category_by_month[category_name][month_name] = amount
+            total_expense_by_month[month_name] += amount
+        
+        return {
+            'expenses_by_category_by_month': dict(expenses_by_category_by_month),
+            'total_expense_by_month': total_expense_by_month
+        }
+
+    def get_optimized_incomes_by_month(self, all_months):
+        """
+        OPTIMIZED: Get income data by month using single query.
+        
+        Replaces multiple queries with a single aggregated query.
+        Performance: Multiple queries reduced to 1 query
+        """
+        # Get data from repository
+        incomes_by_month_query = self.income_repository.get_optimized_incomes_by_month(self.year)
+        
+        # Convert to dictionary with month names
+        income_by_month_dict = {}
+        for item in incomes_by_month_query:
+            month_name = item['month'].strftime('%B')
+            income_by_month_dict[month_name] = float(item['total_amount'])
+        
+        # Fill missing months with 0.0
+        return {month: income_by_month_dict.get(month, 0.0) for month in all_months}
+
+    def get_optimized_payment_method_data(self):
+        """
+        OPTIMIZED: Get payment method data and create datasets using single query.
+        
+        Consolidates multiple payment method queries into efficient aggregations.
+        Performance: ~12+ queries reduced to 2-3 queries
+        """
+        # Get data from repositories
+        payment_method_expenses = self.expense_repository.get_optimized_payment_method_expenses_by_month(self.year)
+        income_by_month = self.income_repository.get_optimized_incomes_by_month(self.year)
+        
+        # Process payment method data
+        monthly_totals = []
+        payment_method_datasets = defaultdict(lambda: [0.0] * 12)
+        
+        # Group by month for monthly totals format
+        monthly_data = defaultdict(list)
+        for item in payment_method_expenses:
+            month_name = item['month'].strftime('%B')
+            month_index = item['month'].month - 1  # 0-based index for arrays
+            payment_method = item['payment_method__name'] or 'No Payment Method'
+            amount = float(item['total_amount'])
+            
+            monthly_data[month_name].append({
+                'payment_method_name': payment_method,
+                'total_amount': amount
+            })
+            
+            payment_method_datasets[payment_method][month_index] = amount
+        
+        # Format monthly totals (keeping existing structure for compatibility)
+        for month in calendar.month_name[1:]:  # Skip empty first item
+            monthly_totals.append({
+                'month': month,
+                'payment': monthly_data.get(month, [])
+            })
+        
+        # Create datasets for charts
+        labels = list(calendar.month_name)[1:]  # Skip empty first item
+        datasets = []
+        total_expenses_by_month = [0.0] * 12
+        
+        for payment_method, monthly_amounts in payment_method_datasets.items():
+            if payment_method != 'Investimento':  # Exclude investments from totals
+                datasets.append({
+                    'label': payment_method,
+                    'data': monthly_amounts
+                })
+                # Add to total expenses
+                total_expenses_by_month = [sum(x) for x in zip(total_expenses_by_month, monthly_amounts)]
+        
+        # Process income data for combined datasets
+        income_datasets = [0.0] * 12
+        for item in income_by_month:
+            month_index = item['month'].month - 1
+            income_datasets[month_index] = float(item['total_amount'])
+        
+        # Create combined expense/income datasets
+        combined_datasets = {
+            'labels': labels,
+            'datasets': [
+                {
+                    'label': 'Total Expenses',
+                    'datasets': total_expenses_by_month
+                },
+                {
+                    'label': 'Total Income',
+                    'datasets': income_datasets
+                }
+            ]
+        }
+        
+        return {
+            'monthly_totals': monthly_totals,
+            'datasets': {
+                'labels': labels,
+                'datasets': datasets
+            },
+            'combined_datasets': combined_datasets
+        }
+
+    def get_optimized_monthly_expenses(self, month):
+        """
+        OPTIMIZED: Get monthly expenses with proper select_related to avoid N+1 queries.
+        
+        Performance: Eliminates N+1 queries by using select_related for foreign keys.
+        """
+        return self.expense_repository.get_optimized_monthly_expenses_with_relations(self.year, month)
+
     def _debug_category_calculation(self, payment_method, month: int, expenses: List[CategoryExpense]):
         """Debug logging for category calculations."""
         debug_to_json(
