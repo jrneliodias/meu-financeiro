@@ -80,7 +80,7 @@ if os.getenv("DATABASE_URL"):
     DATABASES = {
         "default": dj_database_url.config(
             env="DATABASE_URL",
-            conn_max_age=600,
+            conn_max_age=60,  # Optimized: Reduced from 600 to 60 seconds for better balance
             ssl_require=True,
         )
     }
@@ -89,6 +89,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+            'CONN_MAX_AGE': 60,  # Add connection reuse for SQLite too
         }
     }
 
@@ -136,6 +137,30 @@ STATICFILES_DIRS = [BASE_DIR / 'registers/static']
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# =============================================================================
+# PERFORMANCE OPTIMIZATION SETTINGS
+# =============================================================================
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,  # 5 minutes default timeout
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+            'CULL_FREQUENCY': 3,
+        }
+    }
+}
+
+# Cache key prefix to avoid collisions
+CACHE_KEY_PREFIX = 'meu_financeiro'
+
+# Session optimization
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS = 'default'
 
 LOGGING = {
     "version": 1,

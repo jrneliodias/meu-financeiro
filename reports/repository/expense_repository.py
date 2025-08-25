@@ -10,8 +10,8 @@ class ExpenseRepository:
     def get_monthly_expenses_by_year(self, year, month):
         return (
             Expense.objects
-            .filter(date__year=year)
-            .filter(date__month=month)
+            .filter(date__year=year, date__month=month)
+            .select_related('category', 'payment_method', 'reccurring_expense')  # Avoid N+1 queries
             .order_by('date')
         )
 
@@ -44,16 +44,11 @@ class ExpenseRepository:
         return credit_expenses
 
     def get_months_by_year(self, year):
-        months_set = (
-            Expense.objects
-            .filter(date__year=year)
-            .annotate(month=TruncMonth('date'))
-            .values('month')
-            .distinct()
-            .order_by('month')
-        )
-        return [(expense['month'].month, calendar.month_name[expense['month'].month])
-                for expense in months_set]
+        """
+        OPTIMIZED: Return all 12 months instead of querying database.
+        This eliminates an unnecessary query and provides consistent month options.
+        """
+        return [(month, calendar.month_name[month]) for month in range(1, 13)]
 
     def get_monthly_expenses_by_payment_method(self, year: int):
 
@@ -67,18 +62,6 @@ class ExpenseRepository:
         )
 
         return list(expenses_by_payment)
-
-    def get_months_by_year(self, year):
-        months_set = (
-            Expense.objects
-            .filter(date__year=year)
-            .annotate(month=TruncMonth('date'))
-            .values('month')
-            .distinct()
-            .order_by('month')
-        )
-        return [(expense['month'].month, calendar.month_name[expense['month'].month])
-                for expense in months_set]
 
     def get_distinct_years_in_tuples(self):
         """Returns distinct years from the Expense model."""
@@ -104,17 +87,11 @@ class ExpenseRepository:
         return [(expense['month'].month, calendar.month_name[expense['month'].month]) for expense in distinct_months]
 
     def get_months_in_list(self):
-        """Retrieve distinct months from the database."""
-        distinct_months = (
-            Expense.objects
-            .annotate(month=TruncMonth('date'))
-            .values('month')
-            .distinct()
-            .order_by('month')
-        )
-        months_list = [calendar.month_name[expense['month'].month]
-                       for expense in distinct_months]
-        return months_list
+        """
+        OPTIMIZED: Return all 12 month names instead of querying database.
+        This eliminates an unnecessary query and provides consistent month options.
+        """
+        return [calendar.month_name[month] for month in range(1, 13)]
 
     def get_months_in_database(self):
         """Retrieve distinct months from the database."""
