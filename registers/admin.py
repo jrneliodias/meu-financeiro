@@ -27,16 +27,17 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_display = ('description', 'date',
                     'category', 'payment_method',  'amount', 'reccurring_expense', 'updated_at')
     # Filtros por categoria e método de pagamento
-    list_filter = (('date', DateRangeFilter), 'category', 'payment_method')
+    list_filter = (('date', DateRangeFilter),
+                   'payment_method', 'category', 'reccurring_expense')
     search_fields = ('description',)  # Habilitar pesquisa pela descrição
     list_per_page = 40
     actions = [duplicate_entries, triplicate_entries]
-    
+
     # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         """
         OPTIMIZED: Use select_related to eliminate N+1 queries in Django Admin.
-        
+
         This reduces ~120 queries to ~7 queries for the expense list page.
         """
         return super().get_queryset(request).select_related(
@@ -65,7 +66,7 @@ class InstallmentAdmin(admin.ModelAdmin):
                     'start_date', 'category', 'payment_method', 'created_at', 'updated_at')
     search_fields = ('name',)
     inlines = [ExpenseInline]
-    
+
     # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
@@ -76,14 +77,16 @@ class InstallmentAdmin(admin.ModelAdmin):
 class RecurringExpenseAdmin(admin.ModelAdmin):
     list_display = ('description', 'total_amount', 'start_date',
                     'category', 'payment_method', 'generate_debit', 'created_at', 'updated_at')
-    search_fields = ('name',)
-    ordering=['-generate_debit']
-    
+    search_fields = ('description',)
+    ordering = ['-generate_debit']
+
     # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             'user', 'category', 'payment_method'
         )
+
+    inlines = [ExpenseInline]
 
 
 class IncomeAdmin(admin.ModelAdmin):
@@ -93,7 +96,7 @@ class IncomeAdmin(admin.ModelAdmin):
     ordering = ['-date']
     list_filter = (('date', DateRangeFilter), 'category')
     actions = [duplicate_entries]
-    
+
     # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(

@@ -58,12 +58,12 @@ class RecurringExpense(models.Model):
         Category, on_delete=models.SET_NULL, null=True, limit_choices_to={'type': 'expense'})
     payment_method = models.ForeignKey(
         PaymentMethod, on_delete=models.SET_NULL, null=True)
-    generate_debit = models.BooleanField(default=True )
+    generate_debit = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.description} - Total: {self.total_amount} "
+        return f"{self.description}"
 
 
 class Expense(models.Model):

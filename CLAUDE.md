@@ -24,10 +24,28 @@ This is a Django-based personal finance management application called "Meu Finan
 - **Investment**: Investment tracking
 
 ### Service Layer Architecture
-The codebase uses a service layer pattern:
-- **registers/services**: Business logic for expense/income creation, installments, CSV imports
-- **reports/services**: Optimized data aggregation and report generation
-- **reports/repository**: Data access layer with performance-optimized queries
+The codebase uses a service layer pattern with clear separation of concerns:
+
+#### registers/services
+- **ExpenseService**: Expense creation, editing, and business logic
+- **IncomeService**: Income management and validation
+- **InstallmentService**: Multi-payment purchase plan handling
+- **CSVImportService**: Bulk data import with validation and error handling
+
+#### reports/services
+- **ExpenseService**: Report-specific expense calculations
+- **BalanceService**: Financial balance calculations
+- **ExpenseCalculator**: Monthly and period-based expense aggregations
+- **CategoryCalculator**: Category-based expense analysis
+- **BillingPeriodCalculator**: Credit card billing cycle calculations
+- **DailyExpenseCalculator**: Daily spending trend analysis
+
+#### reports/repository
+Data access layer with performance-optimized queries:
+- **ExpenseRepository**: Complex expense queries with select_related optimizations
+- **CategoryRepository**: Category-based data aggregation
+- **PaymentMethodRepository**: Payment method analysis queries
+- **IncomeRepository**: Income data access with performance optimizations
 
 ## Common Development Commands
 
@@ -66,6 +84,24 @@ python manage.py measure_performance --iterations=5
 
 # Run with SQL query explanation
 python manage.py measure_performance --explain
+```
+
+### Custom Management Commands
+```bash
+# Import CSV data
+python manage.py import_csv path/to/file.csv
+
+# Export expenses to CSV
+python manage.py export_expenses
+
+# Process recurring payments (monthly automation)
+python manage.py recurrence_payment
+
+# Import legacy data
+python manage.py import_data
+
+# Run expense service operations
+python manage.py run_expense_service
 ```
 
 ### CSV Import
