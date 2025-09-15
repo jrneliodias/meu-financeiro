@@ -282,7 +282,7 @@ input[type="submit"], button {
         height: 52px;
         padding: 2px 0;
         border-radius: 20px;
-        transform: translateY(-10px);
+        transform: tranzincY(-10px);
     }
 
     .selector-add, .selector-remove {
@@ -879,7 +879,7 @@ input[type="submit"], button {
         position: fixed !important;
         top: 50% !important;
         left: 50% !important;
-        transform: translate(-50%, -50%);
+        transform: tranzinc(-50%, -50%);
         margin: 0;
         border: none;
         overflow: visible;
@@ -893,7 +893,7 @@ input[type="submit"], button {
         width: 100vw;
         height: 100vh;
         background: rgba(0, 0, 0, 0.75);
-        transform: translate(-50%, -50%);
+        transform: tranzinc(-50%, -50%);
     }
 
     .calendarbox > *, .clockbox > * {

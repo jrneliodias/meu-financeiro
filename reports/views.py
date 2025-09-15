@@ -7,6 +7,7 @@ from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
 from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
 from reports.services import ExpenseService, BalanceService
+from reports.services.recurring_expense_service import RecurringExpenseService
 from django.views.generic import UpdateView
 from registers.models import Expense, Income, PaymentMethod
 from registers.forms import ExpenseForm
@@ -18,6 +19,7 @@ expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
 category_repository = CategoryRepository()
 balance_service = BalanceService()
+recurring_expense_service = RecurringExpenseService()
 
 
 def index(request):
@@ -85,6 +87,9 @@ def expense_report(request):
         expense_repository, selected_year, selected_month
     )
 
+    # 5. Get fixed expenses summary
+    fixed_expenses_summary = recurring_expense_service.get_fixed_expenses_summary()
+
     # Prepare the context
     context = {
         'all_months': all_months,
@@ -104,6 +109,7 @@ def expense_report(request):
         'monthly_expenses_queryset': monthly_expenses_queryset,
         'global_balance': global_balance,
         'daily_spending_data': daily_spending_data,
+        'fixed_expenses_summary': fixed_expenses_summary,
     }
 
     return render(request, 'reports/expense_report.html', context)

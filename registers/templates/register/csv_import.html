@@ -10,10 +10,10 @@
     </div>
 
     <!-- Import Form -->
-    <div class="bg-slate-800 rounded-lg p-6 mb-6">
+    <div class="bg-zinc-800 rounded-lg p-6 mb-6">
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
-            
+
             <!-- Input Method Toggle -->
             <div class="mb-6">
                 <div class="flex space-x-4">
@@ -71,7 +71,7 @@
                 <!-- CSV Settings -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-white">CSV Settings</h3>
-                    
+
                     <div>
                         <label for="{{ form.separator.id_for_label }}" class="block text-sm font-medium text-white mb-2">
                             {{ form.separator.label }}
@@ -96,7 +96,7 @@
                 <!-- Import Options -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-white">Import Options</h3>
-                    
+
                     <div class="flex items-center">
                         {{ form.auto_create_categories }}
                         <label for="{{ form.auto_create_categories.id_for_label }}" class="ml-2 text-sm text-white">
@@ -140,28 +140,28 @@
     </div>
 
     <!-- CSV Format Guide -->
-    <div class="bg-slate-800 rounded-lg p-6">
+    <div class="bg-zinc-800 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-white mb-4">CSV Format Guide</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <h4 class="font-medium text-white mb-2">Required Columns</h4>
                 <ul class="text-sm text-gray-400 space-y-1">
-                    <li><code class="bg-slate-700 px-1 rounded">date</code> - Date in YYYY-MM-DD format</li>
-                    <li><code class="bg-slate-700 px-1 rounded">description</code> - Transaction description</li>
-                    <li><code class="bg-slate-700 px-1 rounded">amount</code> - Transaction amount (numeric)</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">date</code> - Date in YYYY-MM-DD format</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">description</code> - Transaction description</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">amount</code> - Transaction amount (numeric)</li>
                 </ul>
             </div>
             <div>
                 <h4 class="font-medium text-white mb-2">Optional Columns</h4>
                 <ul class="text-sm text-gray-400 space-y-1">
-                    <li><code class="bg-slate-700 px-1 rounded">category</code> - Expense category</li>
-                    <li><code class="bg-slate-700 px-1 rounded">type</code> - Transaction type (default: expense)</li>
-                    <li><code class="bg-slate-700 px-1 rounded">payment_method</code> - Payment method</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">category</code> - Expense category</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">type</code> - Transaction type (default: expense)</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">payment_method</code> - Payment method</li>
                 </ul>
             </div>
         </div>
-        
-        <div class="mt-4 p-4 bg-slate-700 rounded-lg">
+
+        <div class="mt-4 p-4 bg-zinc-700 rounded-lg">
             <h5 class="font-medium text-white mb-2">Example CSV Format:</h5>
             <pre class="text-sm text-gray-300 overflow-x-auto"><code>date,description,amount,category,type,payment_method
 2025-01-15,Grocery Store,45.67,Supermercado,expense,Crédito - Nubank
@@ -190,36 +190,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const textInputSection = document.getElementById('textInputSection');
     const fileInput = document.querySelector('input[type="file"]');
     const textInput = document.querySelector('textarea[name="csv_text"]');
-    
+
     // Toggle functionality
     fileToggle.addEventListener('click', function() {
         // Show file upload section, hide text input section
         fileUploadSection.style.display = 'block';
         textInputSection.style.display = 'none';
-        
+
         // Update button styles
         fileToggle.classList.remove('bg-gray-600');
         fileToggle.classList.add('bg-blue-600');
         textToggle.classList.remove('bg-blue-600');
         textToggle.classList.add('bg-gray-600');
-        
+
         // Clear text input and make file input required
         if (textInput) {
             textInput.value = '';
         }
     });
-    
+
     textToggle.addEventListener('click', function() {
         // Show text input section, hide file upload section
         textInputSection.style.display = 'block';
         fileUploadSection.style.display = 'none';
-        
+
         // Update button styles
         textToggle.classList.remove('bg-gray-600');
         textToggle.classList.add('bg-blue-600');
         fileToggle.classList.remove('bg-blue-600');
         fileToggle.classList.add('bg-gray-600');
-        
+
         // Clear file input
         if (fileInput) {
             fileInput.value = '';
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     // File upload preview
     if (fileInput) {
         // Store original label text
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (label) {
             fileInput.setAttribute('data-original-label', label.textContent);
         }
-        
+
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && label) {
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Initialize with file upload section visible
     if (fileUploadSection && textInputSection) {
         fileUploadSection.style.display = 'block';
@@ -256,4 +256,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}

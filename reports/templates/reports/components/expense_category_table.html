@@ -1,14 +1,14 @@
-<div class="my-3 space-y-4 bg-slate-800/50 rounded-lg p-3 ">
+<div class="my-3 space-y-4 bg-zinc-800/50 rounded-lg p-3 ">
   <h2 class="text-2xl font-bold">Expenses by Category</h2>
   <table class="hidden md:table w-full p-2" border="1">
     <thead>
-      <tr class="*:p-2 border-b border-slate-700 ">
+      <tr class="*:p-2 border-b border-zinc-700 ">
         <th class="text-left">Category</th>
         {% for month in all_months %}<th class="text-left">{{ month }}</th>{% endfor %}
       </tr>
     </thead>
     <tbody>
-      <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
+      <tr class="*:p-2 border-b border-zinc-700 bg-zinc-800/50">
         <td class="font-bold">Total</td>
         {% for value in formatted_totals %}
           <td class="text-left font-bold heatmap-cell"
@@ -16,10 +16,10 @@
         {% endfor %}
       </tr>
       {% for category, values in formatted_expenses_by_category.items %}
-        <tr class="*:p-2 border-b border-slate-700">
+        <tr class="*:p-2 border-b border-zinc-700">
           <td class="font-medium">{{ category }}</td>
           {% for value in values %}
-            <td class="text-left heatmap-cell {% if value == 'R$ 0,00' %}text-slate-600{% endif %}"
+            <td class="text-left heatmap-cell {% if value == 'R$ 0,00' %}text-zinc-600{% endif %}"
                 data-value="{{ value|stringformat:'f' }}">{{ value }}</td>
           {% endfor %}
         </tr>
@@ -30,20 +30,20 @@
     <!-- Mobile selector for months -->
     <div class="mb-4">
       <select id="monthSelector"
-              class="w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-slate-900">
+              class="w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
         {% for month in all_months %}<option value="{{ forloop.counter0 }}">{{ month }}</option>{% endfor %}
       </select>
     </div>
     <!-- Mobile table with just category and selected month -->
     <table class="p-2 w-full" border="1">
       <thead>
-        <tr class="*:p-2 border-b border-slate-700">
+        <tr class="*:p-2 border-b border-zinc-700">
           <th class="text-left">Category</th>
           <th class="text-left" id="selectedMonthHeader">Month</th>
         </tr>
       </thead>
       <tbody id="mobileCategoryTableBody">
-        <tr class="*:p-2 border-b border-slate-700 bg-slate-800/50">
+        <tr class="*:p-2 border-b border-zinc-700 bg-zinc-800/50">
           <td class="font-bold">Total</td>
           <td class="text-left font-bold heatmap-cell" id="selectedMonthTotal"></td>
         </tr>
@@ -211,7 +211,7 @@
           // Add a legend to explain the coloring
           addLegend: function() {
               const legend = document.createElement('div');
-              legend.className = "mt-4 text-xs bg-slate-800 p-3 rounded";
+              legend.className = "mt-4 text-xs bg-zinc-800 p-3 rounded";
               legend.innerHTML = `
                   <p class="font-semibold mb-2">Color Legend:</p>
                   <div class="flex flex-wrap gap-3">
@@ -298,7 +298,7 @@
           createStatsDisplay: function() {
               const statsDisplay = document.createElement('div');
               statsDisplay.id = 'mobileStatsDisplay';
-              statsDisplay.className = 'mt-3 text-xs bg-slate-800 p-2 rounded';
+              statsDisplay.className = 'mt-3 text-xs bg-zinc-800 p-2 rounded';
               statsDisplay.innerHTML = '<h4 class="font-semibold">Monthly Statistics</h4><div id="statsContent"></div>';
               
               this.elements.statsDisplay = statsDisplay;
@@ -370,7 +370,7 @@
           // Add a new category row to the table
           addCategoryRow: function(category, value) {
               const row = document.createElement('tr');
-              row.className = "*:p-2 border-b border-slate-700";
+              row.className = "*:p-2 border-b border-zinc-700";
               
               // Create category cell
               const categoryCell = document.createElement('td');
@@ -379,7 +379,7 @@
               
               // Create value cell
               const valueCell = document.createElement('td');
-              valueCell.className = value === 'R$ 0,00' ? "text-left text-slate-600 heatmap-cell" : "text-left heatmap-cell";
+              valueCell.className = value === 'R$ 0,00' ? "text-left text-zinc-600 heatmap-cell" : "text-left heatmap-cell";
               valueCell.textContent = value;
               valueCell.setAttribute('data-value', value);
               
@@ -414,7 +414,7 @@
                   
                   // Create stats display
                   const statsDisplay = document.createElement('div');
-                  statsDisplay.className = 'mt-3 text-xs bg-slate-800 p-2 rounded';
+                  statsDisplay.className = 'mt-3 text-xs bg-zinc-800 p-2 rounded';
                   statsDisplay.innerHTML = `
                       <h4 class="font-semibold">Estatísticas Gerais</h4>
                       <div class="grid grid-cols-5 gap-2 mt-1">

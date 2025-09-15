@@ -8,19 +8,19 @@
                 <ul class="flex gap-2">
                     <li>
                         <a href="{% url 'register_expense' %}?quick_fill=uber" 
-                           class="block px-4 py-2 text-gray-300 hover:bg-slate-700 rounded-lg">
+                           class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
                             <i class="fas fa-car-side mr-2"></i>Uber Ride
                         </a>
                     </li>
                     <li>
                         <a href="{% url 'register_expense' %}?quick_fill=food" 
-                           class="block px-4 py-2 text-gray-300 hover:bg-slate-700 rounded-lg">
+                           class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
                             <i class="fas fa-utensils mr-2"></i>Food
                         </a>
                     </li>
                     <li>
                         <a href="{% url 'register_expense' %}?quick_fill=market" 
-                           class="block px-4 py-2 text-gray-300 hover:bg-slate-700 rounded-lg">
+                           class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
                             <i class="fas fa-shopping-cart mr-2"></i>Market
                         </a>
                     </li>
@@ -28,42 +28,42 @@
             </nav>
         </header>
         
-        <section class="bg-slate-800/40 p-6 rounded-lg shadow-lg">
+        <section class="bg-zinc-800/40 p-6 rounded-lg shadow-lg">
             <form method="post" class="space-y-4">
                 {% csrf_token %}
                 <fieldset>
                     <div class="mb-4 space-y-2">
                         <label for="id_description" class="text-gray-400">Description</label>
-                        {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+                        {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                 </fieldset>
 
                 <fieldset class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label for="id_amount" class="text-gray-400">Amount</label>
-                        {{ form.amount|add_class:"w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+                        {{ form.amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                     <div class="space-y-2">
                         <label for="id_installments" class="text-gray-400">Installments</label>
-                        {{ form.installments|add_class:"w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+                        {{ form.installments|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                 </fieldset>
 
                 <fieldset>
                     <div class="mb-4 space-y-2">
                         <label for="id_date" class="text-gray-400">Date</label>
-                        {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+                        {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                 </fieldset>
 
                 <fieldset class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label for="id_category" class="text-gray-400">Category</label>
-                        {{ form.category|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-slate-900" }}
+                        {{ form.category|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
                     </div>
                     <div class="space-y-2">
                         <label for="id_payment_method" class="text-gray-400">Payment Method</label>
-                        {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-slate-900" }}
+                        {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
                     </div>
                 </fieldset>
 
@@ -78,7 +78,7 @@
             <aside class="mt-4">
                 <ul class="messages space-y-2">
                     {% for message in messages %}
-                        <li class="{{ message.tags }} p-4 rounded-lg bg-slate-700">{{ message }}</li>
+                        <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
                     {% endfor %}
                 </ul>
             </aside>

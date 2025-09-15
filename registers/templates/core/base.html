@@ -20,41 +20,41 @@
     />
     <title>Dashboard</title>
   </head>
-  <body class="bg-slate-900 w-full h-screen grid lg:grid-cols-[auto_1fr]">
+  <body class="bg-zinc-900 w-full h-screen grid lg:grid-cols-[auto_1fr]">
     <aside
-      class="h-fit lg:h-full w-full lg:pt-10 p-3 text-white flex flex-wrap lg:flex-col justify-center lg:justify-start gap-4 border-r border-slate-700 min-w-[190px]"
+      class="h-fit lg:h-full w-full lg:pt-10 p-3 text-white flex flex-wrap lg:flex-col justify-center lg:justify-start gap-4 border-r border-zinc-700 min-w-[190px]"
     >
       <a
         href="{% url 'expense_report' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg {% if request.path == '/' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
+        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
       >
         <i class="fa-solid fa-house text-xs"></i>
         <span class="text-sm hidden lg:block">Dashboard</span>
       </a>
       <a
         href="{% url 'register_expense' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg {% if request.path == '/register/expense' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
+        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/register/expense' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
       >
         <i class="fa-solid fa-coins text-xs"></i>
         <span class="text-sm hidden lg:block">Register Expense</span>
       </a>
       <a
         href="{% url 'register_income' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg {% if request.path == '/register/income' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
+        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/register/income' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
       >
         <i class="fa-solid fa-coins text-xs"></i>
         <span class="text-sm hidden lg:block">Register Income</span>
       </a>
       <a
         href="{% url 'csv_import' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg {% if 'csv-import' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
+        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'csv-import' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
       >
         <i class="fa-solid fa-file-csv text-xs"></i>
         <span class="text-sm hidden lg:block">CSV Import</span>
       </a>
       <a
         href="/admin"
-        class="font-semibold flex items-center gap-2 hover:bg-slate-700 px-4 py-2 rounded-lg"
+        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg"
       >
         <i class="fa-solid fa-user-shield text-xs"></i>
         <span class="text-sm hidden lg:block">Admin</span>

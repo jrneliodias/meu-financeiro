@@ -1055,7 +1055,7 @@ function XRegExp(pattern, flags) {
 
     var applied = prepareFlags(pattern, flags);
     var appliedPattern = applied.pattern;
-    var appliedFlags = (0, _flags["default"])(applied); // Use XRegExp's tokens to translate the pattern to a native regex pattern.
+    var appliedFlags = (0, _flags["default"])(applied); // Use XRegExp's tokens to tranzinc the pattern to a native regex pattern.
     // `appliedPattern.length` may change on each iteration if tokens use `reparse`
 
     while (pos < appliedPattern.length) {
