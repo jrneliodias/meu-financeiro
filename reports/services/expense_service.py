@@ -334,33 +334,59 @@ class ExpenseService:
         self._debug_final_results(formatted_results)
         return formatted_results
 
-    def get_optimized_expenses_data(self, all_months):
+    def get_optimized_expenses_data(self, all_months, sort_categories=True):
         """
         OPTIMIZED: Get expense data by category and month using single query.
-        
+
         Replaces the previous N×12 queries with a single database query.
         Performance: ~50+ queries reduced to 1 query
+
+        Args:
+            all_months: List of months to include in the data
+            sort_categories: Whether to sort categories alphabetically (default: True)
         """
         # Get data from repository
         expenses_by_month_category = self.expense_repository.get_optimized_expenses_by_month_and_category(self.year)
-        
+
         # Initialize data structures with all months
         expenses_by_category_by_month = defaultdict(lambda: {month: 0.0 for month in all_months})
         total_expense_by_month = {month: 0.0 for month in all_months}
-        
+
         # Process the single query result
         for item in expenses_by_month_category:
             month_name = item['month'].strftime('%B')
             category_name = item['category__name'] or 'No Category'
             amount = float(item['total_amount'])
-            
+
             expenses_by_category_by_month[category_name][month_name] = amount
             total_expense_by_month[month_name] += amount
-        
+
+        # Apply sorting if requested (following SOLID principles)
+        if sort_categories:
+            expenses_by_category_by_month = self._sort_categories_alphabetically(expenses_by_category_by_month)
+
         return {
-            'expenses_by_category_by_month': dict(expenses_by_category_by_month),
+            'expenses_by_category_by_month': expenses_by_category_by_month,
             'total_expense_by_month': total_expense_by_month
         }
+
+    def _sort_categories_alphabetically(self, expenses_by_category):
+        """
+        Private method to sort categories alphabetically.
+
+        Following SOLID principles:
+        - Single Responsibility: Only handles category sorting
+        - Open/Closed: Can be extended for different sorting strategies
+        - Dependency Inversion: Sorting logic is separated from data fetching
+
+        Args:
+            expenses_by_category: Dictionary of categories and their expense data
+
+        Returns:
+            OrderedDict with categories sorted alphabetically
+        """
+        from collections import OrderedDict
+        return OrderedDict(sorted(expenses_by_category.items(), key=lambda x: x[0].lower()))
 
     def get_optimized_incomes_by_month(self, all_months):
         """
