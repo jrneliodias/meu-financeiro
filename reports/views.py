@@ -25,11 +25,10 @@ recurring_expense_service = RecurringExpenseService()
 def index(request):
     return render(request, 'core/index.html')
 
-@cache_page(60)  # Increased cache time to 1 minute
 def expense_report(request):
     """
     Optimized expense report view using consolidated database queries.
-    
+
     Performance improvements:
     - Single aggregated query for expenses by category and payment method
     - Single aggregated query for incomes by month
@@ -56,7 +55,7 @@ def expense_report(request):
     # OPTIMIZED: Use service methods instead of standalone functions
     # 1. Get expense data with single aggregated query
     optimized_expenses = expense_service.get_optimized_expenses_data(all_months)
-    
+
     # Format data for template
     formatted_expenses_by_category = {}
     for category, month_totals in optimized_expenses['expenses_by_category_by_month'].items():
@@ -69,19 +68,19 @@ def expense_report(request):
         format_brl(optimized_expenses['total_expense_by_month'].get(month, 0.0))
         for month in all_months
     ]
-    
+
     # 2. Get income data with single query
     incomes_by_month = expense_service.get_optimized_incomes_by_month(all_months)
-    
+
     # 3. Get payment method data with consolidated queries
     payment_method_data = expense_service.get_optimized_payment_method_data()
-    
+
     # 4. Get monthly expenses with proper select_related (no N+1)
     monthly_expenses_queryset = expense_service.get_optimized_monthly_expenses(selected_month)
-    
+
     # Calculate global balance (keep existing logic as it's already optimized)
     global_balance = balance_service.calculate_global_balance()
-    
+
     # Get daily spending data
     daily_spending_data = get_daily_spending_data(
         expense_repository, selected_year, selected_month
@@ -329,19 +328,19 @@ def format_brl(value):
 def get_daily_spending_data(expense_repository, year, month):
     """
     Get daily spending data for the chart.
-    
+
     Why separate function? Maintains the modular approach of your existing code
     and makes testing easier.
     """
     try:
         daily_calculator = DailyExpenseCalculator(expense_repository, year, month)
-        
+
         # Get trend data for the last 30 days
         trend_data = daily_calculator.get_daily_spending_trends(days=30)
-        
+
         # Format data for Chart.js - ensure all values are JSON-serializable
         sorted_dates = sorted(trend_data['daily_expenses'].keys())
-        
+
         result = {
             'labels': [str(date) for date in sorted_dates],  # Ensure strings
             'dailyExpenses': [float(trend_data['daily_expenses'][date]) for date in sorted_dates],  # Ensure floats
@@ -349,14 +348,14 @@ def get_daily_spending_data(expense_repository, year, month):
             'totalSpending': float(trend_data['total_spending']),  # Ensure float
             'averageDaily': float(trend_data['average_daily'])  # Ensure float
         }
-        
+
         return result
-        
+
     except Exception as e:
         print(f"ERROR in get_daily_spending_data: {e}")
         import traceback
         print(f"ERROR traceback: {traceback.format_exc()}")
-        
+
         # Return empty but valid data structure to prevent template errors
         return {
             'labels': [],
@@ -373,22 +372,22 @@ def daily_spending_data_ajax(request):
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'error': 'Invalid request'}, status=400)
-    
+
     try:
         # Get the number of days from the request
         days = int(request.GET.get('days', 30))
-        
+
         # Validate days parameter
         if days not in [7, 30, 60, 90]:
             return JsonResponse({'error': 'Invalid days parameter'}, status=400)
-        
+
         # Create daily calculator and get data
         daily_calculator = DailyExpenseCalculator(expense_repository)
         trend_data = daily_calculator.get_daily_spending_trends(days=days)
-        
+
         # Format data for Chart.js
         sorted_dates = sorted(trend_data['daily_expenses'].keys())
-        
+
         result = {
             'labels': [str(date) for date in sorted_dates],
             'dailyExpenses': [float(trend_data['daily_expenses'][date]) for date in sorted_dates],
@@ -396,14 +395,14 @@ def daily_spending_data_ajax(request):
             'totalSpending': float(trend_data['total_spending']),
             'averageDaily': float(trend_data['average_daily'])
         }
-        
+
         return JsonResponse(result)
-        
+
     except Exception as e:
         print(f"ERROR in daily_spending_data_ajax: {e}")
         import traceback
         print(f"ERROR traceback: {traceback.format_exc()}")
-        
+
         return JsonResponse({
             'error': 'Failed to load daily spending data',
             'message': str(e)
@@ -413,10 +412,10 @@ def daily_spending_data_ajax(request):
 def expense_details_ajax(request):
     """
     AJAX endpoint to get detailed expenses for a specific date.
-    
+
     Used by the daily spending chart modal to show individual expenses
     when a user clicks on a chart point.
-    
+
     Returns:
     - List of expenses for the date
     - Total amount for the date
@@ -424,29 +423,29 @@ def expense_details_ajax(request):
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'error': 'Invalid request'}, status=400)
-    
+
     date_str = request.GET.get('date')
     if not date_str:
         return JsonResponse({'error': 'Date parameter is required'}, status=400)
-    
+
     try:
         # Parse date string (expected format: YYYY-MM-DD)
         from datetime import datetime
         target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
         return JsonResponse({'error': 'Invalid date format. Expected YYYY-MM-DD'}, status=400)
-    
+
     try:
         from reports.repository.expense_repository import ExpenseRepository
         from decimal import Decimal
-        
+
         expense_repo = ExpenseRepository()
         expenses = expense_repo.get_expenses_by_date(target_date)
-        
+
         # Convert QuerySet to list and ensure JSON serialization
         expenses_list = []
         total_amount = Decimal('0.00')
-        
+
         for expense in expenses:
             expense_data = {
                 'id': expense['id'],
@@ -458,7 +457,7 @@ def expense_details_ajax(request):
             }
             expenses_list.append(expense_data)
             total_amount += expense['amount']
-        
+
         return JsonResponse({
             'date': date_str,
             'expenses': expenses_list,
@@ -466,9 +465,6 @@ def expense_details_ajax(request):
             'count': len(expenses_list),
             'formatted_date': target_date.strftime('%d/%m/%Y')  # Brazilian format
         })
-        
+
     except Exception as e:
         return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
-
-
-
