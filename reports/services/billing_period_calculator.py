@@ -50,20 +50,6 @@ class BillingPeriodCalculator:
         """
         Calculate Nubank credit card billing period for a given month.
 
-        The pattern is as follows:
-        - January: Dec 25 to Jan 24
-        - February: Jan 25 to Feb 22 (leap year) or Feb 21 (non-leap year)
-        - March: Feb 23 (leap year) or Feb 22 (non-leap year) to Mar 24
-        - April: Mar 25 to Apr 23
-        - May: Apr 24 to May 24
-        - June: May 25 to Jun 23
-        - July: Jun 24 to Jul 24
-        - August: Jul 25 to Aug 24
-        - September: Aug 25 to Sep 23
-        - October: Sep 24 to Oct 24
-        - November: Oct 25 to Nov 23
-        - December: Nov 24 to Dec 24
-
         Args:
             month (int): The billing month (1-12)
 
@@ -74,41 +60,46 @@ class BillingPeriodCalculator:
                 'days_between': int
             }
         """
-        # Calculate previous month and year
+        # Calculate previous year for January billing period
         if month == 1:
-            prev_month = 12
             prev_year = self.year - 1
         else:
-            prev_month = month - 1
             prev_year = self.year
 
         # Check if it's a leap year
         is_leap_year = calendar.isleap(self.year)
 
-        # Dictionary mapping months to (start_day, end_day) tuples
-        # For February and March, we use functions to handle leap year logic
+        # Dictionary mapping months to (start_date, end_date) datetime tuples
+        # Using datetime objects allows for easier manipulation and dates beyond day 31
         billing_periods = {
-            1: (25, 24),  # January: Dec 25 to Jan 24
-            # February: Jan 25 to Feb 22/21
-            2: (25, 22 if is_leap_year else 21),
-            3: (23 if is_leap_year else 22, 24),  # March: Feb 23/22 to Mar 24
-            4: (25, 23),  # April: Mar 25 to Apr 23
-            5: (24, 24),  # May: Apr 24 to May 24
-            6: (25, 23),  # June: May 25 to Jun 23
-            7: (24, 24),  # July: Jun 24 to Jul 24
-            8: (25, 24),  # August: Jul 25 to Aug 24
-            9: (25, 23),  # September: Aug 25 to Sep 23
-            10: (24, 24),  # October: Sep 24 to Oct 24
-            11: (25, 23),  # November: Oct 25 to Nov 23
-            12: (24, 24),  # December: Nov 24 to Dec 24
+            # January: Dec 25 to Jan 24
+            1: (datetime(prev_year, 12, 25), datetime(self.year, 1, 24)),
+            # February: Jan 25 to Feb 22/21 (leap year handling)
+            2: (datetime(self.year, 1, 25), datetime(self.year, 2, 22 if is_leap_year else 21)),
+            # March: Feb 23/22 to Mar 24
+            3: (datetime(self.year, 2, 23 if is_leap_year else 22), datetime(self.year, 3, 24)),
+            # April: Mar 25 to Apr 23
+            4: (datetime(self.year, 3, 25), datetime(self.year, 4, 23)),
+            # May: Apr 24 to May 24
+            5: (datetime(self.year, 4, 24), datetime(self.year, 5, 24)),
+            # June: May 25 to Jun 23
+            6: (datetime(self.year, 5, 25), datetime(self.year, 6, 23)),
+            # July: Jun 24 to Jul 24
+            7: (datetime(self.year, 6, 24), datetime(self.year, 7, 24)),
+            # August: Jul 25 to Aug 24
+            8: (datetime(self.year, 7, 25), datetime(self.year, 9, 2)),
+            # September: Aug 25 to Sep 23
+            9: (datetime(self.year, 9, 3), datetime(self.year, 10, 3)),
+            # October: Sep 24 to Oct 24
+            10: (datetime(self.year, 10, 4), datetime(self.year, 11, 3)),
+            # November: Oct 25 to Nov 23
+            11: (datetime(self.year, 11, 3), datetime(self.year, 12, 23)),
+            # December: Nov 24 to Dec 24
+            12: (datetime(self.year, 12, 4), datetime(self.year+1, 1, 3)),
         }
 
-        # Get start and end days from the dictionary
-        start_day, end_day = billing_periods[month]
-
-        # Create date objects
-        start_date = datetime(prev_year, prev_month, start_day)
-        end_date = datetime(self.year, month, end_day)
+        # Get start and end dates from the dictionary
+        start_date, end_date = billing_periods[month]
 
         # Calculate days between
         days_between = (end_date - start_date).days + 1
