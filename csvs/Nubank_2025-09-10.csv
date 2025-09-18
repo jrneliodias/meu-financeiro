@@ -1,48 +1,113 @@
-date,description,amount,category,type,payment_method
-2025-09-02,Uber Uber *Trip Help.U,8.96,Uber,expense,Crédito - Nubank
-2025-09-02,Uber* Trip,8.94,Uber,expense,Crédito - Nubank
-2025-09-02,Uber* Trip,7.92,Uber,expense,Crédito - Nubank
-2025-09-02,Uber Uber *Trip Help.U,5.93,Uber,expense,Crédito - Nubank
-2025-09-02,Dl*99 Ride,4.60,Uber,expense,Crédito - Nubank
-2025-09-02,Jetshr,22.00,Outros,expense,Crédito - Nubank
-2025-09-02,Uber Uber *Trip Help.U,7.98,Uber,expense,Crédito - Nubank
-2025-09-01,Supermercado Lider Can,157.22,Supermercado,expense,Crédito - Nubank
-2025-09-01,Uber Uber *Trip Help.U,24.96,Uber,expense,Crédito - Nubank
-2025-09-01,Dl*99 Ride,4.60,Uber,expense,Crédito - Nubank
-2025-09-01,Pg *99 Ride,8.00,Uber,expense,Crédito - Nubank
-2025-08-30,"IOF de ""Abacus.Ai""",1.97,Software,expense,Crédito - Nubank
-2025-08-30,Abacus.Ai,56.43,Software,expense,Crédito - Nubank
-2025-08-30,Pg *99 Ride,5.40,Uber,expense,Crédito - Nubank
-2025-08-29,Jetshr,38.90,Outros,expense,Crédito - Nubank
-2025-08-28,Supermercado Lider Can,148.57,Supermercado,expense,Crédito - Nubank
-2025-08-28,Uber* Trip,10.96,Uber,expense,Crédito - Nubank
-2025-08-28,Uber* Trip,15.92,Uber,expense,Crédito - Nubank
-2025-08-27,Uber* Trip,6.92,Uber,expense,Crédito - Nubank
-2025-08-27,Uber* Trip,11.94,Uber,expense,Crédito - Nubank
-2025-08-27,Uber* Trip,12.97,Uber,expense,Crédito - Nubank
-2025-08-27,Uber* Trip,13.91,Uber,expense,Crédito - Nubank
-2025-08-25,Pg *99 Ride,13.20,Uber,expense,Crédito - Nubank
-2025-08-25,Sosthenes & Sosthenes,90.00,Quarto,expense,Crédito - Nubank
-2025-08-25,Pg *99 Ride,4.60,Uber,expense,Crédito - Nubank
-2025-08-25,Leoberi,58.00,Lanche,expense,Crédito - Nubank
-2025-08-24,Amazonmktplc*Nerishopc,31.90,Outros,expense,Crédito - Nubank
-2025-08-24,Jetshr,27.00,Outros,expense,Crédito - Nubank
-2025-08-24,Pg *99 Ride,8.10,Uber,expense,Crédito - Nubank
-2025-08-24,Jetshr,6.89,Outros,expense,Crédito - Nubank
-2025-08-24,Dl*99 Ride,4.60,Uber,expense,Crédito - Nubank
-2025-08-24,Dl*99 Ride,8.40,Uber,expense,Crédito - Nubank
-2025-08-23,Jetshr,4.47,Outros,expense,Crédito - Nubank
-2025-08-23,Supermercado Lider Can,54.80,Supermercado,expense,Crédito - Nubank
-2025-08-22,Supermercado Lider Can,124.70,Supermercado,expense,Crédito - Nubank
-2025-08-22,Jetshr,6.99,Outros,expense,Crédito - Nubank
-2025-08-21,Uber Uber *Trip Help.U,10.34,Uber,expense,Crédito - Nubank
-2025-08-21,Uber Uber *Trip Help.U,11.93,Uber,expense,Crédito - Nubank
-2025-08-20,Supermercado Lider Can,202.25,Supermercado,expense,Crédito - Nubank
-2025-08-18,Jetshr,1.90,Outros,expense,Crédito - Nubank
-2025-08-18,Jetshr,1.90,Outros,expense,Crédito - Nubank
-2025-08-18,Jetshr,1.90,Outros,expense,Crédito - Nubank
-2025-08-18,Dl *Google Youtube,6.99,Streaming,expense,Crédito - Nubank
-2025-08-17,Jetshr,35.00,Outros,expense,Crédito - Nubank
-2025-08-17,Jetshr,1.90,Outros,expense,Crédito - Nubank
-2025-08-17,Sr. Forneria Pizzas,80.50,Lanche,expense,Crédito - Nubank
-2025-08-16,Drogasil - Parcela 3/3,49.59,Farmácia,expense,Crédito - Nubank
+date,title,amount
+2025-09-02,Uber Uber *Trip Help.U,8.96
+2025-09-02,Uber* Trip,8.94
+2025-09-02,Uber* Trip,7.92
+2025-09-02,Dm *Spotify,34.90
+2025-09-02,Uber Uber *Trip Help.U,5.93
+2025-09-02,Dl*99 Ride,4.60
+2025-09-02,Jetshr,22.00
+2025-09-02,Uber Uber *Trip Help.U,7.98
+2025-09-01,Supermercado Lider Can,157.22
+2025-09-01,Uber Uber *Trip Help.U,24.96
+2025-09-01,Dl*99 Ride,4.60
+2025-09-01,Pg *99 Ride,8.00
+2025-08-31,Dl *Google Youtubeprem,53.90
+2025-08-30,"IOF de ""Abacus.Ai""",1.97
+2025-08-30,Abacus.Ai,56.43
+2025-08-30,Pg *99 Ride,5.40
+2025-08-29,Jetshr,38.90
+2025-08-28,Supermercado Lider Can,148.57
+2025-08-28,Uber* Trip,10.96
+2025-08-28,Uber* Trip,15.92
+2025-08-28,"Estorno de ""Amazonmktplc*Nerishopc""",-31.90
+2025-08-27,Uber* Trip,6.92
+2025-08-27,Uber* Trip,11.94
+2025-08-27,Uber* Trip,12.97
+2025-08-27,Uber* Trip,13.91
+2025-08-26,Studio Z - Parcela 1/2,75.00
+2025-08-25,Pg *99 Ride,13.20
+2025-08-25,Sosthenes & Sosthenes,90.00
+2025-08-25,Pg *99 Ride,4.60
+2025-08-25,Leoberi,58.00
+2025-08-24,Amazonmktplc*Nerishopc,31.90
+2025-08-24,Jetshr,27.00
+2025-08-24,Pg *99 Ride,8.10
+2025-08-24,Jetshr,6.89
+2025-08-24,Dl*99 Ride,4.60
+2025-08-24,Dl*99 Ride,8.40
+2025-08-23,Jetshr,4.47
+2025-08-23,Supermercado Lider Can,54.80
+2025-08-22,Supermercado Lider Can,124.70
+2025-08-22,Jetshr,6.99
+2025-08-21,Uber Uber *Trip Help.U,10.34
+2025-08-21,Uber Uber *Trip Help.U,11.93
+2025-08-21,Dl *Google Ellation,19.99
+2025-08-20,Supermercado Lider Can,202.25
+2025-08-18,Jetshr,1.90
+2025-08-18,Jetshr,1.90
+2025-08-18,Jetshr,1.90
+2025-08-18,Dl *Google Youtube,6.99
+2025-08-17,Jetshr,35.00
+2025-08-17,Jetshr,1.90
+2025-08-17,Sr. Forneria Pizzas,80.50
+2025-08-16,Drogasil - Parcela 3/3,49.59
+2025-08-16,Desconto Antecipação Drogasil,-0.41
+2025-08-16,Jetshr,6.23
+2025-08-16,Desconto Antecipação Pg *Cod3r Ensino Cod3r,-0.28
+2025-08-16,Jetshr,10.00
+2025-08-16,Pg *Cod3r Ensino Cod3r - Parcela 3/3,33.95
+2025-08-16,Supermercado Lider Can,121.37
+2025-08-16,Mp *Melimais,24.90
+2025-08-16,Jetshr,8.67
+2025-08-14,Dl*99 Ride,4.60
+2025-08-14,Linkedin,34.99
+2025-08-14,Dl*99 Ride,6.90
+2025-08-13,Uber* Trip,12.94
+2025-08-13,Www_contabo_com,37.24
+2025-08-13,"IOF de ""Www_contabo_com""",1.30
+2025-08-13,Uber Uber *Trip Help.U,9.93
+2025-08-12,Uber Uber *Trip Help.U,24.95
+2025-08-12,Supermercado Lider Can,96.88
+2025-08-11,Uber* Trip,44.91
+2025-08-11,Uber* Trip,27.57
+2025-08-11,Netflix Entretenimento,59.90
+2025-08-11,Ifd*55.141.581 Joao Th,10.00
+2025-08-11,Whebe,119.00
+2025-08-11,Uber* Trip,6.11
+2025-08-09,Dl *Google Youtube,6.99
+2025-08-07,Uber Uber *Trip Help.U,9.97
+2025-08-07,Uber* Trip,11.96
+2025-08-06,Supermercado Lider Can,196.32
+2025-08-05,99app *99app,3.00
+2025-08-05,99app *99app,5.40
+2025-08-05,Selfitsobrs,139.90
+2025-08-04,Dm *Helphbomaxcom,39.90
+2025-08-03,99app *99app,5.10
+2025-08-03,99app *99app,4.70
+2025-08-03,Ricardorafael,67.00
+2025-08-02,Dm *Spotify,34.90
+2025-08-02,Supermercado Lider Can,194.36
+2025-08-01,Pagamento recebido,-3038.24
+2025-08-01,Uber Uber *Trip Help.U,11.95
+2025-07-31,Dl *Google Youtubeprem,53.90
+2025-07-31,Cursor Ai Powered Ide,116.55
+2025-07-31,"IOF de ""Cursor Ai Powered Ide""",4.07
+2025-07-30,Eccoa Saude,365.00
+2025-07-30,Uber Uber *Trip Help.U,12.94
+2025-07-30,Uber* Trip,13.98
+2025-07-30,Supermercado Lider Can,231.46
+2025-07-29,Uber Uber *Trip Help.U,10.92
+2025-07-28,Uber Uber *Trip Help.U,25.93
+2025-07-28,Tudo Conveniencia,41.45
+2025-07-28,Uber Uber *Trip Help.U,26.96
+2025-07-28,Cinepolis Operadora de,37.00
+2025-07-27,Big Parque Verde,26.90
+2025-07-27,99app *99app,11.50
+2025-07-27,Americanas,24.86
+2025-07-27,99app *99app,4.70
+2025-07-25,Drogasil - Parcela 2/3,49.59
+2025-07-25,Supermercado Lider Can - Parcela 2/2,109.50
+2025-07-25,Pg *Cod3r Ensino Cod3r - Parcela 2/3,33.95
+2025-07-25,Pbkaspersky - Parcela 3/3,46.63
+2025-07-25,Gran Centro Universita - Parcela 6/6,94.88
+2025-07-25,Supermercado Lider Can,37.72
