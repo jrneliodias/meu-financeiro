@@ -5,27 +5,42 @@ from typing import Dict, List, Tuple, Optional
 import logging
 import io
 
-from ..models import Expense, Category, PaymentMethod
+from ..models import Expense, Income, Category, PaymentMethod
+from .csv_record_strategies import RecordStrategyFactory
 
 logger = logging.getLogger(__name__)
 
 
 class CSVImportService:
-    """Service for handling CSV file imports with validation and error handling"""
-    
+    """
+    Service for handling CSV file imports with validation and error handling.
+
+    SOLID Principles Applied:
+    - Single Responsibility: Handles CSV parsing, validation, and orchestration
+    - Open/Closed: Extensible via strategy pattern without modification
+    - Dependency Inversion: Depends on RecordStrategyFactory abstraction
+
+    The service now supports both Expense and Income creation based on:
+    1. Explicit 'type' column in CSV (takes precedence)
+    2. Sign of amount: negative = expense, positive = income
+    """
+
     REQUIRED_COLUMNS = ['date', 'description', 'amount']
     OPTIONAL_COLUMNS = ['category', 'type', 'payment_method']
-    
+
     def __init__(self):
         self.import_stats = {
             'total_rows': 0,
             'imported': 0,
+            'imported_expenses': 0,
+            'imported_incomes': 0,
             'errors': 0,
             'warnings': 0,
             'skipped': 0
         }
         self.error_log = []
         self.warning_log = []
+        self.strategy_factory = RecordStrategyFactory()
     
     def validate_csv_structure(self, df: pd.DataFrame) -> Tuple[bool, List[str]]:
         """Validate CSV structure and return validation status and errors"""
@@ -152,73 +167,79 @@ class CSVImportService:
             'sample_data': preview_df.to_dict('records')
         }
     
-    def import_data(self, df: pd.DataFrame, user: User, 
+    def import_data(self, df: pd.DataFrame, user: User,
                    auto_create_categories: bool = True,
                    auto_create_payment_methods: bool = True) -> Dict:
-        """Import data from DataFrame to database"""
+        """
+        Import data from DataFrame to database using strategy pattern.
+
+        This method now supports both Expense and Income creation:
+        - Uses RecordStrategyFactory to determine the appropriate record type
+        - Negative amounts → Expense records
+        - Positive amounts → Income records
+        - Explicit 'type' column → Takes precedence over amount sign
+
+        Args:
+            df: DataFrame containing CSV data
+            user: User who owns the records
+            auto_create_categories: Whether to auto-create missing categories
+            auto_create_payment_methods: Whether to auto-create missing payment methods
+
+        Returns:
+            Dictionary with import statistics, errors, and warnings
+        """
         self.import_stats = {
             'total_rows': len(df),
             'imported': 0,
+            'imported_expenses': 0,
+            'imported_incomes': 0,
             'errors': 0,
             'warnings': 0,
             'skipped': 0
         }
         self.error_log = []
         self.warning_log = []
-        
+
         for index, row in df.iterrows():
             try:
                 # Validate required fields
                 if pd.isna(row['date']) or pd.isna(row['description']) or pd.isna(row['amount']):
                     self._log_error(index, "Missing required fields")
                     continue
-                
-                # Handle category
-                category_name = str(row.get('category', 'Outros')).strip()
-                if auto_create_categories:
-                    category, created = Category.objects.get_or_create(
-                        name=category_name, 
-                        type='expense',
-                        defaults={'name': category_name, 'type': 'expense'}
-                    )
-                else:
-                    try:
-                        category = Category.objects.get(name=category_name, type='expense')
-                    except Category.DoesNotExist:
-                        self._log_warning(index, f"Category '{category_name}' not found, skipping")
-                        continue
-                
-                # Handle payment method
-                payment_method_name = str(row.get('payment_method', 'Crédito - Nubank')).strip()
-                if auto_create_payment_methods:
-                    payment_method, created = PaymentMethod.objects.get_or_create(
-                        name=payment_method_name,
-                        defaults={'name': payment_method_name, 'start_billing_day': 1}
-                    )
-                else:
-                    try:
-                        payment_method = PaymentMethod.objects.get(name=payment_method_name)
-                    except PaymentMethod.DoesNotExist:
-                        self._log_warning(index, f"Payment method '{payment_method_name}' not found, skipping")
-                        continue
-                
-                # Create expense
-                expense = Expense(
+
+                # Convert row to dictionary for strategy pattern
+                row_data = row.to_dict()
+
+                # Get appropriate strategy for this row
+                strategy = self.strategy_factory.get_strategy(row_data)
+
+                if strategy is None:
+                    self._log_error(index, "No strategy found to handle this row (amount is zero or invalid)")
+                    continue
+
+                # Create record using the selected strategy
+                record, error = strategy.create_record(
                     user=user,
-                    description=str(row['description']).strip(),
-                    amount=float(row['amount']),
-                    date=row['date'].date() if hasattr(row['date'], 'date') else row['date'],
-                    category=category,
-                    payment_method=payment_method,
+                    row_data=row_data,
+                    auto_create_categories=auto_create_categories,
+                    auto_create_payment_methods=auto_create_payment_methods
                 )
-                expense.save()
-                
+
+                if error:
+                    self._log_error(index, error)
+                    continue
+
+                # Update statistics based on record type
                 self.import_stats['imported'] += 1
-                
+                if isinstance(record, Expense):
+                    self.import_stats['imported_expenses'] += 1
+                elif isinstance(record, Income):
+                    self.import_stats['imported_incomes'] += 1
+
             except Exception as e:
                 self._log_error(index, f"Error importing row: {str(e)}")
                 logger.error(f"Import error at row {index}: {e}")
-        
+
         return {
             'stats': self.import_stats,
             'errors': self.error_log,
