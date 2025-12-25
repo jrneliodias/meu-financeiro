@@ -40,10 +40,15 @@ def get_expense_categories_from_db(db_path='db.sqlite3'):
         return []
 
 
-def processar_csv_com_gemini(caminho_do_arquivo, caminho_saida=None):
+def processar_csv_com_gemini(caminho_do_arquivo, caminho_saida=None, caminho_exemplo=None):
     """
     Processa um arquivo CSV usando a API do Gemini para adicionar categorias
     baseadas nas categorias de despesas do banco de dados.
+
+    Args:
+        caminho_do_arquivo: Caminho do CSV a ser processado
+        caminho_saida: Caminho de saída (opcional)
+        caminho_exemplo: Caminho de um CSV de exemplo com resultado esperado (opcional)
     """
     try:
         # 1. Buscar categorias do banco de dados
@@ -63,8 +68,34 @@ def processar_csv_com_gemini(caminho_do_arquivo, caminho_saida=None):
         # Converter o DataFrame em uma string no formato CSV para enviar para a API
         dados_csv = df.to_csv(index=False)
 
-        # 3. Construir um prompt detalhado com as categorias do banco
+        # 3. Ler o CSV de exemplo, se fornecido
+        exemplo_csv = ""
+        if caminho_exemplo:
+            print(f"Lendo CSV de exemplo: {caminho_exemplo}")
+            try:
+                df_exemplo = pd.read_csv(caminho_exemplo)
+                exemplo_csv = df_exemplo.to_csv(index=False)
+                print(f"Exemplo carregado com {len(df_exemplo)} linhas")
+            except Exception as e:
+                print(f"AVISO: Não foi possível ler o arquivo de exemplo: {e}")
+                print("Continuando sem exemplo...")
+
+        # 4. Construir um prompt detalhado com as categorias do banco
         categorias_lista = "\n           - ".join(categorias)
+
+        # Construir seção de exemplo se fornecido
+        secao_exemplo = ""
+        if exemplo_csv:
+            secao_exemplo = f"""
+        4. **Exemplo de Resultado Esperado:**
+           Use o exemplo abaixo como referência para entender o padrão de categorização:
+
+        ```
+        {exemplo_csv}
+        ```
+
+           Observe como as descrições foram categorizadas no exemplo acima e siga o mesmo padrão de raciocínio.
+        """
 
         regras = f"""
         Você é um assistente especializado em categorização de despesas financeiras.
@@ -85,7 +116,7 @@ def processar_csv_com_gemini(caminho_do_arquivo, caminho_saida=None):
            - NÃO use crases (```) ou qualquer formatação de código
            - Use vírgula como delimitador
            - Mantenha todas as colunas originais do CSV
-
+{secao_exemplo}
         Retorne apenas o CSV processado, começando diretamente com o cabeçalho.
         """
 
@@ -156,18 +187,25 @@ def processar_csv_com_gemini(caminho_do_arquivo, caminho_saida=None):
 # Exemplo de uso via linha de comando
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python main.py <caminho_do_csv> [caminho_saida_opcional]")
-        print("\nExemplo:")
-        print("  python main.py csvs/despesas.csv")
-        print("  python main.py csvs/despesas.csv csvs/despesas_processado.csv")
+        print("Uso: python gemini_process.py <caminho_do_csv> [caminho_saida] [caminho_exemplo]")
+        print("\nExemplos:")
+        print("  python gemini_process.py csvs/despesas.csv")
+        print("  python gemini_process.py csvs/despesas.csv csvs/despesas_processado.csv")
+        print("  python gemini_process.py csvs/despesas.csv csvs/despesas_processado.csv csvs/exemplo_resultado.csv")
+        print("\nParâmetros:")
+        print("  caminho_do_csv      - Arquivo CSV a ser processado (obrigatório)")
+        print("  caminho_saida       - Arquivo de saída (opcional, padrão: <original>_processed.csv)")
+        print("  caminho_exemplo     - CSV com exemplos de categorização (opcional)")
         print("\nO script irá:")
         print("  1. Conectar ao banco db.sqlite3")
         print("  2. Buscar todas as categorias do tipo 'expense'")
         print("  3. Usar o Gemini para adicionar a coluna 'category' ao CSV")
-        print("  4. Salvar o CSV processado (por padrão com sufixo '_processed')")
+        print("  4. Se fornecido, usar o CSV de exemplo para melhorar a precisão")
+        print("  5. Salvar o CSV processado")
         sys.exit(1)
 
     caminho_csv = sys.argv[1]
     caminho_saida = sys.argv[2] if len(sys.argv) > 2 else None
+    caminho_exemplo = sys.argv[3] if len(sys.argv) > 3 else None
 
-    processar_csv_com_gemini(caminho_csv, caminho_saida)
+    processar_csv_com_gemini(caminho_csv, caminho_saida, caminho_exemplo)
