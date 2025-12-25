@@ -11,11 +11,16 @@
         {# Payment Method Chart Component #}
         {% include "reports/components/payment_method_chart.html" %}
       </div>
-      {# Daily Spending Chart - New Addition #}
+      {# Daily Spending Chart #}
       <div class="w-full">
         {% include "reports/components/daily_spending_chart.html" %}
       </div>
-      
+
+      {# Installment Progress Card #}
+      <div class="w-full">
+        {% include "reports/components/installment_progress_card.html" with installments_progress=installments_progress %}
+      </div>
+
       {# Expense Category Table Component #}
       {% include "reports/components/expense_category_table.html" with all_months=all_months formatted_expenses_by_category=formatted_expenses_by_category formatted_totals=formatted_totals %}
       {# Expense Details Table Component #}

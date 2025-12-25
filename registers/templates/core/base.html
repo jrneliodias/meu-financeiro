@@ -20,9 +20,9 @@
     />
     <title>Dashboard</title>
   </head>
-  <body class="bg-zinc-900 w-full h-screen grid lg:grid-cols-[auto_1fr]">
+  <body class="bg-zinc-900 w-full min-h-screen grid lg:grid-cols-[auto_1fr]">
     <aside
-      class="h-fit lg:h-full w-full lg:pt-10 p-3 text-white flex flex-wrap lg:flex-col justify-center lg:justify-start gap-4 border-r border-zinc-700 min-w-[190px]"
+      class="h-fit lg:sticky lg:h-full w-full lg:pt-10 p-3 text-white flex flex-wrap lg:flex-col justify-center lg:justify-start gap-4 border-r border-zinc-700 min-w-[190px]"
     >
       <a
         href="{% url 'expense_report' %}"
@@ -60,7 +60,7 @@
         <span class="text-sm hidden lg:block">Admin</span>
       </a>
 
-      <div class="lg:mt-auto lg:pt-4 lg:border-t lg:border-zinc-700">
+      <div class=" lg:pt-4 lg:border-t lg:border-zinc-700">
         <div class="flex items-center gap-2 px-4 py-2 text-zinc-400">
           <i class="fa-solid fa-user text-xs"></i>
           <span class="text-sm hidden lg:block">{{ user.username }}</span>

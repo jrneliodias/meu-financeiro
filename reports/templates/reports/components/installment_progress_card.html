@@ -1,0 +1,93 @@
+{% if installments_progress.installments %}
+<div class="bg-zinc-800/50 rounded-lg p-4 w-full">
+  <!-- Header Section -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold text-white flex items-center">
+      <svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      Open Installments
+    </h2>
+    <div class="flex items-center space-x-3">
+      <span class="text-sm text-gray-400">
+        {{ installments_progress.count }} parcelamento{{ installments_progress.count|pluralize }}
+      </span>
+      <span class="text-orange-400 font-semibold">
+        {{ installments_progress.formatted_total_remaining }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Installments List -->
+  <div class="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
+    {% for installment in installments_progress.installments %}
+    <div class="bg-zinc-700/50 rounded-lg p-4">
+      <!-- Installment Header -->
+      <div class="flex justify-between items-start mb-2">
+        <div class="flex-1">
+          <h3 class="text-white font-medium text-base">
+            {{ installment.description }}
+          </h3>
+          {% if installment.category_name %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-600 text-gray-300 mt-1">
+            {{ installment.category_name }}
+          </span>
+          {% endif %}
+        </div>
+        <div class="text-right">
+          <span class="text-sm text-gray-400">
+            {{ installment.paid_installments }}/{{ installment.total_installments }} parcelas pagas
+          </span>
+        </div>
+      </div>
+
+      <!-- Progress Bar Container -->
+      <div class="relative mt-3">
+        <!-- Background Bar -->
+        <div class="w-full h-3 bg-zinc-600 rounded-full overflow-hidden">
+          <!-- Progress Fill - CSS-only with gradient -->
+          <div
+            class="h-full rounded-full transition-all duration-500 ease-out"
+            style="width: {{ installment.progress_percentage }}%;
+                   background: linear-gradient(90deg, #22c55e 0%, #4ade80 100%);"
+          >
+          </div>
+        </div>
+
+        <!-- Progress Percentage Label -->
+        <div class="absolute -top-0.5 right-0 text-xs text-gray-400">
+          {{ installment.progress_percentage|floatformat:0 }}%
+        </div>
+      </div>
+
+      <!-- Amount Details -->
+      <div class="flex justify-between items-center mt-3 text-sm">
+        <div class="flex items-center space-x-4">
+          <span class="text-green-400">
+            <span class="text-gray-400">Pago:</span>
+            {{ installment.formatted_paid_amount }}
+          </span>
+          <span class="text-orange-400">
+            <span class="text-gray-400">Restante:</span>
+            {{ installment.formatted_remaining_amount }}
+          </span>
+        </div>
+        <div class="text-gray-400">
+          Total: {{ installment.formatted_total_amount }}
+        </div>
+      </div>
+
+      <!-- Payment Method Badge -->
+      {% if installment.payment_method_name %}
+      <div class="mt-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/50 text-blue-300">
+          {{ installment.payment_method_name }}
+        </span>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

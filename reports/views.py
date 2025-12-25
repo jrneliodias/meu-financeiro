@@ -14,10 +14,12 @@ from registers.forms import ExpenseForm
 from utils.dates import get_all_months, get_current_date
 from django.http import JsonResponse
 from reports.services.daily_expense_calculator import DailyExpenseCalculator
+from reports.services.installment_progress_calculator import InstallmentProgressCalculator
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 expense_repository = ExpenseRepository()
+installment_calculator = InstallmentProgressCalculator()
 income_repository = IncomeRepository()
 category_repository = CategoryRepository()
 balance_service = BalanceService()
@@ -93,6 +95,12 @@ def expense_report(request):
     # 5. Get fixed expenses summary
     fixed_expenses_summary = recurring_expense_service.get_fixed_expenses_summary()
 
+    # 6. Get installment progress data
+    installments_progress = installment_calculator.get_installments_summary(
+        reference_month=selected_month,
+        reference_year=selected_year
+    )
+
     # Prepare the context
     context = {
         'all_months': all_months,
@@ -113,6 +121,7 @@ def expense_report(request):
         'global_balance': global_balance,
         'daily_spending_data': daily_spending_data,
         'fixed_expenses_summary': fixed_expenses_summary,
+        'installments_progress': installments_progress,
     }
 
     return render(request, 'reports/expense_report.html', context)
