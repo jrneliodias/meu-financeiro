@@ -25,6 +25,13 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(
     ",") if os.getenv("ALLOWED_HOSTS") else []
 
+# CSRF Trusted Origins (required for HTTPS)
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(
+    ",") if os.getenv("CSRF_TRUSTED_ORIGINS") else []
+
+# Security settings for HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
