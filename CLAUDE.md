@@ -46,6 +46,13 @@ Data access layer with performance-optimized queries:
 - **CategoryRepository**: Category-based data aggregation
 - **PaymentMethodRepository**: Payment method analysis queries
 - **IncomeRepository**: Income data access with performance optimizations
+- **RecurringExpenseRepository**: Recurring expense data access
+
+#### registers/components
+Form component architecture using dependency injection:
+- **ExpenseFormComponent**: Configures expense form fields with user context
+- **QuickFillMenu**: Pre-configured expense templates for rapid data entry
+- Forms receive user context via `kwargs.pop('user')` pattern
 
 ## Common Development Commands
 
@@ -111,6 +118,13 @@ date,description,amount,category,type,payment_method
 2025-09-02,Uber Uber *Trip Help.U,8.96,Uber,expense,Crédito - Nubank
 ```
 
+The CSV import uses a **Strategy Pattern** (`registers/services/csv_record_strategies.py`) to determine record type:
+1. **ExplicitTypeStrategy**: Checks for 'type' column (takes precedence)
+2. **NegativeAmountExpenseStrategy**: Negative amounts → Expense records
+3. **PositiveAmountIncomeStrategy**: Positive amounts → Income records
+
+To add new record type handling, create a new strategy class implementing `RecordCreationStrategy` and register it with `RecordStrategyFactory`.
+
 ## Database Configuration
 
 Uses SQLite for development and PostgreSQL for production via DATABASE_URL environment variable:
@@ -175,12 +189,14 @@ expense = expense_service.create_single_expense(user, expense_data)
 ### Query Optimization
 Always use select_related/prefetch_related for foreign key access:
 ```python
-# Good
+# Good (note: 'reccurring_expense' has a typo in the field name - legacy code)
 queryset.select_related('category', 'payment_method', 'reccurring_expense')
 
 # Bad - causes N+1 queries
 queryset  # then accessing .category in templates
 ```
+
+**Note**: The field `reccurring_expense` has a typo (double 'c') that persists in migrations and cannot be easily renamed.
 
 ### Repository Pattern
 Use repository classes for complex queries:
@@ -191,13 +207,23 @@ expenses = expense_repository.get_optimized_monthly_expenses(month)
 
 ## Testing Commands
 
-Run Django's built-in tests:
 ```bash
+# Run all tests
 python manage.py test
 
 # Test specific app
 python manage.py test registers
 python manage.py test reports
+
+# Run a single test file
+python manage.py test registers.tests.test_csv_record_strategies
+python manage.py test reports.tests.test_billing_period_calculator
+
+# Run a single test class
+python manage.py test registers.tests.test_csv_record_strategies.NegativeAmountExpenseStrategyTest
+
+# Run a single test method
+python manage.py test registers.tests.test_csv_record_strategies.NegativeAmountExpenseStrategyTest.test_can_handle_negative_amount
 ```
 
 ## Database Migration Between SQLite and PostgreSQL
