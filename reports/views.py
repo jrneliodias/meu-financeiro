@@ -15,6 +15,8 @@ from utils.dates import get_all_months, get_current_date
 from django.http import JsonResponse
 from reports.services.daily_expense_calculator import DailyExpenseCalculator
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 expense_repository = ExpenseRepository()
 income_repository = IncomeRepository()
 category_repository = CategoryRepository()
@@ -25,6 +27,8 @@ recurring_expense_service = RecurringExpenseService()
 def index(request):
     return render(request, 'core/index.html')
 
+
+@login_required
 def expense_report(request):
     """
     Optimized expense report view using consolidated database queries.
@@ -114,7 +118,7 @@ def expense_report(request):
     return render(request, 'reports/expense_report.html', context)
 
 
-class ExpenseUpdateView(UpdateView):
+class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     model = Expense
     form_class = ExpenseForm
     template_name = 'reports/expense_update.html'
@@ -366,6 +370,7 @@ def get_daily_spending_data(expense_repository, year, month):
         }
 
 
+@login_required
 def daily_spending_data_ajax(request):
     """
     AJAX endpoint to get daily spending data for different periods.
@@ -409,6 +414,7 @@ def daily_spending_data_ajax(request):
         }, status=500)
 
 
+@login_required
 def expense_details_ajax(request):
     """
     AJAX endpoint to get detailed expenses for a specific date.

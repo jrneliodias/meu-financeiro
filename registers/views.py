@@ -20,6 +20,7 @@ income_service = IncomeService()
 csv_import_service = CSVImportService()
 
 
+@login_required
 def register_expense(request):
     if request.method == 'POST':
         form = ExpenseForm(request.POST, user=request.user)
@@ -28,10 +29,6 @@ def register_expense(request):
 
         expense_data = form.cleaned_data
         user = request.user
-
-        if not user.is_authenticated:
-            messages.error(request, "User isn't logged in")
-            # or wherever you want to redirect unauthenticated users
 
         if expense_data['installments'] > 1:
             installment_service.create_installments(user, expense_data)
@@ -55,10 +52,12 @@ def register_expense(request):
     return render(request, 'register/expense_form.html', {'form': form})
 
 
+@login_required
 def expense_success(request):
     return render(request, 'register/expense_success.html')
 
 
+@login_required
 def register_income(request):
     if (request.method == 'POST'):
         form = IncomeForm(request.POST)
@@ -67,12 +66,6 @@ def register_income(request):
         income_data = form.cleaned_data
 
         user = request.user
-
-        if not user.is_authenticated:
-            messages.error(
-                request, "user isn't logged in")
-            return render(request, 'register/income_form.html', {'form': form})
-
         income = income_service.create_income(user, income_data)
 
         return redirect('expense_success')
@@ -82,6 +75,7 @@ def register_income(request):
     return render(request, 'register/income_form.html', {'form': form})
 
 
+@login_required
 def income_success(request):
     return render(request, 'register/income_success.html')
 
@@ -223,6 +217,7 @@ def csv_import_confirm(request):
     return redirect('csv_import')
 
 
+@login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def csv_import_ajax(request):
