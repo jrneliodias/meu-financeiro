@@ -1,32 +1,32 @@
 {% if installments_progress.installments %}
-<div class="bg-zinc-800/50 rounded-lg p-4 w-full">
+<div class="bg-zinc-800/50 rounded-lg p-3 md:p-4 w-full">
   <!-- Header Section -->
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-bold text-white flex items-center">
-      <svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+    <h2 class="text-lg md:text-xl font-bold text-white flex items-center">
+      <svg class="w-4 h-4 md:w-5 md:h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
       </svg>
       Open Installments
     </h2>
     <div class="flex items-center space-x-3">
-      <span class="text-sm text-gray-400">
+      <span class="text-xs md:text-sm text-gray-400">
         {{ installments_progress.count }} parcelamento{{ installments_progress.count|pluralize }}
       </span>
-      <span class="text-orange-400 font-semibold">
+      <span class="text-orange-400 font-semibold text-sm md:text-base">
         {{ installments_progress.formatted_total_remaining }}
       </span>
     </div>
   </div>
 
   <!-- Installments List -->
-  <div class="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
+  <div class="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
     {% for installment in installments_progress.installments %}
-    <div class="bg-zinc-700/50 rounded-lg p-4">
+    <div class="bg-zinc-700/50 rounded-lg p-3 md:p-4">
       <!-- Installment Header -->
-      <div class="flex justify-between items-start mb-2">
-        <div class="flex-1">
-          <h3 class="text-white font-medium text-base">
+      <div class="flex justify-between items-start mb-2 gap-2">
+        <div class="flex-1 min-w-0">
+          <h3 class="text-white font-medium text-sm md:text-base truncate">
             {{ installment.description }}
           </h3>
           {% if installment.category_name %}
@@ -35,17 +35,17 @@
           </span>
           {% endif %}
         </div>
-        <div class="text-right">
-          <span class="text-sm text-gray-400">
-            {{ installment.paid_installments }}/{{ installment.total_installments }} parcelas pagas
+        <div class="text-right flex-shrink-0">
+          <span class="text-xs md:text-sm text-gray-400">
+            {{ installment.paid_installments }}/{{ installment.total_installments }} pagas
           </span>
         </div>
       </div>
 
       <!-- Progress Bar Container -->
-      <div class="relative mt-3">
+      <div class="relative mt-2 md:mt-3">
         <!-- Background Bar -->
-        <div class="w-full h-3 bg-zinc-600 rounded-full overflow-hidden">
+        <div class="w-full h-2 md:h-3 bg-zinc-600 rounded-full overflow-hidden">
           <!-- Progress Fill - CSS-only with gradient -->
           <div
             class="h-full rounded-full transition-all duration-500 ease-out"
@@ -62,14 +62,14 @@
       </div>
 
       <!-- Amount Details -->
-      <div class="flex justify-between items-center mt-3 text-sm">
-        <div class="flex items-center space-x-4">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-2 md:mt-3 text-xs md:text-sm gap-1">
+        <div class="flex items-center space-x-3 md:space-x-4">
           <span class="text-green-400">
             <span class="text-gray-400">Pago:</span>
             {{ installment.formatted_paid_amount }}
           </span>
           <span class="text-orange-400">
-            <span class="text-gray-400">Restante:</span>
+            <span class="text-gray-400">Resta:</span>
             {{ installment.formatted_remaining_amount }}
           </span>
         </div>

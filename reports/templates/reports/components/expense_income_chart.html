@@ -1,110 +1,93 @@
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full lg:w-1/2">
-  <h2 class="text-2xl font-bold">Expense and Income by Month</h2>
-  <div class="h-[50vh] min-h-[300px] lg:min-h-[800px] mt-2 p-3 px-0">
+  <h2 class="text-xl md:text-2xl font-bold">Expense and Income by Month</h2>
+  <div class="h-[80vh] min-h-[400px] lg:h-auto lg:min-h-[800px] mt-2 p-3 px-0">
     <canvas id="expenseIncomeTotalChart" class="w-full"></canvas>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
-
+  const isMobileExpenseIncome = window.innerWidth < 768;
 
   const expenseIncomeColors = [
-
   {
-    backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Red with opacity
-borderColor: 'rgba(255, 99, 132, 1)',          // Solid red      // Lighter purple for border
+    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+    borderColor: 'rgba(255, 99, 132, 1)',
     borderWidth: 1
   },
-
   {
-    backgroundColor: 'rgba(52, 211, 153, 0.2)',    // Darker green with opacity
-    borderColor: 'rgba(52, 211, 153, 1)',          // Lighter green for border
+    backgroundColor: 'rgba(52, 211, 153, 0.2)',
+    borderColor: 'rgba(52, 211, 153, 1)',
     borderWidth: 1
   },
   ]
 
   const calculatedExpenseIncomeTotal = {{ monthly_expense_income_datasets|safe }};
 
-
   const calculatedExpenseIncomeTotalCtx = document.getElementById('expenseIncomeTotalChart').getContext('2d');
 
   const calculatedExpenseIncomeTotalDatasets = calculatedExpenseIncomeTotal.datasets.map((dataset, index) => ({
-    label: dataset.label, // Payment method name
-    data: dataset.datasets,   // Monthly expenses for this payment method
-    backgroundColor: expenseIncomeColors[index % expenseIncomeColors.length].backgroundColor, // Rotate through colors
+    label: dataset.label,
+    data: dataset.datasets,
+    backgroundColor: expenseIncomeColors[index % expenseIncomeColors.length].backgroundColor,
     borderColor: expenseIncomeColors[index % expenseIncomeColors.length].borderColor,
     borderWidth: expenseIncomeColors[index % expenseIncomeColors.length].borderWidth,
   }));
 
-
   new Chart(calculatedExpenseIncomeTotalCtx, {
     type: 'bar',
     data: {
-        labels: calculatedExpenseIncomeTotal.labels, // Months
-        datasets: calculatedExpenseIncomeTotalDatasets, // Payment method datasets
+        labels: calculatedExpenseIncomeTotal.labels,
+        datasets: calculatedExpenseIncomeTotalDatasets,
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
         layout: {
           padding: {
-            top: 20,
-            right: 100,  // Increased right padding for labels
+            top: 10,
+            right: isMobileExpenseIncome ? 70 : 100,
             bottom: 10,
-            left: 10
+            left: 0
           }
         },
-        indexAxis: 'y', // This makes the bars horizontal with y-axis categories
+        indexAxis: 'y',
         plugins: {
             legend: {
                 display: false,
-                position: 'right', // Legend on the right
-                align: 'start',
-                labels: {
-                    color: 'white',
-                    font: {
-                        size: 8
-                    }
-                }
             },
             tooltip: {
                 enabled: true,
             },
             datalabels: {
                 anchor: 'end',
-                align: 'right', // Position labels at the end of bars
+                align: 'right',
                 formatter: function(value, context) {
-                    return value > 0
-                        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-                        : ''; // Hide labels for values <= 0
+                    if (value <= 0) return '';
+                    if (isMobileExpenseIncome) {
+                        return 'R$ ' + (value/1000).toFixed(1) + 'k';
+                    }
+                    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
                 },
                 color: 'white',
                 font: {
                     weight: 'bold',
-                    size: 12
+                    size: isMobileExpenseIncome ? 9 : 12
                 }
             }
         },
         scales: {
             y: {
-                title: {
-                    display: false, // No need for title on y-axis as it's obvious these are months
-                },
-              
-            
+                title: { display: false },
+                ticks: {
+                    font: { size: isMobileExpenseIncome ? 10 : 12 },
+                    color: 'white'
+                }
             },
             x: {
                 beginAtZero: false,
-                title: {
-                    display: false,
-                    text: 'Amount (R$)',
-                    color: 'white'
-                },
-                ticks: {
-                    display: false,
-                },
-            
+                title: { display: false },
+                ticks: { display: false },
             }
         }
     },

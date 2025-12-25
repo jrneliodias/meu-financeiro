@@ -1,112 +1,110 @@
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full lg:w-1/2">
-  <h2 class="text-2xl font-bold">Monthly Expenses by Payment Method</h2>
-  <div class="lg:min-h-[800px] mt-2 p-3 px-0 w-full">
+  <h2 class="text-xl md:text-2xl font-bold">Monthly Expenses by Payment Method</h2>
+  <div class="h-[70vh] min-h-[500px] lg:h-auto lg:min-h-[800px] mt-2 p-3 px-0 w-full">
     <canvas id="calculatedPaymentMethodExpenseChart" class="w-full"></canvas>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
+  const isMobilePaymentMethod = window.innerWidth < 768;
+
   const PaymentMethodcolors = [
     {
-      backgroundColor: 'rgba(253, 186, 116, 0.2)',   // Darker orange with opacity
-      borderColor: 'rgba(253, 186, 116, 1)',         // Lighter orange for border
+      backgroundColor: 'rgba(253, 186, 116, 0.2)',
+      borderColor: 'rgba(253, 186, 116, 1)',
       borderWidth: 1
     },
-
     {
-      backgroundColor: 'rgba(167, 139, 250, 0.2)',   // Darker purple with opacity
-      borderColor: 'rgba(167, 139, 250, 1)',         // Lighter purple for border
+      backgroundColor: 'rgba(167, 139, 250, 0.2)',
+      borderColor: 'rgba(167, 139, 250, 1)',
       borderWidth: 1
     },
-
     {
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Red with opacity
-      borderColor: 'rgba(255, 99, 132, 1)',          // Solid red        // Lighter green for border
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      borderColor: 'rgba(255, 99, 132, 1)',
       borderWidth: 1
     },
-
   ]
 
-
   const calculatedPaymentMethodRawData = {{ calculated_monthy_payment_method_expense_totals| safe }};
-  const calculatedPaymentMethodLabels = calculatedPaymentMethodRawData.labels; // Extract the months
+  const calculatedPaymentMethodLabels = calculatedPaymentMethodRawData.labels;
   const calculatedPaymentMethodLabelsDatasets = calculatedPaymentMethodRawData.datasets.map((dataset, index) => ({
-    label: dataset.label, // Payment method name
-    data: dataset.data,   // Monthly expenses for this payment method
-    backgroundColor: PaymentMethodcolors[index % PaymentMethodcolors.length].backgroundColor, // Rotate through colors
+    label: dataset.label,
+    data: dataset.data,
+    backgroundColor: PaymentMethodcolors[index % PaymentMethodcolors.length].backgroundColor,
     borderColor: PaymentMethodcolors[index % PaymentMethodcolors.length].borderColor,
     borderWidth: PaymentMethodcolors[index % PaymentMethodcolors.length].borderWidth,
   }));
 
   const calculatedPaymentMethodExpenseChartCtx = document.getElementById('calculatedPaymentMethodExpenseChart').getContext('2d');
   new Chart(calculatedPaymentMethodExpenseChartCtx, {
-    type: 'bar', // Change to 'line' for line charts
+    type: 'bar',
     data: {
-      labels: calculatedPaymentMethodLabels, // Months
-      datasets: calculatedPaymentMethodLabelsDatasets, // Payment method datasets
-
+      labels: calculatedPaymentMethodLabels,
+      datasets: calculatedPaymentMethodLabelsDatasets,
     },
-
     options: {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
         padding: {
-         // Add more padding at the top
-          right: 100,  // Add more padding at the right for labels
+          top: 10,
+          right: isMobilePaymentMethod ? 70 : 100,
           bottom: 2,
-          left: 10
+          left: 0
         }
       },
       indexAxis: 'y',
-      barThickness: 10,  // Reduced thickness to accommodate multiple bars
-      categoryPercentage: 0.9,  // Controls spacing between categories
-      barPercentage: 0.1,  // Controls spacing between bars within a category
+      barThickness: isMobilePaymentMethod ? 10 : 14,
+      categoryPercentage: isMobilePaymentMethod ? 0.5 : 0.8,
+      barPercentage: isMobilePaymentMethod ? 0.9 : 0.85,
       plugins: {
-        
+        legend: {
+          display: isMobilePaymentMethod ? false : true,
+          position: 'top',
+          labels: {
+            color: 'white',
+            font: { size: 12 },
+            boxWidth: 14
+          }
+        },
         tooltip: {
           enabled: true,
         },
-        // Custom plugin to draw values above the bars
         datalabels: {
           anchor: 'end',
           align: 'right',
           formatter: function (value, context) {
-            return value > 0
-              ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-              : ''; // Hide labels for values <= 0
+            if (value <= 0) return '';
+            if (isMobilePaymentMethod) {
+              return 'R$ ' + (value/1000).toFixed(1) + 'k';
+            }
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
           },
-          color: 'white',  // Color of the text above the bars
+          color: 'white',
           font: {
             weight: 'bold',
-            size: 10
+            size: isMobilePaymentMethod ? 10 : 12
           }
         }
-
       },
       scales: {
         y: {
-          stacked: false,  // Disable stacking for y-axis
-          title: {
-            display: false,
-          },
+          stacked: false,
+          title: { display: false },
+          ticks: {
+            font: { size: isMobilePaymentMethod ? 11 : 13 },
+            color: 'white'
+          }
         },
         x: {
-          stacked: false,  // Disable stacking for x-axis
+          stacked: false,
           display: false,
           beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Total Expenses',
-          },
         },
       },
-
-
     },
     plugins: [ChartDataLabels]
   });
-
-
 </script>

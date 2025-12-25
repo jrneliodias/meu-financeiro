@@ -1,28 +1,28 @@
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-bold">Daily Spending Chart</h2>
-    <div class="flex space-x-2">
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4">
+    <h2 class="text-xl md:text-2xl font-bold">Daily Spending Chart</h2>
+    <div class="grid grid-cols-2 md:flex gap-2">
       <select id="dailyChartPeriod"
-              class="bg-zinc-700 text-white rounded px-3 py-1">
-        <option value="7">Last 7 Days</option>
-        <option value="30" selected>Last 30 Days</option>
-        <option value="60">Last 60 Days</option>
-        <option value="90">Last 90 Days</option>
+              class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
+        <option value="7">7 Days</option>
+        <option value="30" selected>30 Days</option>
+        <option value="60">60 Days</option>
+        <option value="90">90 Days</option>
       </select>
-      <select id="dailyChartType" class="bg-zinc-700 text-white rounded px-3 py-1">
-        <option value="bar">Bar Chart</option>
-        <option value="line" selected>Line Chart</option>
+      <select id="dailyChartType" class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
+        <option value="bar">Bar</option>
+        <option value="line" selected>Line</option>
       </select>
       <select id="dailyChartScale"
-              class="bg-zinc-700 text-white rounded px-3 py-1">
-        <option value="linear" selected>Linear Scale</option>
-        <option value="logarithmic">Log Scale (Better for Outliers)</option>
+              class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
+        <option value="linear" selected>Linear</option>
+        <option value="logarithmic">Log</option>
       </select>
       <select id="outlierHandling"
-              class="bg-zinc-700 text-white rounded px-3 py-1">
-        <option value="show" selected>Show All Data</option>
-        <option value="highlight">Highlight Outliers (>R$ 1,000)</option>
-        <option value="separate">Hide Outliers (>R$ 1,000)</option>
+              class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
+        <option value="show" selected>All Data</option>
+        <option value="highlight">Highlight</option>
+        <option value="separate">Hide Outliers</option>
       </select>
     </div>
   </div>
@@ -33,7 +33,7 @@
     <strong>Debug Information:</strong>
     <div id="debugContent"></div>
   </div>
-  <div class="lg:min-h-[600px] max-h-[600px]  mt-2 p-3 px-0 w-full">
+  <div class="h-[50vh] min-h-[300px] md:h-auto md:min-h-[400px] lg:min-h-[600px] mt-2 p-3 px-0 w-full">
     <canvas id="dailySpendingChart" class="w-full"></canvas>
   </div>
 </div>
