@@ -23,23 +23,43 @@ csv_import_service = CSVImportService()
 @login_required
 def register_expense(request):
     if request.method == 'POST':
+        print(f"[DEBUG] POST data received: {request.POST}")
         form = ExpenseForm(request.POST, user=request.user)
+
         if not form.is_valid():
+            print(f"[DEBUG] Form is INVALID. Errors: {form.errors}")
+            print(f"[DEBUG] Form errors as dict: {form.errors.as_data()}")
+            # Show errors to user
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
             return render(request, 'register/expense_form.html', {'form': form})
 
+        print(f"[DEBUG] Form is VALID. Cleaned data: {form.cleaned_data}")
         expense_data = form.cleaned_data
         user = request.user
 
-        if expense_data['installments'] > 1:
-            installment_service.create_installments(user, expense_data)
-            messages.success(
-                request, f"{expense_data['installments']} installments have been registered.")
-        else:
-            expense = expense_service.create_single_expense(user, expense_data)
-            messages.success(
-                request, f"Expense {expense.__str__()} has been registered.")
+        try:
+            if expense_data['installments'] > 1:
+                print(f"[DEBUG] Creating {expense_data['installments']} installments")
+                installment_service.create_installments(user, expense_data)
+                messages.success(
+                    request, f"{expense_data['installments']} installments have been registered.")
+            else:
+                print(f"[DEBUG] Creating single expense")
+                expense = expense_service.create_single_expense(user, expense_data)
+                print(f"[DEBUG] Expense created with ID: {expense.id}")
+                messages.success(
+                    request, f"Expense {expense.__str__()} has been registered.")
+        except Exception as e:
+            print(f"[DEBUG] ERROR creating expense: {e}")
+            import traceback
+            traceback.print_exc()
+            messages.error(request, f"Error creating expense: {e}")
+            return render(request, 'register/expense_form.html', {'form': form})
 
         # Redirect after successful POST
+        print(f"[DEBUG] Redirecting to register_expense")
         return redirect('register_expense')
 
     else:
