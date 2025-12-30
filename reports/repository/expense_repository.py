@@ -230,6 +230,55 @@ class ExpenseRepository:
             .order_by('-amount', 'description')  # Highest amounts first
         )
 
+    def get_expenses_by_category_and_month(
+        self,
+        target_year: int,
+        target_month_number: int,
+        category_name_filter: str
+    ):
+        """
+        Get all expenses for a specific category and month with related data.
+
+        Single Responsibility: This method only retrieves expense data.
+        It does NOT format, validate, or transform the data.
+
+        Args:
+            target_year: Year to filter expenses (e.g., 2024)
+            target_month_number: Month number (1-12, where 1=January, 12=December)
+            category_name_filter: Category name to filter by (e.g., "Groceries")
+
+        Returns:
+            QuerySet containing expense records with related category and payment method data.
+            Each record includes: id, date, description, amount, category name, payment method name, created_at.
+            Results are ordered chronologically by date, then by amount (highest first) within each day.
+
+        Performance:
+            - Uses select_related() to avoid N+1 queries
+            - Single optimized database query with JOIN operations
+            - Only fetches required fields via values()
+        """
+        expense_queryset_with_relations = (
+            Expense.objects
+            .filter(
+                date__year=target_year,
+                date__month=target_month_number,
+                category__name=category_name_filter
+            )
+            .select_related('category', 'payment_method')  # Eager loading to prevent N+1 queries
+            .values(
+                'id',
+                'date',
+                'description',
+                'amount',
+                'category__name',
+                'payment_method__name',
+                'created_at'
+            )
+            .order_by('date', '-amount')  # Chronological, then highest amounts first
+        )
+
+        return expense_queryset_with_relations
+
     def get_optimized_expenses_by_month_and_category(self, year):
         """
         OPTIMIZED: Single aggregated query to get all expense data by category and month.

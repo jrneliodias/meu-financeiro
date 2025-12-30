@@ -18,6 +18,7 @@ from reports.services.installment_progress_calculator import InstallmentProgress
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from typing import Optional
 expense_repository = ExpenseRepository()
 installment_calculator = InstallmentProgressCalculator()
 income_repository = IncomeRepository()
@@ -483,3 +484,267 @@ def expense_details_ajax(request):
 
     except Exception as e:
         return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+# ================================================================================
+# Helper Classes for Category Expense Details (Following SOLID Principles)
+# ================================================================================
+
+# Helper Class 1: Month Conversion (SRP - Only handles month conversion)
+class MonthConverter:
+    """
+    Converts month names to numbers and vice versa.
+
+    Single Responsibility: Month name/number conversion logic.
+    Open/Closed: Can be extended to support multiple locales without modifying existing code.
+    """
+
+    MONTH_NAME_TO_NUMBER_MAPPING = {
+        'January': 1, 'February': 2, 'March': 3, 'April': 4,
+        'May': 5, 'June': 6, 'July': 7, 'August': 8,
+        'September': 9, 'October': 10, 'November': 11, 'December': 12
+    }
+
+    @classmethod
+    def convert_name_to_number(cls, month_name: str) -> Optional[int]:
+        """
+        Convert English month name to month number.
+
+        Args:
+            month_name: Month name (e.g., "January")
+
+        Returns:
+            Month number (1-12) or None if invalid
+        """
+        return cls.MONTH_NAME_TO_NUMBER_MAPPING.get(month_name)
+
+
+# Helper Class 2: Request Validation (SRP - Only validates request data)
+class CategoryExpenseRequestValidator:
+    """
+    Validates incoming AJAX request parameters for category expense details.
+
+    Single Responsibility: Request parameter validation only.
+    """
+
+    @staticmethod
+    def validate_ajax_request(request) -> Optional[JsonResponse]:
+        """
+        Validate that the request is a valid AJAX request.
+
+        Returns:
+            JsonResponse with error if invalid, None if valid
+        """
+        if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Invalid request - AJAX required'}, status=400)
+        return None
+
+    @staticmethod
+    def validate_required_parameters(
+        request_year: Optional[str],
+        request_month_name: Optional[str],
+        request_category: Optional[str]
+    ) -> Optional[JsonResponse]:
+        """
+        Validate that all required parameters are present.
+
+        Returns:
+            JsonResponse with error if validation fails, None if valid
+        """
+        if not all([request_year, request_month_name, request_category]):
+            missing_params = []
+            if not request_year:
+                missing_params.append('year')
+            if not request_month_name:
+                missing_params.append('month')
+            if not request_category:
+                missing_params.append('category')
+
+            return JsonResponse({
+                'error': f'Missing required parameters: {", ".join(missing_params)}'
+            }, status=400)
+        return None
+
+    @staticmethod
+    def validate_month_name(month_name: str):
+        """
+        Validate month name and convert to number.
+
+        Returns:
+            Tuple of (month_number, error_response)
+            If valid: (month_number, None)
+            If invalid: (None, JsonResponse with error)
+        """
+        month_number = MonthConverter.convert_name_to_number(month_name)
+        if not month_number:
+            return None, JsonResponse({
+                'error': f'Invalid month name: {month_name}. Expected English month name (e.g., "January")'
+            }, status=400)
+        return month_number, None
+
+
+# Helper Class 3: Data Formatting (SRP - Only formats expense data for API response)
+class CategoryExpenseDataFormatter:
+    """
+    Formats expense data for JSON API responses.
+
+    Single Responsibility: Data transformation/formatting only.
+    """
+
+    @staticmethod
+    def format_expense_for_response(expense_record: dict) -> dict:
+        """
+        Format a single expense record for API response.
+
+        Args:
+            expense_record: Raw expense data from database
+
+        Returns:
+            Formatted expense data ready for JSON serialization
+        """
+        return {
+            'id': expense_record['id'],
+            'date': expense_record['date'].isoformat(),
+            'description': expense_record['description'],
+            'amount': float(expense_record['amount']),
+            'category': expense_record['category__name'] or 'Uncategorized',
+            'payment_method': expense_record['payment_method__name'] or 'N/A',
+            'created_at': expense_record['created_at'].strftime('%H:%M')
+        }
+
+    @staticmethod
+    def calculate_total_amount(expense_records: list) -> Decimal:
+        """
+        Calculate total amount from expense records.
+
+        Args:
+            expense_records: List of expense dictionaries
+
+        Returns:
+            Total amount as Decimal
+        """
+        total_expense_amount = Decimal('0.00')
+        for expense_record in expense_records:
+            total_expense_amount += expense_record['amount']
+        return total_expense_amount
+
+    @staticmethod
+    def build_response_payload(
+        request_year: int,
+        request_month_name: str,
+        request_category: str,
+        formatted_expenses: list,
+        total_amount: Decimal,
+        target_month_number: int
+    ) -> dict:
+        """
+        Build the complete API response payload.
+
+        Returns:
+            Dictionary ready for JsonResponse
+        """
+        return {
+            'year': request_year,
+            'month': request_month_name,
+            'category': request_category,
+            'expenses': formatted_expenses,
+            'total_amount': float(total_amount),
+            'count': len(formatted_expenses),
+            'formatted_month': f"{target_month_number:02d}/{request_year}"
+        }
+
+
+@login_required
+def category_expense_details_ajax(request):
+    """
+    AJAX endpoint to get detailed expenses for a specific category and month.
+
+    This view orchestrates the workflow but delegates specific responsibilities
+    to helper classes (following Single Responsibility Principle).
+
+    Query Parameters:
+        year: Year (YYYY format, e.g., "2024")
+        month: Month name (e.g., "January")
+        category: Category name (e.g., "Groceries")
+
+    Returns:
+        JsonResponse with:
+        - expenses: List of expense details
+        - total_amount: Sum of all expenses
+        - count: Number of expenses
+        - formatted_month: MM/YYYY format
+
+    HTTP Status Codes:
+        200: Success
+        400: Bad request (invalid parameters)
+        500: Server error
+    """
+    # Step 1: Validate AJAX request
+    ajax_validation_error = CategoryExpenseRequestValidator.validate_ajax_request(request)
+    if ajax_validation_error:
+        return ajax_validation_error
+
+    try:
+        # Step 2: Extract request parameters with semantic names
+        request_year = request.GET.get('year')
+        request_month_name = request.GET.get('month')
+        request_category = request.GET.get('category')
+
+        # Step 3: Validate required parameters
+        parameter_validation_error = CategoryExpenseRequestValidator.validate_required_parameters(
+            request_year, request_month_name, request_category
+        )
+        if parameter_validation_error:
+            return parameter_validation_error
+
+        # Step 4: Convert and validate month name
+        target_month_number, month_validation_error = CategoryExpenseRequestValidator.validate_month_name(
+            request_month_name
+        )
+        if month_validation_error:
+            return month_validation_error
+
+        # Step 5: Fetch expenses from repository (Dependency Inversion - depend on abstraction)
+        expense_repository = ExpenseRepository()
+        category_expense_records = expense_repository.get_expenses_by_category_and_month(
+            target_year=int(request_year),
+            target_month_number=target_month_number,
+            category_name_filter=request_category
+        )
+
+        # Step 6: Format expenses for response
+        formatted_expense_list = []
+        for expense_record in category_expense_records:
+            formatted_expense = CategoryExpenseDataFormatter.format_expense_for_response(expense_record)
+            formatted_expense_list.append(formatted_expense)
+
+        # Step 7: Calculate total amount
+        total_expense_amount = CategoryExpenseDataFormatter.calculate_total_amount(
+            list(category_expense_records)
+        )
+
+        # Step 8: Build complete response payload
+        response_payload = CategoryExpenseDataFormatter.build_response_payload(
+            request_year=int(request_year),
+            request_month_name=request_month_name,
+            request_category=request_category,
+            formatted_expenses=formatted_expense_list,
+            total_amount=total_expense_amount,
+            target_month_number=target_month_number
+        )
+
+        return JsonResponse(response_payload)
+
+    except ValueError as validation_error:
+        return JsonResponse({
+            'error': f'Invalid data format: {str(validation_error)}'
+        }, status=400)
+    except Exception as unexpected_error:
+        # Log the error for debugging (in production, use proper logging)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'Error fetching category expenses: {unexpected_error}', exc_info=True)
+
+        return JsonResponse({
+            'error': 'An unexpected error occurred while fetching expense details'
+        }, status=500)

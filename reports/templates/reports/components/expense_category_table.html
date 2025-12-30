@@ -52,6 +52,86 @@
     </table>
   </div>
 </div>
+
+<!-- Category Expense Details Modal -->
+<div id="categoryExpenseModal"
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-zinc-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-zinc-700">
+      <h2 class="text-xl font-semibold text-white flex items-center">
+        <i class="fas fa-receipt mr-3 text-blue-400"></i>
+        <span id="categoryModalTitle">Expense Details</span>
+      </h2>
+      <button id="categoryModalCloseBtn"
+              class="text-gray-400 hover:text-white transition-colors duration-200">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]" id="categoryExpenseContent">
+      <!-- Loading state -->
+      <div id="categoryModalLoading" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
+        <p class="text-gray-300">Loading expense details...</p>
+      </div>
+
+      <!-- Error state -->
+      <div id="categoryModalError"
+           class="hidden bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          <span id="categoryModalErrorMessage">Failed to load expense details.</span>
+        </div>
+      </div>
+
+      <!-- Success state -->
+      <div id="categoryModalContent" class="hidden">
+        <!-- Summary section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-zinc-700 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Total Amount</h3>
+            <p class="text-2xl font-bold text-blue-400" id="categoryModalTotalAmount">R$ 0,00</p>
+          </div>
+          <div class="bg-zinc-700 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Number of Expenses</h3>
+            <p class="text-2xl font-bold text-green-400" id="categoryModalExpenseCount">0</p>
+          </div>
+        </div>
+
+        <!-- Expenses list -->
+        <div class="bg-zinc-700 rounded-lg overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-zinc-600">
+                <tr class="text-left">
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Date</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Description</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Payment Method</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="categoryExpensesList" class="divide-y divide-zinc-600">
+                <!-- Expenses will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="flex justify-end p-6 border-t border-zinc-700">
+      <button id="categoryModalCloseFooterBtn"
+              class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+        <i class="fas fa-times mr-2"></i>
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   // JavaScript to handle the mobile view functionality and enhanced statistics heatmap
   document.addEventListener('DOMContentLoaded', function() {
@@ -433,5 +513,393 @@
       
       // Add legend to explain colors
       heatmap.addLegend();
+  });
+
+  // ================================================================================
+  // SOLID Principles Applied in JavaScript
+  // ================================================================================
+
+  // Class 1: API Client (SRP - Only handles API communication)
+  class CategoryExpenseApiClient {
+      /**
+       * Handles all API communication for category expense details.
+       *
+       * Single Responsibility: Only makes HTTP requests, no UI manipulation.
+       * Open/Closed: Can be extended to support other API endpoints without modification.
+       */
+
+      constructor(baseEndpointUrl = '/category-expense-details/') {
+          this.baseEndpointUrl = baseEndpointUrl;
+      }
+
+      async fetchCategoryExpenses(selectedYear, selectedMonthName, selectedCategoryName) {
+          const queryParameters = new URLSearchParams({
+              year: selectedYear,
+              month: selectedMonthName,
+              category: selectedCategoryName
+          });
+
+          const fullEndpointUrl = `${this.baseEndpointUrl}?${queryParameters.toString()}`;
+
+          const apiResponse = await fetch(fullEndpointUrl, {
+              method: 'GET',
+              headers: {
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'Content-Type': 'application/json',
+              }
+          });
+
+          if (!apiResponse.ok) {
+              throw new Error(`HTTP error! status: ${apiResponse.status}`);
+          }
+
+          const categoryExpenseData = await apiResponse.json();
+
+          if (categoryExpenseData.error) {
+              throw new Error(categoryExpenseData.error);
+          }
+
+          return categoryExpenseData;
+      }
+  }
+
+
+  // Class 2: Data Renderer (SRP - Only renders data to DOM)
+  class ExpenseTableRenderer {
+      /**
+       * Renders expense data in table format.
+       *
+       * Single Responsibility: DOM manipulation and rendering only.
+       */
+
+      constructor(tableBodyElementId) {
+          this.tableBodyElement = document.getElementById(tableBodyElementId);
+          this.currencyFormatter = new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: 'BRL'
+          });
+          this.dateFormatter = new Intl.DateTimeFormat('pt-BR');
+      }
+
+      renderExpenseList(expenseDataArray) {
+          this.tableBodyElement.innerHTML = '';
+
+          if (expenseDataArray.length === 0) {
+              this.renderEmptyState();
+              return;
+          }
+
+          expenseDataArray.forEach(expenseItem => {
+              const expenseTableRow = this.createExpenseRow(expenseItem);
+              this.tableBodyElement.appendChild(expenseTableRow);
+          });
+      }
+
+      renderEmptyState() {
+          this.tableBodyElement.innerHTML = `
+              <tr>
+                  <td colspan="4" class="px-4 py-8 text-center text-gray-400">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      No expenses found for this category and month.
+                  </td>
+              </tr>
+          `;
+      }
+
+      createExpenseRow(expenseItem) {
+          const expenseRow = document.createElement('tr');
+          expenseRow.className = 'hover:bg-zinc-600 transition-colors duration-150';
+
+          const formattedExpenseDate = this.dateFormatter.format(
+              new Date(expenseItem.date + 'T00:00:00')
+          );
+          const formattedExpenseAmount = this.currencyFormatter.format(expenseItem.amount);
+          const sanitizedDescription = this.sanitizeHtmlContent(expenseItem.description);
+          const sanitizedPaymentMethod = this.sanitizeHtmlContent(expenseItem.payment_method);
+
+          expenseRow.innerHTML = `
+              <td class="px-4 py-3 text-gray-300 text-sm">${formattedExpenseDate}</td>
+              <td class="px-4 py-3">
+                  <div class="font-medium text-white">${sanitizedDescription}</div>
+              </td>
+              <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-blue-100">
+                      ${sanitizedPaymentMethod}
+                  </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                  <span class="font-semibold text-green-400">
+                      ${formattedExpenseAmount}
+                  </span>
+              </td>
+          `;
+
+          return expenseRow;
+      }
+
+      sanitizeHtmlContent(userInputText) {
+          const temporaryDiv = document.createElement('div');
+          temporaryDiv.textContent = userInputText;
+          return temporaryDiv.innerHTML;
+      }
+  }
+
+
+  // Class 3: Modal State Manager (SRP - Only manages modal visibility and state)
+  class ModalStateManager {
+      /**
+       * Manages modal display states (loading, error, content).
+       *
+       * Single Responsibility: UI state management only.
+       */
+
+      constructor(modalElementId) {
+          this.modalElement = document.getElementById(modalElementId);
+          this.loadingStateElement = document.getElementById('categoryModalLoading');
+          this.errorStateElement = document.getElementById('categoryModalError');
+          this.contentStateElement = document.getElementById('categoryModalContent');
+          this.errorMessageElement = document.getElementById('categoryModalErrorMessage');
+          this.modalTitleElement = document.getElementById('categoryModalTitle');
+          this.totalAmountElement = document.getElementById('categoryModalTotalAmount');
+          this.expenseCountElement = document.getElementById('categoryModalExpenseCount');
+
+          this.currencyFormatter = new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: 'BRL'
+          });
+      }
+
+      openModal() {
+          this.modalElement.classList.remove('hidden');
+      }
+
+      closeModal() {
+          this.modalElement.classList.add('hidden');
+      }
+
+      setModalTitle(categoryName, monthName, yearValue) {
+          this.modalTitleElement.textContent = `${categoryName} - ${monthName} ${yearValue}`;
+      }
+
+      showLoadingState() {
+          this.loadingStateElement.classList.remove('hidden');
+          this.errorStateElement.classList.add('hidden');
+          this.contentStateElement.classList.add('hidden');
+      }
+
+      showErrorState(errorMessage) {
+          this.loadingStateElement.classList.add('hidden');
+          this.contentStateElement.classList.add('hidden');
+          this.errorStateElement.classList.remove('hidden');
+          this.errorMessageElement.textContent = errorMessage;
+      }
+
+      showContentState(totalAmount, expenseCount) {
+          this.loadingStateElement.classList.add('hidden');
+          this.errorStateElement.classList.add('hidden');
+          this.contentStateElement.classList.remove('hidden');
+
+          this.totalAmountElement.textContent = this.currencyFormatter.format(totalAmount);
+          this.expenseCountElement.textContent = expenseCount;
+      }
+  }
+
+
+  // Class 4: Main Modal Controller (Coordinates all components)
+  class CategoryExpenseModal {
+      /**
+       * Main controller that coordinates API client, renderer, and state manager.
+       *
+       * Single Responsibility: Orchestration of components.
+       * Dependency Inversion: Depends on abstractions (injected dependencies).
+       */
+
+      constructor(apiClient, stateManager, tableRenderer) {
+          this.apiClient = apiClient;
+          this.stateManager = stateManager;
+          this.tableRenderer = tableRenderer;
+          this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+          const closeButtonElement = document.getElementById('categoryModalCloseBtn');
+          const closeFooterButtonElement = document.getElementById('categoryModalCloseFooterBtn');
+
+          closeButtonElement?.addEventListener('click', () => this.close());
+          closeFooterButtonElement?.addEventListener('click', () => this.close());
+
+          this.stateManager.modalElement?.addEventListener('click', (clickEvent) => {
+              if (clickEvent.target === this.stateManager.modalElement) {
+                  this.close();
+              }
+          });
+
+          document.addEventListener('keydown', (keyboardEvent) => {
+              if (keyboardEvent.key === 'Escape' &&
+                  !this.stateManager.modalElement.classList.contains('hidden')) {
+                  this.close();
+              }
+          });
+      }
+
+      async open(selectedYear, selectedMonthName, selectedCategoryName) {
+          this.stateManager.setModalTitle(selectedCategoryName, selectedMonthName, selectedYear);
+          this.stateManager.openModal();
+          this.stateManager.showLoadingState();
+
+          try {
+              const categoryExpenseData = await this.apiClient.fetchCategoryExpenses(
+                  selectedYear,
+                  selectedMonthName,
+                  selectedCategoryName
+              );
+
+              this.displayExpenseData(categoryExpenseData);
+          } catch (fetchError) {
+              console.error('Error fetching category expenses:', fetchError);
+              this.stateManager.showErrorState(
+                  fetchError.message || 'Failed to load expense details'
+              );
+          }
+      }
+
+      displayExpenseData(categoryExpenseData) {
+          this.stateManager.showContentState(
+              categoryExpenseData.total_amount,
+              categoryExpenseData.count
+          );
+          this.tableRenderer.renderExpenseList(categoryExpenseData.expenses);
+      }
+
+      close() {
+          this.stateManager.closeModal();
+      }
+  }
+
+
+  // Class 5: Click Handler (SRP - Only handles user click interactions)
+  class CategoryTableClickHandler {
+      /**
+       * Handles click events on category table cells.
+       *
+       * Single Responsibility: Event handling and delegation only.
+       */
+
+      constructor(expenseModal, selectedYear, monthNamesArray) {
+          this.expenseModal = expenseModal;
+          this.selectedYear = selectedYear;
+          this.monthNamesArray = monthNamesArray;
+      }
+
+      attachDesktopTableClickHandlers() {
+          const desktopTableRows = document.querySelectorAll('table.hidden.md\\:table tbody tr');
+
+          desktopTableRows.forEach(categoryRow => {
+              const categoryNameCell = categoryRow.querySelector('td:first-child');
+              if (!categoryNameCell) return;
+
+              const categoryName = categoryNameCell.textContent.trim();
+              if (categoryName === 'Total') return; // Skip total row
+
+              const monthlyCells = categoryRow.querySelectorAll('td:not(:first-child)');
+              monthlyCells.forEach((monthlyAmountCell, monthIndex) => {
+                  this.makeClickableIfHasValue(
+                      monthlyAmountCell,
+                      categoryName,
+                      this.monthNamesArray[monthIndex]
+                  );
+              });
+          });
+      }
+
+      attachMobileTableClickHandlers() {
+          const mobileTableRows = document.querySelectorAll('#mobileCategoryTableBody tr');
+          const monthSelectorElement = document.getElementById('monthSelector');
+          const selectedMonthIndex = parseInt(monthSelectorElement?.value || 0);
+          const currentMonthName = this.monthNamesArray[selectedMonthIndex];
+
+          mobileTableRows.forEach(categoryRow => {
+              const categoryNameCell = categoryRow.querySelector('td:first-child');
+              const monthlyAmountCell = categoryRow.querySelector('td:last-child');
+
+              if (!categoryNameCell || !monthlyAmountCell) return;
+
+              const categoryName = categoryNameCell.textContent.trim();
+              if (categoryName === 'Total') return;
+
+              // Clone cell to remove old event listeners
+              const freshAmountCell = monthlyAmountCell.cloneNode(true);
+              monthlyAmountCell.parentNode.replaceChild(freshAmountCell, monthlyAmountCell);
+
+              this.makeClickableIfHasValue(freshAmountCell, categoryName, currentMonthName);
+          });
+      }
+
+      makeClickableIfHasValue(tableCellElement, categoryName, monthName) {
+          const cellDisplayValue = tableCellElement.textContent.trim();
+          const ZERO_VALUE_DISPLAY = 'R$ 0,00';
+
+          if (cellDisplayValue && cellDisplayValue !== ZERO_VALUE_DISPLAY) {
+              tableCellElement.style.cursor = 'pointer';
+              tableCellElement.classList.add(
+                  'hover:bg-zinc-700',
+                  'transition-colors',
+                  'duration-200'
+              );
+              tableCellElement.title = 'Click to view expense details';
+
+              tableCellElement.addEventListener('click', () => {
+                  this.expenseModal.open(this.selectedYear, monthName, categoryName);
+              });
+          }
+      }
+
+      initializeMobileHandlers() {
+          const MOBILE_BREAKPOINT_WIDTH = 768;
+          const DEBOUNCE_DELAY_MS = 100;
+
+          if (window.innerWidth < MOBILE_BREAKPOINT_WIDTH) {
+              setTimeout(() => this.attachMobileTableClickHandlers(), DEBOUNCE_DELAY_MS);
+
+              const monthSelectorElement = document.getElementById('monthSelector');
+              monthSelectorElement?.addEventListener('change', () => {
+                  setTimeout(() => this.attachMobileTableClickHandlers(), DEBOUNCE_DELAY_MS);
+              });
+          }
+      }
+  }
+
+
+  // ================================================================================
+  // Initialization - Dependency Injection (following Dependency Inversion Principle)
+  // ================================================================================
+
+  // Wait for DOM to be fully loaded before initializing
+  document.addEventListener('DOMContentLoaded', () => {
+      // Create instances with explicit dependencies
+      const categoryExpenseApiClient = new CategoryExpenseApiClient();
+      const modalStateManager = new ModalStateManager('categoryExpenseModal');
+      const expenseTableRenderer = new ExpenseTableRenderer('categoryExpensesList');
+
+      // Inject dependencies into main modal controller
+      const categoryExpenseModal = new CategoryExpenseModal(
+          categoryExpenseApiClient,
+          modalStateManager,
+          expenseTableRenderer
+      );
+
+      // Initialize click handler with dependencies
+      const currentSelectedYear = {{ selected_year|default:2024 }};
+      const monthNamesArray = [{% for month in all_months %}"{{ month }}",{% endfor %}];
+
+      const categoryTableClickHandler = new CategoryTableClickHandler(
+          categoryExpenseModal,
+          currentSelectedYear,
+          monthNamesArray
+      );
+
+      // Attach event handlers
+      categoryTableClickHandler.attachDesktopTableClickHandlers();
+      categoryTableClickHandler.initializeMobileHandlers();
   });
 </script>
