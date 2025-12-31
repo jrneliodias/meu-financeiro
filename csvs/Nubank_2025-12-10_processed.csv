@@ -1,4 +1,4 @@
-date,title,amount,category, payment_method
+date,description,amount,category, payment_method
 2025-12-01,Uber Uber *Trip Help.U,7.94,Uber, Crédito - Nubank
 2025-12-01,Maioca Joao Paulo Ii,14.4,Lanche, Crédito - Nubank
 2025-12-01,Lave & Pegue Lavanderi,17.0,Lavanderia, Crédito - Nubank
@@ -33,7 +33,6 @@ date,title,amount,category, payment_method
 2025-11-23,Dl*99 Ride,3.0,Uber, Crédito - Nubank
 2025-11-22,Uber* Trip,7.94,Uber, Crédito - Nubank
 2025-11-22,Uber* Trip,11.94,Uber, Crédito - Nubank
-2025-11-21,Dl*Google Crunch,19.99,Software, Crédito - Nubank
 2025-11-20,Uber Uber *Trip Help.U,13.94,Uber, Crédito - Nubank
 2025-11-20,Mrfox,75.0,Outros, Crédito - Nubank
 2025-11-20,Uber* Trip,14.93,Uber, Crédito - Nubank
