@@ -139,3 +139,7 @@ GitHub.sublime-settings
 .history
 
 debug_logs/
+
+# CSV data files (processed transactions)
+csvs/*_processed.csv
+csvs/*_processed_processed.csv
