@@ -143,3 +143,10 @@ debug_logs/
 # CSV data files (processed transactions)
 csvs/*_processed.csv
 csvs/*_processed_processed.csv
+
+# Backup files
+backups/
+*.dump
+*.sql
+backup_*.json
+backup_*.json.gz
