@@ -131,9 +131,9 @@
 
             <!-- Submit Button -->
             <div class="flex justify-end pt-4">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-upload mr-2"></i>
-                    Import CSV
+                <button type="submit" id="importCsvBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-upload mr-2" id="importIcon"></i>
+                    <span id="importText">Import CSV</span>
                 </button>
             </div>
         </form>
@@ -190,6 +190,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const textInputSection = document.getElementById('textInputSection');
     const fileInput = document.querySelector('input[type="file"]');
     const textInput = document.querySelector('textarea[name="csv_text"]');
+    const importForm = document.querySelector('form');
+    const importButton = document.getElementById('importCsvBtn');
+    const importIcon = document.getElementById('importIcon');
+    const importText = document.getElementById('importText');
 
     // Toggle functionality
     fileToggle.addEventListener('click', function() {
@@ -253,6 +257,32 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileUploadSection && textInputSection) {
         fileUploadSection.style.display = 'block';
         textInputSection.style.display = 'none';
+    }
+
+    // Add loading state to import form
+    if (importForm && importButton) {
+        importForm.addEventListener('submit', function(e) {
+            // Validate that either file or text is provided
+            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            const hasText = textInput && textInput.value.trim() !== '';
+
+            if (!hasFile && !hasText) {
+                alert('Please select a CSV file or paste CSV text before importing.');
+                e.preventDefault();
+                return;
+            }
+
+            // Disable button and show loading state
+            importButton.disabled = true;
+            importButton.classList.remove('hover:bg-blue-700');
+            importButton.classList.add('opacity-75', 'cursor-not-allowed');
+
+            // Change icon to spinner
+            importIcon.className = 'fas fa-spinner fa-spin mr-2';
+
+            // Update text
+            importText.textContent = 'Processing...';
+        });
     }
 });
 </script>

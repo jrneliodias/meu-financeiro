@@ -15,3 +15,14 @@ def format_brl(value):
         return formatted_value
     except (ValueError, TypeError):
         return "R$ 0,00"  # Return a default value if formatting fails
+
+
+@register.filter
+def get_item(dictionary, key):
+    """
+    Gets an item from a dictionary using the key.
+    Usage: {{ my_dict|get_item:my_key }}
+    """
+    if dictionary is None:
+        return None
+    return dictionary.get(key)

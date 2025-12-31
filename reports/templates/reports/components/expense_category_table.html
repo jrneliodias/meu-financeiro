@@ -110,6 +110,7 @@
                   <th class="px-4 py-3 text-sm font-medium text-gray-300">Description</th>
                   <th class="px-4 py-3 text-sm font-medium text-gray-300">Payment Method</th>
                   <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">Amount</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody id="categoryExpensesList" class="divide-y divide-zinc-600">
@@ -593,12 +594,100 @@
               const expenseTableRow = this.createExpenseRow(expenseItem);
               this.tableBodyElement.appendChild(expenseTableRow);
           });
+
+          // Attach delete button event listeners
+          this.attachDeleteButtonListeners();
+      }
+
+      attachDeleteButtonListeners() {
+          const deleteButtons = this.tableBodyElement.querySelectorAll('.delete-expense-btn');
+
+          deleteButtons.forEach(button => {
+              button.addEventListener('click', async (event) => {
+                  event.stopPropagation();
+                  const expenseId = button.getAttribute('data-expense-id');
+                  const expenseDescription = button.getAttribute('data-expense-description');
+
+                  if (confirm(`Are you sure you want to delete "${expenseDescription}"?`)) {
+                      await this.deleteExpense(expenseId, button);
+                  }
+              });
+          });
+      }
+
+      async deleteExpense(expenseId, buttonElement) {
+          const row = buttonElement.closest('tr');
+
+          try {
+              // Disable button during deletion
+              buttonElement.disabled = true;
+              buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+              const response = await fetch(`/register/expense/${expenseId}/delete/`, {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': this.getCsrfToken(),
+                      'Content-Type': 'application/json',
+                  }
+              });
+
+              const data = await response.json();
+
+              if (data.success) {
+                  // Remove row with animation
+                  row.style.opacity = '0';
+                  row.style.transition = 'opacity 0.3s ease-out';
+
+                  setTimeout(() => {
+                      row.remove();
+
+                      // Update expense count
+                      const countElement = document.getElementById('categoryModalExpenseCount');
+                      const currentCount = parseInt(countElement.textContent);
+                      countElement.textContent = currentCount - 1;
+
+                      // Check if table is now empty
+                      const remainingRows = this.tableBodyElement.querySelectorAll('tr').length;
+                      if (remainingRows === 0) {
+                          this.renderEmptyState();
+                      }
+                  }, 300);
+
+                  // Show success message (you can replace with toast notification)
+                  console.log(data.message);
+              } else {
+                  alert(data.error || 'Failed to delete expense');
+                  buttonElement.disabled = false;
+                  buttonElement.innerHTML = '<i class="fas fa-trash-alt"></i>';
+              }
+          } catch (error) {
+              console.error('Error deleting expense:', error);
+              alert('An error occurred while deleting the expense');
+              buttonElement.disabled = false;
+              buttonElement.innerHTML = '<i class="fas fa-trash-alt"></i>';
+          }
+      }
+
+      getCsrfToken() {
+          const cookieName = 'csrftoken';
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+              const cookies = document.cookie.split(';');
+              for (let i = 0; i < cookies.length; i++) {
+                  const cookie = cookies[i].trim();
+                  if (cookie.substring(0, cookieName.length + 1) === (cookieName + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(cookieName.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
       }
 
       renderEmptyState() {
           this.tableBodyElement.innerHTML = `
               <tr>
-                  <td colspan="4" class="px-4 py-8 text-center text-gray-400">
+                  <td colspan="5" class="px-4 py-8 text-center text-gray-400">
                       <i class="fas fa-info-circle mr-2"></i>
                       No expenses found for this category and month.
                   </td>
@@ -609,6 +698,7 @@
       createExpenseRow(expenseItem) {
           const expenseRow = document.createElement('tr');
           expenseRow.className = 'hover:bg-zinc-600 transition-colors duration-150';
+          expenseRow.setAttribute('data-expense-id', expenseItem.id);
 
           const formattedExpenseDate = this.dateFormatter.format(
               new Date(expenseItem.date + 'T00:00:00')
@@ -631,6 +721,14 @@
                   <span class="font-semibold text-green-400">
                       ${formattedExpenseAmount}
                   </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                  <button class="delete-expense-btn text-red-400 hover:text-red-300 transition-colors duration-200"
+                          data-expense-id="${expenseItem.id}"
+                          data-expense-description="${sanitizedDescription}"
+                          title="Delete expense">
+                      <i class="fas fa-trash-alt"></i>
+                  </button>
               </td>
           `;
 
