@@ -1,0 +1,146 @@
+{% extends "core/base.html" %}
+{% load currency_filters %}
+{% load static %}
+
+{% block content %}
+<div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Recurring Expenses</h2>
+        <a href="{% url 'register_recurring_expense' %}"
+           class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>Add New
+        </a>
+    </div>
+
+    <!-- Desktop Table (hidden on mobile) -->
+    <div class="hidden md:block">
+        <table border="1" class="w-full p-2">
+            <thead class="border-b border-zinc-700">
+                <tr>
+                    <th class="text-start p-2">Description</th>
+                    <th class="text-start p-2">Amount</th>
+                    <th class="text-start p-2">Start Date</th>
+                    <th class="text-start p-2">Category</th>
+                    <th class="text-start p-2">Payment Method</th>
+                    <th class="text-center p-2">Active</th>
+                    <th class="text-center p-2">Generated</th>
+                    <th class="text-end p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recurring_expense in recurring_expenses %}
+                <tr class="*:p-2 border-b border-zinc-700">
+                    <td>{{ recurring_expense.description }}</td>
+                    <td>{{ recurring_expense.total_amount|format_brl }}</td>
+                    <td>{{ recurring_expense.start_date }}</td>
+                    <td>{{ recurring_expense.category.name|default:"N/A" }}</td>
+                    <td>{{ recurring_expense.payment_method.name|default:"N/A" }}</td>
+                    <td class="text-center">
+                        <button class="toggle-btn cursor-pointer"
+                                data-id="{{ recurring_expense.id }}"
+                                data-active="{{ recurring_expense.generate_debit }}">
+                            <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }} text-2xl
+                                      {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <button class="view-expenses-btn text-blue-400 hover:text-blue-300 cursor-pointer"
+                                data-id="{{ recurring_expense.id }}">
+                            <i class="fas fa-list mr-1"></i>
+                            {{ recurring_expense.expense_count|default:0 }} expenses
+                        </button>
+                    </td>
+                    <td class="text-end space-x-2">
+                        <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
+                           class="text-blue-600 hover:text-blue-800">
+                            <i class="fa-solid fa-edit"></i>
+                        </a>
+                        <button class="delete-btn text-red-600 hover:text-red-800 cursor-pointer"
+                                data-id="{{ recurring_expense.id }}"
+                                data-description="{{ recurring_expense.description }}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center p-4">
+                        No recurring expenses found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Cards (visible on mobile) -->
+    <div class="md:hidden grid grid-cols-1 gap-4">
+        {% if recurring_expenses %}
+            {% for recurring_expense in recurring_expenses %}
+            <div class="bg-zinc-700/30 rounded-lg p-4 grid grid-cols-1 gap-3 relative">
+                <!-- Header -->
+                <div class="grid grid-cols-[1fr_auto] items-start gap-2">
+                    <h3 class="font-bold text-lg">{{ recurring_expense.description }}</h3>
+                    <span class="font-bold text-lg">{{ recurring_expense.total_amount|format_brl }}</span>
+                </div>
+
+                <!-- Details -->
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm border-t border-zinc-600 pt-3">
+                    <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                        <span class="text-gray-400">Date:</span>
+                        <span>{{ recurring_expense.start_date }}</span>
+                    </div>
+                    <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                        <span class="text-gray-400">Category:</span>
+                        <span>{{ recurring_expense.category.name|default:"N/A" }}</span>
+                    </div>
+                    <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                        <span class="text-gray-400">Payment:</span>
+                        <span>{{ recurring_expense.payment_method.name|default:"N/A" }}</span>
+                    </div>
+                    <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                        <span class="text-gray-400">Active:</span>
+                        <button class="toggle-btn cursor-pointer"
+                                data-id="{{ recurring_expense.id }}"
+                                data-active="{{ recurring_expense.generate_debit }}">
+                            <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }}
+                                      {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-between items-center border-t border-zinc-600 pt-3">
+                    <button class="view-expenses-btn text-blue-400 hover:text-blue-300"
+                            data-id="{{ recurring_expense.id }}">
+                        <i class="fas fa-list mr-1"></i>
+                        {{ recurring_expense.expense_count|default:0 }} expenses
+                    </button>
+                    <div class="space-x-3">
+                        <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
+                           class="text-blue-400 hover:text-blue-300">
+                            <i class="fa-solid fa-edit"></i>
+                        </a>
+                        <button class="delete-btn text-red-400 hover:text-red-300 cursor-pointer"
+                                data-id="{{ recurring_expense.id }}"
+                                data-description="{{ recurring_expense.description }}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center p-6 bg-zinc-700/30 rounded-lg">
+                No recurring expenses found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Incluir Modal -->
+{% include "reports/components/recurring_expense_modal.html" %}
+
+<!-- Incluir JavaScript -->
+<script src="{% static 'js/recurring_expense_list.js' %}"></script>
+{% endblock content %}

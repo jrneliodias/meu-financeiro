@@ -1,16 +1,19 @@
 from django.shortcuts import render, redirect
-from .forms import ExpenseForm, IncomeForm, CSVImportForm
+from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm
 from .services import ExpenseService, InstallmentService, IncomeService, CSVImportService
+from .services.csv_processor_service import CSVProcessorService
+from reports.services.recurring_expense_service import RecurringExpenseService
 from django.contrib import messages
 from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .models import Expense
 import json
 import pandas as pd
+import io
 
 # Create your views here.
 
@@ -286,3 +289,223 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
         if quick_fill:
             form.apply_quick_fill(quick_fill)
         return form
+
+
+@login_required
+def register_recurring_expense(request):
+    """Create new recurring expense"""
+    if request.method == 'POST':
+        form = RecurringExpenseForm(request.POST, user=request.user)
+
+        if not form.is_valid():
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return render(request, 'register/recurring_expense_form.html', {'form': form})
+
+        recurring_expense_data = form.cleaned_data
+        user = request.user
+
+        try:
+            recurring_expense_service = RecurringExpenseService()
+            recurring_expense = recurring_expense_service.create_recurring_expense(
+                user, recurring_expense_data
+            )
+            messages.success(
+                request,
+                f"Recurring expense '{recurring_expense.description}' registered successfully."
+            )
+            return redirect('recurring_expense_list')
+        except Exception as e:
+            messages.error(request, f"Error creating recurring expense: {e}")
+            return render(request, 'register/recurring_expense_form.html', {'form': form})
+    else:
+        form = RecurringExpenseForm(user=request.user)
+
+    return render(request, 'register/recurring_expense_form.html', {'form': form})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_expense(request, pk):
+    """Delete an individual expense via AJAX"""
+    try:
+        expense = Expense.objects.get(pk=pk)
+
+        # Verify if user owns the expense
+        if expense.user != request.user:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+        description = expense.description
+        expense.delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Expense '{description}' deleted successfully."
+        })
+    except Expense.DoesNotExist:
+        return JsonResponse({'error': 'Expense not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def csv_processor(request):
+    """CSV Processor - Transform Nubank CSV to standardized format (no database writes)"""
+    csv_processor_service = CSVProcessorService()
+
+    if request.method == 'POST':
+        form = CSVProcessorForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+            csv_text = form.cleaned_data['csv_text']
+            separator = form.cleaned_data['separator']
+            auto_detect = form.cleaned_data['auto_detect']
+
+            # Parse CSV data - either from file or text input
+            if csv_file:
+                df, errors = csv_processor_service.parse_csv_file(csv_file, separator)
+            else:
+                df, errors = csv_processor_service.parse_csv_from_string(csv_text, separator)
+
+            if df is None:
+                for error in errors:
+                    messages.error(request, error)
+                return render(request, 'register/csv_processor.html', {'form': form})
+
+            # Determine column mapping
+            column_mapping = None
+            if auto_detect:
+                column_mapping = csv_processor_service.detect_format(df)
+                if column_mapping is None:
+                    messages.error(
+                        request,
+                        f"Could not auto-detect Nubank format. Available columns: {', '.join(df.columns.tolist())}"
+                    )
+                    return render(request, 'register/csv_processor.html', {'form': form})
+            else:
+                # Use manual mapping
+                column_mapping = {
+                    'date': form.cleaned_data['date_column'],
+                    'amount': form.cleaned_data['amount_column'],
+                    'description': form.cleaned_data['description_column']
+                }
+
+            # Process CSV through transformations
+            processed_df, warnings = csv_processor_service.process_csv(df, column_mapping)
+
+            if processed_df is None or processed_df.empty:
+                messages.error(request, "Processing failed. No data to display.")
+                for warning in warnings:
+                    messages.warning(request, warning)
+                return render(request, 'register/csv_processor.html', {'form': form})
+
+            # Show warnings if any
+            for warning in warnings:
+                messages.warning(request, warning)
+
+            # Convert to CSV string for download
+            csv_string = csv_processor_service.dataframe_to_csv_string(processed_df)
+
+            # Convert DataFrame to list of dicts for template
+            processed_data = processed_df.to_dict('records')
+
+            # Store in session for download and updates
+            request.session['processed_csv_data'] = {
+                'data': processed_data,
+                'csv_string': csv_string,
+                'columns': list(processed_df.columns),
+                'row_count': len(processed_df),
+                'stats': {
+                    'total_rows': len(processed_df),
+                    'warnings': warnings
+                }
+            }
+
+            return render(request, 'register/csv_processor_preview.html', {
+                'processed_data': processed_data,
+                'row_count': len(processed_df),
+                'columns': list(processed_df.columns),
+                'stats': {
+                    'total_rows': len(processed_df),
+                    'warnings': warnings
+                }
+            })
+        else:
+            # Show form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+    else:
+        form = CSVProcessorForm()
+
+    return render(request, 'register/csv_processor.html', {'form': form})
+
+
+@login_required
+def csv_processor_download(request):
+    """Download processed CSV file"""
+    # Get csv_string from session
+    processed_data = request.session.get('processed_csv_data')
+
+    if not processed_data:
+        messages.error(request, "No processed data found. Please upload and process a file first.")
+        return redirect('csv_processor')
+
+    csv_string = processed_data['csv_string']
+
+    # Create HTTP response with CSV content
+    response = HttpResponse(csv_string, content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="processed_nubank.csv"'
+    response['Cache-Control'] = 'no-cache'
+
+    return response
+
+
+@login_required
+@require_http_methods(["POST"])
+def csv_processor_update_data(request):
+    """AJAX endpoint to update processed CSV data after table edits"""
+    try:
+        data = json.loads(request.body)
+        rows = data.get('rows', [])
+
+        if not rows:
+            return JsonResponse({
+                'success': False,
+                'error': 'No row data provided'
+            }, status=400)
+
+        # Update session data
+        processed_data = request.session.get('processed_csv_data', {})
+
+        # Update the data
+        processed_data['data'] = rows
+
+        # Regenerate CSV string from updated rows
+        csv_processor_service = CSVProcessorService()
+        df = pd.DataFrame(rows)
+        csv_string = csv_processor_service.dataframe_to_csv_string(df)
+        processed_data['csv_string'] = csv_string
+
+        # Save back to session
+        request.session['processed_csv_data'] = processed_data
+        request.session.modified = True
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Data updated successfully',
+            'row_count': len(rows)
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

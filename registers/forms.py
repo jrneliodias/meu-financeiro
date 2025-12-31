@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense, Income, Category
+from .models import Expense, Income, Category, RecurringExpense, PaymentMethod
 from .components.expense_form.expense_form_component import ExpenseFormComponent
 from .components.expense_form.quick_fill_menu import QuickFillMenu
 
@@ -45,6 +45,30 @@ class IncomeForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
         }
+
+
+class RecurringExpenseForm(forms.ModelForm):
+    """Form for recurring expenses with user dependency injection"""
+
+    class Meta:
+        model = RecurringExpense
+        fields = ['description', 'total_amount', 'start_date',
+                  'category', 'payment_method', 'generate_debit']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # Filter only expense type categories
+        self.fields['category'].queryset = Category.objects.filter(
+            type='expense'
+        ).order_by('name')
+
+        # Order payment methods
+        self.fields['payment_method'].queryset = PaymentMethod.objects.order_by('name')
 
 
 class CSVImportForm(forms.Form):
@@ -163,11 +187,159 @@ class CSVImportForm(forms.Form):
         cleaned_data = super().clean()
         csv_file = cleaned_data.get('csv_file')
         csv_text = cleaned_data.get('csv_text')
-        
+
         if not csv_file and not csv_text:
             raise forms.ValidationError('Please provide either a CSV file or CSV text.')
-        
+
         if csv_file and csv_text:
             raise forms.ValidationError('Please provide either a CSV file OR CSV text, not both.')
-        
+
+        return cleaned_data
+
+
+class CSVProcessorForm(forms.Form):
+    """Form for CSV processing and transformation (no database writes)"""
+
+    csv_file = forms.FileField(
+        label='CSV File',
+        required=False,
+        help_text='Select a CSV file to process. Supported formats: .csv',
+        widget=forms.FileInput(attrs={
+            'class': 'block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400',
+            'accept': '.csv'
+        })
+    )
+
+    csv_text = forms.CharField(
+        label='CSV Text',
+        required=False,
+        help_text='Paste your CSV data directly here. Use this as an alternative to file upload.',
+        widget=forms.Textarea(attrs={
+            'class': 'block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 font-mono p-3',
+            'rows': 10,
+            'placeholder': 'Data,Valor,Descrição\n02/11/2024,8.96,Uber - Trip\n02/11/2024,50.00,Supermercado - Compras'
+        })
+    )
+
+    separator = forms.ChoiceField(
+        label='CSV Separator',
+        choices=[
+            (',', 'Comma (,)'),
+            (';', 'Semicolon (;)'),
+            ('\t', 'Tab'),
+            ('|', 'Pipe (|)'),
+        ],
+        initial=',',
+        help_text='Select the character used to separate columns in your CSV file',
+        widget=forms.Select(attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+        })
+    )
+
+    auto_detect = forms.BooleanField(
+        label='Auto-detect Nubank Format',
+        initial=True,
+        required=False,
+        help_text='Automatically detect Nubank CSV columns (Data, Valor, Descrição)',
+        widget=forms.CheckboxInput(attrs={
+            'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600',
+            'id': 'id_auto_detect'
+        })
+    )
+
+    # Manual column mapping fields (shown when auto_detect is False)
+    date_column = forms.CharField(
+        label='Date Column Name',
+        required=False,
+        help_text='Name of the column containing dates (e.g., "Data")',
+        widget=forms.TextInput(attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+            'placeholder': 'Data'
+        })
+    )
+
+    amount_column = forms.CharField(
+        label='Amount Column Name',
+        required=False,
+        help_text='Name of the column containing amounts (e.g., "Valor")',
+        widget=forms.TextInput(attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+            'placeholder': 'Valor'
+        })
+    )
+
+    description_column = forms.CharField(
+        label='Description Column Name',
+        required=False,
+        help_text='Name of the column containing descriptions (e.g., "Descrição")',
+        widget=forms.TextInput(attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+            'placeholder': 'Descrição'
+        })
+    )
+
+    def clean_csv_file(self):
+        """Validate the uploaded CSV file"""
+        csv_file = self.cleaned_data.get('csv_file')
+
+        if csv_file:
+            # Check file extension
+            if not csv_file.name.endswith('.csv'):
+                raise forms.ValidationError('Please upload a valid CSV file.')
+
+            # Check file size (limit to 10MB)
+            if csv_file.size > 10 * 1024 * 1024:  # 10MB
+                raise forms.ValidationError('File size must be less than 10MB.')
+
+        return csv_file
+
+    def clean_csv_text(self):
+        """Validate the CSV text input"""
+        csv_text = self.cleaned_data.get('csv_text')
+
+        if csv_text:
+            # Basic validation - check if it has at least one line
+            lines = csv_text.strip().split('\n')
+            if len(lines) < 2:  # At least header + one data row
+                raise forms.ValidationError('CSV text must contain at least 2 lines (header and data).')
+
+            # Check if it looks like CSV (has separators)
+            first_line = lines[0]
+            if ',' not in first_line and ';' not in first_line and '\t' not in first_line:
+                raise forms.ValidationError('CSV text does not appear to contain valid separators.')
+
+        return csv_text
+
+    def clean(self):
+        """Validate form data"""
+        cleaned_data = super().clean()
+        csv_file = cleaned_data.get('csv_file')
+        csv_text = cleaned_data.get('csv_text')
+        auto_detect = cleaned_data.get('auto_detect')
+        date_column = cleaned_data.get('date_column')
+        amount_column = cleaned_data.get('amount_column')
+        description_column = cleaned_data.get('description_column')
+
+        # Validate that either file or text is provided, but not both
+        if not csv_file and not csv_text:
+            raise forms.ValidationError('Please provide either a CSV file or CSV text.')
+
+        if csv_file and csv_text:
+            raise forms.ValidationError('Please provide either a CSV file OR CSV text, not both.')
+
+        # If auto_detect is disabled, require manual column mapping
+        if not auto_detect:
+            missing_fields = []
+            if not date_column:
+                missing_fields.append('Date Column')
+            if not amount_column:
+                missing_fields.append('Amount Column')
+            if not description_column:
+                missing_fields.append('Description Column')
+
+            if missing_fields:
+                raise forms.ValidationError(
+                    f"When auto-detect is disabled, you must specify: {', '.join(missing_fields)}"
+                )
+
         return cleaned_data

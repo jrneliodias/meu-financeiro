@@ -80,3 +80,89 @@ class RecurringExpenseService:
         formatted_value = "R$ {:,.2f}".format(float(value)).replace(
             ",", "X").replace(".", ",").replace("X", ".")
         return formatted_value
+
+    def create_recurring_expense(self, user, recurring_expense_data):
+        """
+        Cria uma nova despesa fixa.
+
+        Args:
+            user: User instance
+            recurring_expense_data: Dictionary with form cleaned_data
+
+        Returns:
+            RecurringExpense: Created recurring expense instance
+        """
+        from registers.models import RecurringExpense
+        recurring_expense = RecurringExpense(
+            user=user,
+            description=recurring_expense_data['description'],
+            total_amount=recurring_expense_data['total_amount'],
+            start_date=recurring_expense_data['start_date'],
+            category=recurring_expense_data.get('category'),
+            payment_method=recurring_expense_data.get('payment_method'),
+            generate_debit=recurring_expense_data.get('generate_debit', True)
+        )
+        recurring_expense.save()
+        return recurring_expense
+
+    def update_recurring_expense(self, recurring_expense_id, recurring_expense_data):
+        """
+        Atualiza despesa fixa existente.
+
+        Args:
+            recurring_expense_id: ID of the recurring expense
+            recurring_expense_data: Dictionary with form cleaned_data
+
+        Returns:
+            RecurringExpense: Updated recurring expense instance
+        """
+        recurring_expense = self.repository.get_recurring_expense_by_id(recurring_expense_id)
+        recurring_expense.description = recurring_expense_data['description']
+        recurring_expense.total_amount = recurring_expense_data['total_amount']
+        recurring_expense.start_date = recurring_expense_data['start_date']
+        recurring_expense.category = recurring_expense_data.get('category')
+        recurring_expense.payment_method = recurring_expense_data.get('payment_method')
+        recurring_expense.generate_debit = recurring_expense_data.get('generate_debit', True)
+        recurring_expense.save()
+        return recurring_expense
+
+    def delete_recurring_expense(self, recurring_expense_id):
+        """
+        Exclui uma despesa fixa.
+
+        Args:
+            recurring_expense_id: ID of the recurring expense
+        """
+        recurring_expense = self.repository.get_recurring_expense_by_id(recurring_expense_id)
+        recurring_expense.delete()
+
+    def toggle_generate_debit(self, recurring_expense_id):
+        """
+        Ativa/desativa despesa fixa via repository.
+
+        Args:
+            recurring_expense_id: ID of the recurring expense
+
+        Returns:
+            RecurringExpense: Updated recurring expense instance
+        """
+        return self.repository.toggle_generate_debit(recurring_expense_id)
+
+    def get_recurring_expense_with_expenses(self, recurring_expense_id):
+        """
+        Busca despesa fixa com todas as despesas geradas.
+
+        Args:
+            recurring_expense_id: ID of the recurring expense
+
+        Returns:
+            dict: Dictionary with recurring_expense, expenses, expense_count, total_generated
+        """
+        recurring_expense = self.repository.get_recurring_expense_by_id(recurring_expense_id)
+        expenses = self.repository.get_expenses_by_recurring_expense(recurring_expense_id)
+        return {
+            'recurring_expense': recurring_expense,
+            'expenses': expenses,
+            'expense_count': expenses.count(),
+            'total_generated': sum(expense.amount for expense in expenses)
+        }
