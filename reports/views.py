@@ -11,7 +11,7 @@ from reports.services.recurring_expense_service import RecurringExpenseService
 from django.views.generic import UpdateView
 from registers.models import Expense, Income, PaymentMethod, RecurringExpense
 from registers.forms import ExpenseForm, RecurringExpenseForm
-from utils.dates import get_all_months, get_current_date
+from utils.dates import get_all_months, get_current_date, get_all_months_tuples
 from django.http import JsonResponse
 from reports.services.daily_expense_calculator import DailyExpenseCalculator
 from reports.services.installment_progress_calculator import InstallmentProgressCalculator
@@ -47,7 +47,7 @@ def expense_report(request):
     # Get the current year and month
     current_year, current_month = get_current_date()
     distinct_years = expense_repository.get_distinct_years_in_tuples()
-    distinct_months = expense_repository.get_distinct_months_in_tuples()
+    distinct_months = get_all_months_tuples()
 
     # Get the selected year and month from the request
     selected_year, selected_month, selected_month_name = get_selected_year_and_month(
