@@ -187,4 +187,94 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = new Date(dateString);
         return date.toLocaleDateString('pt-BR');
     }
+
+    // Process Recurring Expenses Modal Functions
+    window.showProcessRecurringModal = function() {
+        // Set default month and year to current
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+
+        document.getElementById('processMonth').value = currentMonth;
+        document.getElementById('processYear').value = currentYear;
+
+        // Reset result message
+        document.getElementById('processResult').classList.add('hidden');
+
+        // Show modal
+        document.getElementById('processRecurringModal').classList.remove('hidden');
+    }
+
+    window.closeProcessRecurringModal = function() {
+        document.getElementById('processRecurringModal').classList.add('hidden');
+    }
+
+    window.submitProcessRecurring = function() {
+        const month = document.getElementById('processMonth').value;
+        const year = document.getElementById('processYear').value;
+        const processBtn = document.getElementById('processBtn');
+        const resultDiv = document.getElementById('processResult');
+
+        // Disable button and show loading
+        processBtn.disabled = true;
+        processBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
+
+        // AJAX request
+        fetch('/process-recurring-expenses/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `month=${month}&year=${year}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Re-enable button
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Processar';
+
+            // Show result
+            resultDiv.classList.remove('hidden');
+
+            if (data.success) {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-900/20 border border-green-500 text-green-400';
+
+                let message = `<strong>Sucesso!</strong><br>`;
+                message += `${data.created_count} despesa(s) criada(s)<br>`;
+                message += `${data.skipped_count} já existente(s)`;
+
+                if (data.errors && data.errors.length > 0) {
+                    message += `<br><br><strong>Avisos:</strong><br>${data.errors.join('<br>')}`;
+                }
+
+                resultDiv.innerHTML = message;
+
+                // Reload page after 2 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-900/20 border border-red-500 text-red-400';
+                resultDiv.innerHTML = `<strong>Erro:</strong> ${data.error || 'Erro ao processar despesas'}`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Processar';
+
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-900/20 border border-red-500 text-red-400';
+            resultDiv.innerHTML = '<strong>Erro:</strong> Erro de comunicação com o servidor';
+        });
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('processRecurringModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeProcessRecurringModal();
+        }
+    });
 });

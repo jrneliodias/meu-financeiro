@@ -166,3 +166,96 @@ class RecurringExpenseService:
             'expense_count': expenses.count(),
             'total_generated': sum(expense.amount for expense in expenses)
         }
+
+    def process_recurring_expenses_for_month(self, user, month, year):
+        """
+        Process recurring expenses for a specific month and year.
+        Creates Expense records for all active recurring expenses.
+
+        Args:
+            user: User instance
+            month: Month number (1-12)
+            year: Year (e.g., 2026)
+
+        Returns:
+            dict: Results with created_count, skipped_count, errors
+        """
+        import datetime
+        from registers.models import Expense, RecurringExpense
+
+        # Validate inputs
+        if not (1 <= month <= 12):
+            return {
+                'success': False,
+                'error': 'Mês deve estar entre 1 e 12',
+                'created_count': 0,
+                'skipped_count': 0,
+                'errors': []
+            }
+
+        if not (2000 <= year <= 2100):
+            return {
+                'success': False,
+                'error': 'Ano inválido',
+                'created_count': 0,
+                'skipped_count': 0,
+                'errors': []
+            }
+
+        # Get all active recurring expenses for user
+        recurring_expenses = RecurringExpense.objects.filter(
+            user=user,
+            generate_debit=True
+        )
+
+        created_count = 0
+        skipped_count = 0
+        errors = []
+        created_expenses = []
+
+        for recurring_expense in recurring_expenses:
+            try:
+                # Create expense date using day from start_date and provided month/year
+                expense_date = datetime.date(
+                    year, month, recurring_expense.start_date.day
+                )
+            except ValueError as e:
+                # Invalid date (e.g., February 30)
+                errors.append(f"{recurring_expense.description}: Data inválida - {str(e)}")
+                continue
+
+            # Check if expense already exists
+            existing = Expense.objects.filter(
+                reccurring_expense=recurring_expense,
+                date=expense_date
+            ).exists()
+
+            if existing:
+                skipped_count += 1
+                continue
+
+            # Create new expense
+            expense = Expense.objects.create(
+                user=user,
+                description=recurring_expense.description,
+                amount=recurring_expense.total_amount,
+                date=expense_date,
+                category=recurring_expense.category,
+                payment_method=recurring_expense.payment_method,
+                reccurring_expense=recurring_expense
+            )
+
+            created_count += 1
+            created_expenses.append({
+                'description': expense.description,
+                'amount': expense.amount,
+                'date': expense_date.strftime('%d/%m/%Y')
+            })
+
+        return {
+            'success': True,
+            'created_count': created_count,
+            'skipped_count': skipped_count,
+            'errors': errors,
+            'created_expenses': created_expenses
+        }

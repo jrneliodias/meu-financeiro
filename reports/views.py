@@ -755,11 +755,22 @@ def category_expense_details_ajax(request):
 @login_required
 def recurring_expense_list(request):
     """List all user's recurring expenses"""
+    from utils.dates import get_all_months_tuples
+
     recurring_expense_service = RecurringExpenseService()
     recurring_expenses = recurring_expense_service.repository.get_all_recurring_expenses_by_user(request.user)
 
+    # Calculate totals
+    active_total = recurring_expense_service.repository.get_total_recurring_expenses_with_debit(request.user)
+    inactive_total = recurring_expense_service.repository.get_total_inactive_recurring_expenses(request.user)
+    total = active_total + inactive_total
+
     context = {
         'recurring_expenses': recurring_expenses,
+        'active_total': active_total,
+        'inactive_total': inactive_total,
+        'total': total,
+        'all_months': get_all_months_tuples(),
     }
 
     return render(request, 'reports/recurring_expense_list.html', context)
@@ -880,3 +891,30 @@ def recurring_expense_details_ajax(request):
         return JsonResponse({'error': 'Recurring expense not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def process_recurring_expenses_ajax(request):
+    """
+    AJAX endpoint to process recurring expenses for a selected month/year.
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+    try:
+        month = int(request.POST.get('month'))
+        year = int(request.POST.get('year'))
+    except (TypeError, ValueError):
+        return JsonResponse({
+            'success': False,
+            'error': 'Mês e ano inválidos'
+        }, status=400)
+
+    # Process expenses using service
+    recurring_expense_service = RecurringExpenseService()
+    result = recurring_expense_service.process_recurring_expenses_for_month(
+        request.user, month, year
+    )
+
+    return JsonResponse(result)

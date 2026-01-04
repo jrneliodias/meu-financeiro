@@ -8,16 +8,50 @@ class RecurringExpenseRepository:
     Handles data access and query optimization for recurring expenses.
     """
 
-    def get_total_recurring_expenses_with_debit(self):
+    def get_total_recurring_expenses_with_debit(self, user=None):
         """
         Calculate the total amount of recurring expenses that have generate_debit=True.
+
+        Args:
+            user: User instance (optional, filters by user if provided)
 
         Returns:
             Decimal: Total amount of active recurring expenses
         """
+        queryset = RecurringExpense.objects.filter(generate_debit=True)
+        if user:
+            queryset = queryset.filter(user=user)
+        return queryset.aggregate(total=Sum('total_amount'))['total'] or 0
+
+    def get_total_inactive_recurring_expenses(self, user):
+        """
+        Calculate total amount of inactive recurring expenses (generate_debit=False).
+
+        Args:
+            user: User instance
+
+        Returns:
+            Decimal: Total amount of inactive recurring expenses
+        """
         return (
             RecurringExpense.objects
-            .filter(generate_debit=True)
+            .filter(user=user, generate_debit=False)
+            .aggregate(total=Sum('total_amount'))['total'] or 0
+        )
+
+    def get_total_all_recurring_expenses(self, user):
+        """
+        Calculate total amount of all recurring expenses (active + inactive).
+
+        Args:
+            user: User instance
+
+        Returns:
+            Decimal: Total amount of all recurring expenses
+        """
+        return (
+            RecurringExpense.objects
+            .filter(user=user)
             .aggregate(total=Sum('total_amount'))['total'] or 0
         )
 
@@ -77,7 +111,7 @@ class RecurringExpenseRepository:
             .filter(user=user)
             .select_related('category', 'payment_method', 'user')
             .annotate(expense_count=Count('recurring_expenses'))
-            .order_by('-generate_debit', 'description')
+            .order_by('-generate_debit', '-total_amount', 'description')
         )
 
     def get_recurring_expense_by_id(self, recurring_expense_id):

@@ -6,10 +6,52 @@
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
     <div class="flex justify-between items-center">
         <h2 class="text-2xl font-bold">Recurring Expenses</h2>
-        <a href="{% url 'register_recurring_expense' %}"
-           class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-            <i class="fas fa-plus mr-2"></i>Add New
-        </a>
+        <div class="flex gap-3">
+            <button onclick="showProcessRecurringModal()"
+                    class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <i class="fas fa-calendar-check mr-2"></i>Processar Despesas
+            </button>
+            <a href="{% url 'register_recurring_expense' %}"
+               class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Add New
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Active Total Card -->
+        <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-400 text-sm font-medium">Despesas Ativas</p>
+                    <p class="text-2xl font-bold text-white mt-1">{{ active_total|format_brl }}</p>
+                </div>
+                <i class="fas fa-check-circle text-green-500 text-3xl"></i>
+            </div>
+        </div>
+
+        <!-- Inactive Total Card -->
+        <div class="bg-gray-900/20 border border-gray-500/30 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm font-medium">Despesas Inativas</p>
+                    <p class="text-2xl font-bold text-white mt-1">{{ inactive_total|format_brl }}</p>
+                </div>
+                <i class="fas fa-pause-circle text-gray-500 text-3xl"></i>
+            </div>
+        </div>
+
+        <!-- Total Card -->
+        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-400 text-sm font-medium">Total Geral</p>
+                    <p class="text-2xl font-bold text-white mt-1">{{ total|format_brl }}</p>
+                </div>
+                <i class="fas fa-calculator text-blue-500 text-3xl"></i>
+            </div>
+        </div>
     </div>
 
     <!-- Desktop Table (hidden on mobile) -->
@@ -28,47 +70,61 @@
                 </tr>
             </thead>
             <tbody>
-                {% for recurring_expense in recurring_expenses %}
-                <tr class="*:p-2 border-b border-zinc-700">
-                    <td>{{ recurring_expense.description }}</td>
-                    <td>{{ recurring_expense.total_amount|format_brl }}</td>
-                    <td>{{ recurring_expense.start_date }}</td>
-                    <td>{{ recurring_expense.category.name|default:"N/A" }}</td>
-                    <td>{{ recurring_expense.payment_method.name|default:"N/A" }}</td>
-                    <td class="text-center">
-                        <button class="toggle-btn cursor-pointer"
-                                data-id="{{ recurring_expense.id }}"
-                                data-active="{{ recurring_expense.generate_debit }}">
-                            <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }} text-2xl
-                                      {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
-                        </button>
-                    </td>
-                    <td class="text-center">
-                        <button class="view-expenses-btn text-blue-400 hover:text-blue-300 cursor-pointer"
-                                data-id="{{ recurring_expense.id }}">
-                            <i class="fas fa-list mr-1"></i>
-                            {{ recurring_expense.expense_count|default:0 }} expenses
-                        </button>
-                    </td>
-                    <td class="text-end space-x-2">
-                        <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
-                           class="text-blue-600 hover:text-blue-800">
-                            <i class="fa-solid fa-edit"></i>
-                        </a>
-                        <button class="delete-btn text-red-600 hover:text-red-800 cursor-pointer"
-                                data-id="{{ recurring_expense.id }}"
-                                data-description="{{ recurring_expense.description }}">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% empty %}
+                {% regroup recurring_expenses by generate_debit as expenses_by_status %}
+                {% for status_group in expenses_by_status %}
+                    {# Section header #}
+                    <tr class="{% if status_group.grouper %}bg-green-900/20 border-t-2 border-green-500{% else %}bg-gray-900/20 border-t-2 border-gray-500{% endif %}">
+                        <td colspan="8" class="p-3 font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
+                            <i class="fas {% if status_group.grouper %}fa-check-circle{% else %}fa-pause-circle{% endif %} mr-2"></i>
+                            Despesas Recorrentes {% if status_group.grouper %}Ativas{% else %}Inativas{% endif %}
+                        </td>
+                    </tr>
+
+                    {# Expenses in this group #}
+                    {% for recurring_expense in status_group.list %}
+                    <tr class="*:p-2 border-b border-zinc-700 {% if not recurring_expense.generate_debit %}opacity-50 bg-gray-900/10{% endif %}">
+                        <td>{{ recurring_expense.description }}</td>
+                        <td>{{ recurring_expense.total_amount|format_brl }}</td>
+                        <td>{{ recurring_expense.start_date }}</td>
+                        <td>{{ recurring_expense.category.name|default:"N/A" }}</td>
+                        <td>{{ recurring_expense.payment_method.name|default:"N/A" }}</td>
+                        <td class="text-center">
+                            <button class="toggle-btn cursor-pointer"
+                                    data-id="{{ recurring_expense.id }}"
+                                    data-active="{{ recurring_expense.generate_debit }}">
+                                <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }} text-2xl
+                                          {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
+                            </button>
+                        </td>
+                        <td class="text-center">
+                            <button class="view-expenses-btn text-blue-400 hover:text-blue-300 cursor-pointer"
+                                    data-id="{{ recurring_expense.id }}">
+                                <i class="fas fa-list mr-1"></i>
+                                {{ recurring_expense.expense_count|default:0 }} expenses
+                            </button>
+                        </td>
+                        <td class="text-end space-x-2">
+                            <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
+                               class="text-blue-600 hover:text-blue-800">
+                                <i class="fa-solid fa-edit"></i>
+                            </a>
+                            <button class="delete-btn text-red-600 hover:text-red-800 cursor-pointer"
+                                    data-id="{{ recurring_expense.id }}"
+                                    data-description="{{ recurring_expense.description }}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+
+                {% if not recurring_expenses %}
                 <tr>
                     <td colspan="8" class="text-center p-4">
                         No recurring expenses found.
                     </td>
                 </tr>
-                {% endfor %}
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -76,8 +132,19 @@
     <!-- Mobile Cards (visible on mobile) -->
     <div class="md:hidden grid grid-cols-1 gap-4">
         {% if recurring_expenses %}
-            {% for recurring_expense in recurring_expenses %}
-            <div class="bg-zinc-700/30 rounded-lg p-4 grid grid-cols-1 gap-3 relative">
+            {% regroup recurring_expenses by generate_debit as expenses_by_status_mobile %}
+            {% for status_group in expenses_by_status_mobile %}
+                {# Section header #}
+                <div class="{% if status_group.grouper %}bg-green-900/20 border border-green-500/30{% else %}bg-gray-900/20 border border-gray-500/30{% endif %} rounded-lg p-3">
+                    <p class="font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
+                        <i class="fas {% if status_group.grouper %}fa-check-circle{% else %}fa-pause-circle{% endif %} mr-2"></i>
+                        Despesas Recorrentes {% if status_group.grouper %}Ativas{% else %}Inativas{% endif %}
+                    </p>
+                </div>
+
+                {# Cards in this group #}
+                {% for recurring_expense in status_group.list %}
+            <div class="bg-zinc-700/30 rounded-lg p-4 grid grid-cols-1 gap-3 relative {% if not recurring_expense.generate_debit %}opacity-50{% endif %}">
                 <!-- Header -->
                 <div class="grid grid-cols-[1fr_auto] items-start gap-2">
                     <h3 class="font-bold text-lg">{{ recurring_expense.description }}</h3>
@@ -129,6 +196,7 @@
                     </div>
                 </div>
             </div>
+                {% endfor %}
             {% endfor %}
         {% else %}
             <div class="text-center p-6 bg-zinc-700/30 rounded-lg">
@@ -138,8 +206,9 @@
     </div>
 </div>
 
-<!-- Incluir Modal -->
+<!-- Incluir Modals -->
 {% include "reports/components/recurring_expense_modal.html" %}
+{% include "reports/components/process_recurring_modal.html" %}
 
 <!-- Incluir JavaScript -->
 <script src="{% static 'js/recurring_expense_list.js' %}"></script>

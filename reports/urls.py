@@ -15,6 +15,8 @@ urlpatterns = [
          views.recurring_expense_toggle, name="recurring_expense_toggle"),
     path("recurring-expense-details/",
          views.recurring_expense_details_ajax, name="recurring_expense_details_ajax"),
+    path("process-recurring-expenses/",
+         views.process_recurring_expenses_ajax, name="process_recurring_expenses_ajax"),
     path("daily-spending-data/", views.daily_spending_data_ajax, name="daily_spending_data_ajax"),
     path("expense-details/", views.expense_details_ajax, name="expense_details_ajax"),
     path("category-expense-details/", views.category_expense_details_ajax, name="category_expense_details_ajax"),
