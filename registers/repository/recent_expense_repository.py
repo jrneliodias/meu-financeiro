@@ -44,7 +44,7 @@ class RecentExpenseRepository:
             Expense.objects
             .filter(user=user)
             .select_related('category', 'payment_method')
-            .order_by('-date', '-id')[:limit]
+            .order_by('-updated_at')[:limit]
         )
 
     def get_expense_by_id_for_user(
