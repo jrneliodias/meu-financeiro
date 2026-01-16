@@ -1,0 +1,51 @@
+<!-- Recent Expenses Section -->
+<section id="recentExpensesSection" class="mt-8 bg-zinc-800/40 p-6 rounded-lg shadow-lg">
+    <header class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-300">
+            <i class="fas fa-history mr-2"></i>Ultimas Despesas
+        </h2>
+        <button
+            id="refreshRecentExpenses"
+            type="button"
+            class="text-gray-400 hover:text-white transition-colors p-2"
+            title="Atualizar lista"
+        >
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </header>
+
+    <!-- Loading State -->
+    <div id="recentExpensesLoading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto"></div>
+        <p class="text-gray-400 mt-2">Carregando despesas...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="recentExpensesError" class="hidden bg-red-900/20 border border-red-500 p-4 rounded">
+        <i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
+        <span id="recentExpensesErrorMessage" class="text-red-300"></span>
+    </div>
+
+    <!-- Table Content -->
+    <div id="recentExpensesContent" class="hidden overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-zinc-700">
+                <tr>
+                    <th class="px-4 py-3 text-left text-gray-300 text-sm font-medium">Data</th>
+                    <th class="px-4 py-3 text-left text-gray-300 text-sm font-medium">Descricao</th>
+                    <th class="px-4 py-3 text-right text-gray-300 text-sm font-medium">Valor</th>
+                    <th class="px-4 py-3 text-center text-gray-300 text-sm font-medium">Acoes</th>
+                </tr>
+            </thead>
+            <tbody id="recentExpensesList" class="divide-y divide-zinc-700">
+                <!-- Rows populated via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    <div id="recentExpensesEmpty" class="hidden text-center py-8 text-gray-400">
+        <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+        <p>Nenhuma despesa recente encontrada</p>
+    </div>
+</section>

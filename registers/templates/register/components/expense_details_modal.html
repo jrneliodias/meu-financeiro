@@ -1,0 +1,39 @@
+<!-- Expense Details Modal -->
+<div
+    id="expenseDetailsModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+>
+    <div class="bg-zinc-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-4 border-b border-zinc-700">
+            <h2 class="text-lg font-semibold text-white">
+                <i class="fas fa-receipt mr-2 text-blue-400"></i>
+                Detalhes da Despesa
+            </h2>
+            <button
+                id="expenseModalCloseBtn"
+                type="button"
+                class="text-gray-400 hover:text-white transition-colors p-1"
+            >
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-4">
+            <!-- Loading State -->
+            <div id="expenseModalLoading" class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto"></div>
+                <p class="text-gray-400 mt-2">Carregando detalhes...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="expenseModalError" class="hidden bg-red-900/20 border border-red-500 p-4 rounded text-red-300">
+            </div>
+
+            <!-- Content (populated via JavaScript) -->
+            <div id="expenseModalContent" class="hidden">
+            </div>
+        </div>
+    </div>
+</div>
