@@ -1,6 +1,13 @@
 from django.shortcuts import render, redirect
 from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm
-from .services import ExpenseService, InstallmentService, IncomeService, CSVImportService
+from .services import (
+    ExpenseService,
+    InstallmentService,
+    IncomeService,
+    CSVImportService,
+    RecentExpenseService,
+)
+from .constants import ApiStatus, ApiMessages
 from .services.csv_processor_service import CSVProcessorService
 from reports.services.recurring_expense_service import RecurringExpenseService
 from django.contrib import messages
@@ -21,6 +28,7 @@ installment_service = InstallmentService()
 expense_service = ExpenseService()
 income_service = IncomeService()
 csv_import_service = CSVImportService()
+recent_expense_service = RecentExpenseService()
 
 
 @login_required
@@ -509,3 +517,73 @@ def csv_processor_update_data(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def recent_expenses_ajax(request):
+    """AJAX endpoint para listar despesas recentes do usuário."""
+    try:
+        expenses = recent_expense_service.get_recent_expenses(request.user)
+
+        return JsonResponse({
+            'success': True,
+            'message': ApiMessages.RECENT_EXPENSES_SUCCESS,
+            'expenses': expenses,
+            'count': len(expenses),
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+        }, status=ApiStatus.SERVER_ERROR)
+
+
+@login_required
+@require_http_methods(["GET"])
+def expense_details_ajax(request, pk):
+    """AJAX endpoint para obter detalhes de uma despesa específica."""
+    try:
+        expense = recent_expense_service.get_expense_details(pk, request.user)
+
+        if expense is None:
+            return JsonResponse({
+                'success': False,
+                'error': ApiMessages.EXPENSE_NOT_FOUND,
+            }, status=ApiStatus.NOT_FOUND)
+
+        return JsonResponse({
+            'success': True,
+            'message': ApiMessages.DETAILS_SUCCESS,
+            'expense': expense,
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+        }, status=ApiStatus.SERVER_ERROR)
+
+
+@login_required
+@require_http_methods(["GET"])
+def expense_autofill_ajax(request, pk):
+    """AJAX endpoint para obter dados de uma despesa para autofill do formulário."""
+    try:
+        form_data = recent_expense_service.get_expense_for_autofill(pk, request.user)
+
+        if form_data is None:
+            return JsonResponse({
+                'success': False,
+                'error': ApiMessages.EXPENSE_NOT_FOUND,
+            }, status=ApiStatus.NOT_FOUND)
+
+        return JsonResponse({
+            'success': True,
+            'message': ApiMessages.AUTOFILL_SUCCESS,
+            'form_data': form_data,
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+        }, status=ApiStatus.SERVER_ERROR)
