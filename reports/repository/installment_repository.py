@@ -140,6 +140,9 @@ class InstallmentRepository:
                 ),
             })
 
+        # Sort by progress percentage descending (most completed first)
+        progress_data.sort(key=lambda x: x['progress_percentage'], reverse=True)
+
         return progress_data
 
     def get_open_installment_count(
