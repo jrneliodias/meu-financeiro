@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% load custom_filters %}
+{% load static %}
 {% block content %}
     <main class="container mx-auto mt-10 max-w-lg">
         <header class="flex justify-between items-center mb-6">
@@ -83,5 +84,11 @@
                 </ul>
             </aside>
         {% endif %}
+
+        {% include "register/components/recent_expenses_table.html" %}
     </main>
+
+    {% include "register/components/expense_details_modal.html" %}
+
+    <script src="{% static 'js/recent_expenses.js' %}"></script>
 {% endblock content %}
