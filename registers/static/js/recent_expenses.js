@@ -198,26 +198,22 @@ const RecentExpenses = {
      */
     renderExpenseCard: function (expense) {
         return `
-            <div class="bg-zinc-700/30 rounded-lg p-3">
-                <div class="flex justify-between items-start mb-2">
-                    <div class="min-w-0 flex-1 mr-2">
-                        <p class="text-gray-200 text-sm truncate">${expense.description}</p>
-                        <p class="text-gray-400 text-xs">${expense.date_formatted}</p>
-                    </div>
-                    <span class="text-gray-200 font-semibold text-sm whitespace-nowrap">${expense.amount_formatted}</span>
-                </div>
-                <div class="flex justify-end gap-3 pt-2 border-t border-zinc-700">
-                    <button type="button" class="action-btn text-blue-400 text-sm" data-id="${expense.id}" data-action="autofill" title="Usar">
-                        <i class="fas fa-copy mr-1"></i>Usar
+            <div class="bg-zinc-700/30 rounded-lg p-4 flex flex-col gap-2">
+                <p class="text-white font-semibold text-base">${expense.description}</p>
+                <p class="text-green-400 font-bold text-xl">${expense.amount_formatted}</p>
+                <p class="text-gray-400 text-sm">${expense.date_formatted}</p>
+                <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-zinc-600">
+                    <button type="button" class="action-btn flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="autofill">
+                        <i class="fas fa-copy"></i>Usar como template
                     </button>
-                    <button type="button" class="action-btn text-gray-400 text-sm" data-id="${expense.id}" data-action="details" title="Detalhes">
-                        <i class="fas fa-eye mr-1"></i>Detalhes
+                    <button type="button" class="action-btn flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="details">
+                        <i class="fas fa-eye"></i>Ver detalhes
                     </button>
-                    <a href="/expense/${expense.id}/update/" class="text-yellow-400 text-sm" title="Editar">
-                        <i class="fas fa-edit mr-1"></i>Editar
+                    <a href="/expense/${expense.id}/update/" class="flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm transition-colors">
+                        <i class="fas fa-edit"></i>Editar
                     </a>
-                    <button type="button" class="action-btn text-red-400 text-sm" data-id="${expense.id}" data-description="${expense.description}" data-action="delete" title="Excluir">
-                        <i class="fas fa-trash mr-1"></i>Excluir
+                    <button type="button" class="action-btn flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-description="${expense.description}" data-action="delete">
+                        <i class="fas fa-trash"></i>Excluir
                     </button>
                 </div>
             </div>
