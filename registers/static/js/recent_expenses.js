@@ -53,6 +53,7 @@ const RecentExpenses = {
         this.elements.errorMessage = document.getElementById('recentExpensesErrorMessage');
         this.elements.content = document.getElementById('recentExpensesContent');
         this.elements.list = document.getElementById('recentExpensesList');
+        this.elements.cardList = document.getElementById('recentExpensesCardList');
         this.elements.empty = document.getElementById('recentExpensesEmpty');
         this.elements.refreshBtn = document.getElementById('refreshRecentExpenses');
         this.elements.modal = document.getElementById('expenseDetailsModal');
@@ -85,6 +86,10 @@ const RecentExpenses = {
         // Delegate events para botoes dinamicos
         if (this.elements.list) {
             this.elements.list.addEventListener('click', (e) => this.handleRowAction(e));
+        }
+
+        if (this.elements.cardList) {
+            this.elements.cardList.addEventListener('click', (e) => this.handleRowAction(e));
         }
 
         if (this.elements.modal) {
@@ -128,6 +133,7 @@ const RecentExpenses = {
         }
 
         this.elements.list.innerHTML = expenses.map((expense) => this.renderExpenseRow(expense)).join('');
+        this.elements.cardList.innerHTML = expenses.map((expense) => this.renderExpenseCard(expense)).join('');
 
         this.hideLoading();
         this.elements.content.classList.remove('hidden');
@@ -184,6 +190,37 @@ const RecentExpenses = {
                     </div>
                 </td>
             </tr>
+        `;
+    },
+
+    /**
+     * Renderiza um card para layout mobile
+     */
+    renderExpenseCard: function (expense) {
+        return `
+            <div class="bg-zinc-700/30 rounded-lg p-3">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="min-w-0 flex-1 mr-2">
+                        <p class="text-gray-200 text-sm truncate">${expense.description}</p>
+                        <p class="text-gray-400 text-xs">${expense.date_formatted}</p>
+                    </div>
+                    <span class="text-gray-200 font-semibold text-sm whitespace-nowrap">${expense.amount_formatted}</span>
+                </div>
+                <div class="flex justify-end gap-3 pt-2 border-t border-zinc-700">
+                    <button type="button" class="action-btn text-blue-400 text-sm" data-id="${expense.id}" data-action="autofill" title="Usar">
+                        <i class="fas fa-copy mr-1"></i>Usar
+                    </button>
+                    <button type="button" class="action-btn text-gray-400 text-sm" data-id="${expense.id}" data-action="details" title="Detalhes">
+                        <i class="fas fa-eye mr-1"></i>Detalhes
+                    </button>
+                    <a href="/expense/${expense.id}/update/" class="text-yellow-400 text-sm" title="Editar">
+                        <i class="fas fa-edit mr-1"></i>Editar
+                    </a>
+                    <button type="button" class="action-btn text-red-400 text-sm" data-id="${expense.id}" data-description="${expense.description}" data-action="delete" title="Excluir">
+                        <i class="fas fa-trash mr-1"></i>Excluir
+                    </button>
+                </div>
+            </div>
         `;
     },
 
@@ -379,32 +416,30 @@ const RecentExpenses = {
                 }
             </div>
 
-            <div class="flex justify-between mt-6 pt-4 border-t border-zinc-700">
+            <div class="flex flex-wrap gap-2 mt-6 pt-4 border-t border-zinc-700">
                 <button
                     type="button"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors text-sm flex-1 min-w-0"
                     data-modal-action="autofill"
                     data-id="${expense.id}"
                 >
-                    <i class="fas fa-copy mr-2"></i>Usar como Template
+                    <i class="fas fa-copy mr-1"></i>Usar
                 </button>
-                <div class="flex gap-2">
-                    <a
-                        href="/expense/${expense.id}/update/"
-                        class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition-colors"
-                    >
-                        <i class="fas fa-edit mr-2"></i>Editar
-                    </a>
-                    <button
-                        type="button"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors"
-                        data-modal-action="delete"
-                        data-id="${expense.id}"
-                        data-description="${expense.description}"
-                    >
-                        <i class="fas fa-trash mr-2"></i>Excluir
-                    </button>
-                </div>
+                <a
+                    href="/expense/${expense.id}/update/"
+                    class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded transition-colors text-sm text-center flex-1 min-w-0"
+                >
+                    <i class="fas fa-edit mr-1"></i>Editar
+                </a>
+                <button
+                    type="button"
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition-colors text-sm flex-1 min-w-0"
+                    data-modal-action="delete"
+                    data-id="${expense.id}"
+                    data-description="${expense.description}"
+                >
+                    <i class="fas fa-trash mr-1"></i>Excluir
+                </button>
             </div>
         `;
 

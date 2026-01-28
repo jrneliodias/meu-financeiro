@@ -1,88 +1,65 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="keywords" content="My Dashboard" />
-    <meta name="description" content="My Dashboard" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=SUSE:wght@100..800&display=swap"
-      rel="stylesheet"
-    />
-    <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <title>Dashboard</title>
-  </head>
-  <body class="bg-zinc-900 w-full min-h-screen grid lg:grid-cols-[auto_1fr]">
-    <aside
-      class="h-fit lg:sticky lg:h-full w-full lg:pt-10 p-3 text-white flex flex-wrap lg:flex-col justify-center lg:justify-start gap-4 border-r border-zinc-700 min-w-[190px]"
-    >
-      <a
-        href="{% url 'expense_report' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
-      >
-        <i class="fa-solid fa-house text-xs"></i>
-        <span class="text-sm hidden lg:block">Dashboard</span>
-      </a>
-      <a
-        href="{% url 'register_expense' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/register/expense' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
-      >
-        <i class="fa-solid fa-coins text-xs"></i>
-        <span class="text-sm hidden lg:block">Register Expense</span>
-      </a>
-      <a
-        href="{% url 'register_income' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/register/income' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
-      >
-        <i class="fa-solid fa-coins text-xs"></i>
-        <span class="text-sm hidden lg:block">Register Income</span>
-      </a>
-      <a
-        href="{% url 'recurring_expense_list' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'recurring-expense' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
-      >
-        <i class="fa-solid fa-repeat text-xs"></i>
-        <span class="text-sm hidden lg:block">Recurring Expenses</span>
-      </a>
-      <a
-        href="{% url 'csv_import' %}"
-        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'csv-import' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}"
-      >
-        <i class="fa-solid fa-file-csv text-xs"></i>
-        <span class="text-sm hidden lg:block">CSV Import</span>
-      </a>
-      <a
-        href="/admin"
-        class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg"
-      >
-        <i class="fa-solid fa-user-shield text-xs"></i>
-        <span class="text-sm hidden lg:block">Admin</span>
-      </a>
 
-      <div class=" lg:pt-4 lg:border-t lg:border-zinc-700">
-        <div class="flex items-center gap-2 px-4 py-2 text-zinc-400">
-          <i class="fa-solid fa-user text-xs"></i>
-          <span class="text-sm hidden lg:block">{{ user.username }}</span>
-        </div>
-        <a
-          href="{% url 'logout' %}"
-          class="font-semibold flex items-center gap-2 hover:bg-red-900/50 px-4 py-2 rounded-lg text-red-400"
-        >
-          <i class="fa-solid fa-right-from-bracket text-xs"></i>
-          <span class="text-sm hidden lg:block">Logout</span>
-        </a>
-      </div>
-    </aside>
-    <main class="p-6 text-white">
-      {% block content %} {% endblock content %}
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="keywords" content="My Dashboard" />
+  <meta name="description" content="My Dashboard" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <title>Dashboard</title>
+</head>
+
+<body class="bg-zinc-900 w-full min-h-screen grid lg:grid-cols-[auto_1fr]" style="font-family: 'JetBrains Mono', monospace;">
+  <aside class="h-fit lg:sticky lg:h-full w-full lg:pt-10 p-3 text-white flex flex-wrap lg:flex-col justify-center lg:justify-start gap-4 border-r border-zinc-700 min-w-[190px]">
+    <a href="{% url 'expense_report' %}"
+      class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-house text-xs"></i>
+      <span class="text-sm hidden lg:block">Dashboard</span>
+    </a>
+    <a href="{% url 'register_expense' %}"
+      class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/register/expense' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-coins text-xs"></i>
+      <span class="text-sm hidden lg:block">Register Expense</span>
+    </a>
+    <a href="{% url 'register_income' %}"
+      class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if request.path == '/register/income' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-coins text-xs"></i>
+      <span class="text-sm hidden lg:block">Register Income</span>
+    </a>
+    <a href="{% url 'recurring_expense_list' %}"
+      class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'recurring-expense' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-repeat text-xs"></i>
+      <span class="text-sm hidden lg:block">Recurring Expenses</span>
+    </a>
+    <a href="{% url 'csv_import' %}"
+      class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'csv-import' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-file-csv text-xs"></i>
+      <span class="text-sm hidden lg:block">CSV Import</span>
+    </a>
+    <a href="/admin" class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg">
+      <i class="fa-solid fa-user-shield text-xs"></i>
+      <span class="text-sm hidden lg:block">Admin</span>
+    </a>
+    <div class="flex items-center gap-2 px-4 py-2 text-zinc-400">
+      <i class="fa-solid fa-user text-xs"></i>
+      <span class="text-sm hidden lg:block">{{ user.username }}</span>
+    </div>
+    <a href="{% url 'logout' %}" class="font-semibold flex items-center gap-2 hover:bg-red-900/50 px-4 py-2 rounded-lg text-red-400">
+      <i class="fa-solid fa-right-from-bracket text-xs"></i>
+      <span class="text-sm hidden lg:block">Logout</span>
+    </a>
+
+  </aside>
+  <main class="p-2 lg:p-6 text-white">
+    {% block content %} {% endblock content %}
+  </main>
+</body>
+
 </html>

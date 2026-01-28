@@ -136,6 +136,25 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'reports/expense_update.html'
     success_url = '/'
 
+    def get_form_kwargs(self):
+        """Inject user into form."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_form(self, form_class=None):
+        """Remove installments field for edit form."""
+        form = super().get_form(form_class)
+        # installments field is only for creation, not editing
+        if 'installments' in form.fields:
+            del form.fields['installments']
+        return form
+
+    def form_valid(self, form):
+        """Save and add success message."""
+        messages.success(self.request, "Expense updated successfully.")
+        return super().form_valid(form)
+
 
 def process_monthly_expenses(monthly_reports, all_months):
     """Process monthly expense reports and return structured data."""

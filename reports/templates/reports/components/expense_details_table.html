@@ -59,13 +59,14 @@
           
           
           <!-- Header with description and amount using grid -->
-          <div class="grid grid-cols-[1fr_auto] items-start gap-2">
-            <h3 class="font-bold text-lg pr-6">{{ expense.description }}</h3>
-            <span class="font-bold text-lg text-right">{{ expense.amount|format_brl }}</span>
+          <div class="grid grid-cols-1 items-start gap-2">
+           
+            <h3 class="font-bold text-lg ">{{ expense.description }}</h3>
+            <span class="font-bold text-red-400 text-lg text-right">{{ expense.amount|format_brl }}</span>
           </div>
           
           <!-- Primary details in 2x2 grid -->
-          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm border-t border-zinc-600 pt-3">
+          <div class="grid grid-cols-1 gap-x-4 gap-y-2 text-sm border-t border-zinc-600 pt-3">
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
               <span class="text-gray-400">Date:</span>
               <span>{{ expense.date }}</span>

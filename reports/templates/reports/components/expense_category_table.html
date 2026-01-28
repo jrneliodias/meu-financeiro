@@ -55,10 +55,10 @@
 
 <!-- Category Expense Details Modal -->
 <div id="categoryExpenseModal"
-     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-zinc-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto p-4">
+  <div class="bg-zinc-800 rounded-lg shadow-xl max-w-4xl w-full my-auto flex flex-col max-h-[90vh]">
     <!-- Modal Header -->
-    <div class="flex items-center justify-between p-6 border-b border-zinc-700">
+    <div class="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-700 flex-shrink-0">
       <h2 class="text-xl font-semibold text-white flex items-center">
         <i class="fas fa-receipt mr-3 text-blue-400"></i>
         <span id="categoryModalTitle">Expense Details</span>
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Modal Body -->
-    <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]" id="categoryExpenseContent">
+    <div class="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0" id="categoryExpenseContent">
       <!-- Loading state -->
       <div id="categoryModalLoading" class="text-center py-8">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
@@ -102,7 +102,8 @@
 
         <!-- Expenses list -->
         <div class="bg-zinc-700 rounded-lg overflow-hidden">
-          <div class="overflow-x-auto">
+          <!-- Desktop table (hidden on mobile) -->
+          <div class="hidden sm:block overflow-x-auto">
             <table class="w-full">
               <thead class="bg-zinc-600">
                 <tr class="text-left">
@@ -118,12 +119,16 @@
               </tbody>
             </table>
           </div>
+          <!-- Mobile card list (hidden on desktop) -->
+          <div id="categoryExpensesCardList" class="sm:hidden flex flex-col gap-3 p-3">
+            <!-- Cards will be populated via JavaScript -->
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Modal Footer -->
-    <div class="flex justify-end p-6 border-t border-zinc-700">
+    <div class="flex justify-end p-4 sm:p-6 border-t border-zinc-700 flex-shrink-0">
       <button id="categoryModalCloseFooterBtn"
               class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
         <i class="fas fa-times mr-2"></i>
@@ -568,13 +573,14 @@
   // Class 2: Data Renderer (SRP - Only renders data to DOM)
   class ExpenseTableRenderer {
       /**
-       * Renders expense data in table format.
+       * Renders expense data in table and card formats.
        *
        * Single Responsibility: DOM manipulation and rendering only.
        */
 
-      constructor(tableBodyElementId) {
+      constructor(tableBodyElementId, cardListElementId = 'categoryExpensesCardList') {
           this.tableBodyElement = document.getElementById(tableBodyElementId);
+          this.cardListElement = document.getElementById(cardListElementId);
           this.currencyFormatter = new Intl.NumberFormat('pt-BR', {
               style: 'currency',
               currency: 'BRL'
@@ -584,6 +590,9 @@
 
       renderExpenseList(expenseDataArray) {
           this.tableBodyElement.innerHTML = '';
+          if (this.cardListElement) {
+              this.cardListElement.innerHTML = '';
+          }
 
           if (expenseDataArray.length === 0) {
               this.renderEmptyState();
@@ -591,32 +600,57 @@
           }
 
           expenseDataArray.forEach(expenseItem => {
+              // Desktop table row
               const expenseTableRow = this.createExpenseRow(expenseItem);
               this.tableBodyElement.appendChild(expenseTableRow);
+
+              // Mobile card
+              if (this.cardListElement) {
+                  const expenseCard = this.createExpenseCard(expenseItem);
+                  this.cardListElement.appendChild(expenseCard);
+              }
           });
 
-          // Attach delete button event listeners
-          this.attachDeleteButtonListeners();
+          // Attach action button event listeners
+          this.attachActionButtonListeners();
       }
 
-      attachDeleteButtonListeners() {
-          const deleteButtons = this.tableBodyElement.querySelectorAll('.delete-expense-btn');
-
-          deleteButtons.forEach(button => {
+      attachActionButtonListeners() {
+          // Attach listeners to table delete buttons
+          const tableDeleteButtons = this.tableBodyElement.querySelectorAll('.delete-expense-btn');
+          tableDeleteButtons.forEach(button => {
               button.addEventListener('click', async (event) => {
                   event.stopPropagation();
                   const expenseId = button.getAttribute('data-expense-id');
                   const expenseDescription = button.getAttribute('data-expense-description');
 
-                  if (confirm(`Are you sure you want to delete "${expenseDescription}"?`)) {
+                  if (confirm(`Tem certeza que deseja excluir "${expenseDescription}"?`)) {
                       await this.deleteExpense(expenseId, button);
                   }
               });
           });
+
+          // Attach listeners to card delete buttons
+          if (this.cardListElement) {
+              const cardDeleteButtons = this.cardListElement.querySelectorAll('.delete-expense-btn');
+              cardDeleteButtons.forEach(button => {
+                  button.addEventListener('click', async (event) => {
+                      event.stopPropagation();
+                      const expenseId = button.getAttribute('data-expense-id');
+                      const expenseDescription = button.getAttribute('data-expense-description');
+
+                      if (confirm(`Tem certeza que deseja excluir "${expenseDescription}"?`)) {
+                          await this.deleteExpense(expenseId, button);
+                      }
+                  });
+              });
+          }
       }
 
       async deleteExpense(expenseId, buttonElement) {
-          const row = buttonElement.closest('tr');
+          // Find both the table row and card for this expense
+          const tableRow = this.tableBodyElement.querySelector(`tr[data-expense-id="${expenseId}"]`);
+          const card = this.cardListElement?.querySelector(`div[data-expense-id="${expenseId}"]`);
 
           try {
               // Disable button during deletion
@@ -634,12 +668,17 @@
               const data = await response.json();
 
               if (data.success) {
-                  // Remove row with animation
-                  row.style.opacity = '0';
-                  row.style.transition = 'opacity 0.3s ease-out';
+                  // Remove both table row and card with animation
+                  [tableRow, card].forEach(element => {
+                      if (element) {
+                          element.style.opacity = '0';
+                          element.style.transition = 'opacity 0.3s ease-out';
+                      }
+                  });
 
                   setTimeout(() => {
-                      row.remove();
+                      tableRow?.remove();
+                      card?.remove();
 
                       // Update expense count
                       const countElement = document.getElementById('categoryModalExpenseCount');
@@ -653,16 +692,15 @@
                       }
                   }, 300);
 
-                  // Show success message (you can replace with toast notification)
                   console.log(data.message);
               } else {
-                  alert(data.error || 'Failed to delete expense');
+                  alert(data.error || 'Falha ao excluir despesa');
                   buttonElement.disabled = false;
                   buttonElement.innerHTML = '<i class="fas fa-trash-alt"></i>';
               }
           } catch (error) {
               console.error('Error deleting expense:', error);
-              alert('An error occurred while deleting the expense');
+              alert('Ocorreu um erro ao excluir a despesa');
               buttonElement.disabled = false;
               buttonElement.innerHTML = '<i class="fas fa-trash-alt"></i>';
           }
@@ -689,10 +727,18 @@
               <tr>
                   <td colspan="5" class="px-4 py-8 text-center text-gray-400">
                       <i class="fas fa-info-circle mr-2"></i>
-                      No expenses found for this category and month.
+                      Nenhuma despesa encontrada para esta categoria e mês.
                   </td>
               </tr>
           `;
+          if (this.cardListElement) {
+              this.cardListElement.innerHTML = `
+                  <div class="text-center text-gray-400 py-8">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      Nenhuma despesa encontrada para esta categoria e mês.
+                  </div>
+              `;
+          }
       }
 
       createExpenseRow(expenseItem) {
@@ -723,16 +769,58 @@
                   </span>
               </td>
               <td class="px-4 py-3 text-center">
-                  <button class="delete-expense-btn text-red-400 hover:text-red-300 transition-colors duration-200"
-                          data-expense-id="${expenseItem.id}"
-                          data-expense-description="${sanitizedDescription}"
-                          title="Delete expense">
-                      <i class="fas fa-trash-alt"></i>
-                  </button>
+                  <div class="flex items-center justify-center gap-3">
+                      <a href="/expense/${expenseItem.id}/update/"
+                         class="text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                         title="Editar despesa">
+                          <i class="fas fa-edit"></i>
+                      </a>
+                      <button class="delete-expense-btn text-red-400 hover:text-red-300 transition-colors duration-200"
+                              data-expense-id="${expenseItem.id}"
+                              data-expense-description="${sanitizedDescription}"
+                              title="Excluir despesa">
+                          <i class="fas fa-trash-alt"></i>
+                      </button>
+                  </div>
               </td>
           `;
 
           return expenseRow;
+      }
+
+      createExpenseCard(expenseItem) {
+          const expenseCard = document.createElement('div');
+          expenseCard.className = 'bg-zinc-600/50 rounded-lg p-4 flex flex-col gap-2';
+          expenseCard.setAttribute('data-expense-id', expenseItem.id);
+
+          const formattedExpenseDate = this.dateFormatter.format(
+              new Date(expenseItem.date + 'T00:00:00')
+          );
+          const formattedExpenseAmount = this.currencyFormatter.format(expenseItem.amount);
+          const sanitizedDescription = this.sanitizeHtmlContent(expenseItem.description);
+          const sanitizedPaymentMethod = this.sanitizeHtmlContent(expenseItem.payment_method);
+
+          expenseCard.innerHTML = `
+              <p class="text-white font-semibold text-base">${sanitizedDescription}</p>
+              <p class="text-green-400 font-bold text-xl">${formattedExpenseAmount}</p>
+              <p class="text-gray-400 text-sm">${formattedExpenseDate}</p>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-blue-100 w-fit">
+                  ${sanitizedPaymentMethod}
+              </span>
+              <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-zinc-500">
+                  <a href="/expense/${expenseItem.id}/update/"
+                     class="flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm transition-colors">
+                      <i class="fas fa-edit"></i>Editar
+                  </a>
+                  <button class="delete-expense-btn flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm transition-colors"
+                          data-expense-id="${expenseItem.id}"
+                          data-expense-description="${sanitizedDescription}">
+                      <i class="fas fa-trash-alt"></i>Excluir
+                  </button>
+              </div>
+          `;
+
+          return expenseCard;
       }
 
       sanitizeHtmlContent(userInputText) {
