@@ -30,7 +30,9 @@
     <!-- Mobile selector for months -->
     <div class="mb-4">
       <select id="monthSelector"
-              class="w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
+              class="w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900"
+              data-selected-month="{{ selected_month|default:'' }}"
+              data-selected-year="{{ selected_year|default:'' }}">
         {% for month in all_months %}<option value="{{ forloop.counter0 }}">{{ month }}</option>{% endfor %}
       </select>
     </div>
@@ -353,13 +355,13 @@
           init: function() {
               // Only run on mobile screens
               if (window.innerWidth >= 768) return false;
-              
+
               // Get DOM elements
               this.elements.selector = document.getElementById('monthSelector');
               this.elements.header = document.getElementById('selectedMonthHeader');
               this.elements.tableBody = document.getElementById('mobileCategoryTableBody');
               this.elements.totalCell = document.getElementById('selectedMonthTotal');
-              
+
               // Format data for JavaScript
               this.data.months = [{% for month in all_months %}"{{ month }}",{% endfor %}];
               this.data.categories = {
@@ -368,13 +370,34 @@
                   {% endfor %}
               };
               this.data.totals = [{% for value in formatted_totals %}"{{ value }}",{% endfor %}];
-              
+
+              // Pre-select the month from the top filter
+              if (this.data.months.length > 0) {
+                  const selectedMonthNum = this.elements.selector.dataset.selectedMonth;
+
+                  if (selectedMonthNum) {
+                      // Convert month number (1-12) to array index (0-11)
+                      const monthIndex = parseInt(selectedMonthNum) - 1;
+
+                      // Check if this index is valid for our months array
+                      if (monthIndex >= 0 && monthIndex < this.data.months.length) {
+                          this.elements.selector.selectedIndex = monthIndex;
+                      } else {
+                          // Fallback: select the last month
+                          this.elements.selector.selectedIndex = this.data.months.length - 1;
+                      }
+                  } else {
+                      // Fallback: select the last month
+                      this.elements.selector.selectedIndex = this.data.months.length - 1;
+                  }
+              }
+
               // Add event listeners
               this.elements.selector.addEventListener('change', () => this.updateTable());
-              
+
               // Create stats display area
               this.createStatsDisplay();
-              
+
               // Initial load
               this.updateTable();
               return true;

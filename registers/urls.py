@@ -10,6 +10,7 @@ urlpatterns = [
     path("expense/recent/", views.recent_expenses_ajax, name="recent_expenses_ajax"),
     path("expense/<int:pk>/details/", views.expense_details_ajax, name="expense_details_ajax"),
     path("expense/<int:pk>/autofill/", views.expense_autofill_ajax, name="expense_autofill_ajax"),
+    path("expense/list-details/", views.expense_list_details_ajax, name="expense_list_details_ajax"),
     path("expense/<int:pk>/delete/", views.delete_expense, name="delete_expense"),
     path("income", views.register_income,
          name="register_income"),
@@ -26,4 +27,7 @@ urlpatterns = [
     path("quick-fill-presets/create/", views.quick_fill_preset_create, name="quick_fill_preset_create"),
     path("quick-fill-presets/<int:pk>/edit/", views.quick_fill_preset_edit, name="quick_fill_preset_edit"),
     path("quick-fill-presets/<int:pk>/delete/", views.quick_fill_preset_delete, name="quick_fill_preset_delete"),
+    # Category autocomplete
+    path("categories/search/", views.category_search_ajax, name="category_search_ajax"),
+    path("categories/create/", views.category_create_ajax, name="category_create_ajax"),
 ]

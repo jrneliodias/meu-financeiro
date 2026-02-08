@@ -8,6 +8,7 @@ from .services import (
     RecentExpenseService,
     QuickFillPresetService,
 )
+from .services.expense_list_service import ExpenseListService
 from .constants import ApiStatus, ApiMessages
 from .services.csv_processor_service import CSVProcessorService
 from reports.services.recurring_expense_service import RecurringExpenseService
@@ -18,7 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Expense
+from .models import Expense, Category
 import json
 import pandas as pd
 import io
@@ -31,6 +32,7 @@ income_service = IncomeService()
 csv_import_service = CSVImportService()
 recent_expense_service = RecentExpenseService()
 quick_fill_preset_service = QuickFillPresetService()
+expense_list_service = ExpenseListService()
 
 
 @login_required
@@ -601,6 +603,66 @@ def expense_autofill_ajax(request, pk):
 
 
 @login_required
+@require_http_methods(["GET"])
+def expense_list_details_ajax(request):
+    """AJAX endpoint para obter lista filtrada de despesas."""
+    try:
+        filter_type = request.GET.get('filter_type', 'recent')
+        filter_value = request.GET.get('filter_value')
+
+        # Get filtered expenses based on filter type
+        if filter_type == 'category':
+            if not filter_value:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Category ID is required for category filter',
+                }, status=ApiStatus.BAD_REQUEST)
+
+            expenses = expense_list_service.get_expenses_by_category(
+                category_id=int(filter_value),
+                user=request.user
+            )
+
+            # Get category name for title
+            try:
+                category = Category.objects.get(id=filter_value)
+                filter_title = category.name
+            except Category.DoesNotExist:
+                filter_title = 'Categoria não encontrada'
+
+        elif filter_type == 'recent':
+            expenses = expense_list_service.get_recent_expenses(request.user)
+            filter_title = 'Recentes'
+
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f'Invalid filter type: {filter_type}',
+            }, status=ApiStatus.BAD_REQUEST)
+
+        # Calculate total amount
+        total_amount = sum(exp['amount'] for exp in expenses)
+
+        return JsonResponse({
+            'success': True,
+            'expenses': expenses,
+            'total_amount': float(total_amount),
+            'count': len(expenses),
+            'filter_info': {
+                'type': filter_type,
+                'value': filter_title,
+                'title': f'Despesas - {filter_title}'
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+        }, status=ApiStatus.SERVER_ERROR)
+
+
+@login_required
 def quick_fill_preset_list(request):
     """List all quick fill presets for the current user."""
     presets = quick_fill_preset_service.get_all_presets_for_user(request.user)
@@ -711,3 +773,54 @@ def quick_fill_preset_delete(request, pk):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def category_search_ajax(request):
+    """AJAX endpoint to search expense categories by name."""
+    search_term = request.GET.get('q', '').strip()
+    categories = (
+        Category.objects
+        .filter(type='expense', name__icontains=search_term)
+        .order_by('name')[:10]
+    )
+    return JsonResponse({
+        'categories': [
+            {'id': cat.id, 'name': cat.name}
+            for cat in categories
+        ],
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def category_create_ajax(request):
+    """AJAX endpoint to create a new expense category."""
+    try:
+        data = json.loads(request.body)
+        category_name = data.get('name', '').strip()
+
+        if not category_name:
+            return JsonResponse(
+                {'error': 'Category name is required.'}, status=400
+            )
+
+        existing = Category.objects.filter(
+            type='expense', name__iexact=category_name
+        ).first()
+        if existing:
+            return JsonResponse({
+                'success': True,
+                'category': {'id': existing.id, 'name': existing.name},
+            })
+
+        category = Category.objects.create(
+            name=category_name, type='expense'
+        )
+        return JsonResponse({
+            'success': True,
+            'category': {'id': category.id, 'name': category.name},
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)

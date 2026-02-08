@@ -1,0 +1,15 @@
+<div class="relative" id="category-autocomplete-wrapper">
+    <input type="text"
+           id="category-search-input"
+           placeholder="Search or create category..."
+           autocomplete="off"
+           class="w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <ul id="category-dropdown"
+        class="hidden absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg max-h-48 overflow-y-auto shadow-lg">
+    </ul>
+
+    <div class="hidden">
+        {{ form.category }}
+    </div>
+</div>

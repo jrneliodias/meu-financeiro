@@ -24,7 +24,6 @@ const RecentExpenses = {
         error: null,
         errorMessage: null,
         content: null,
-        list: null,
         empty: null,
         refreshBtn: null,
         modal: null,
@@ -52,7 +51,6 @@ const RecentExpenses = {
         this.elements.error = document.getElementById('recentExpensesError');
         this.elements.errorMessage = document.getElementById('recentExpensesErrorMessage');
         this.elements.content = document.getElementById('recentExpensesContent');
-        this.elements.list = document.getElementById('recentExpensesList');
         this.elements.cardList = document.getElementById('recentExpensesCardList');
         this.elements.empty = document.getElementById('recentExpensesEmpty');
         this.elements.refreshBtn = document.getElementById('refreshRecentExpenses');
@@ -84,10 +82,6 @@ const RecentExpenses = {
         }
 
         // Delegate events para botoes dinamicos
-        if (this.elements.list) {
-            this.elements.list.addEventListener('click', (e) => this.handleRowAction(e));
-        }
-
         if (this.elements.cardList) {
             this.elements.cardList.addEventListener('click', (e) => this.handleRowAction(e));
         }
@@ -132,7 +126,6 @@ const RecentExpenses = {
             return;
         }
 
-        this.elements.list.innerHTML = expenses.map((expense) => this.renderExpenseRow(expense)).join('');
         this.elements.cardList.innerHTML = expenses.map((expense) => this.renderExpenseCard(expense)).join('');
 
         this.hideLoading();
@@ -142,59 +135,7 @@ const RecentExpenses = {
     },
 
     /**
-     * Renderiza uma linha da tabela
-     */
-    renderExpenseRow: function (expense) {
-        return `
-            <tr class="hover:bg-zinc-700/50 transition-colors">
-                <td class="px-4 py-3 text-gray-300 whitespace-nowrap">${expense.date_formatted}</td>
-                <td class="px-4 py-3 text-gray-200 truncate max-w-xs" title="${expense.description}">${expense.description}</td>
-                <td class="px-4 py-3 text-right text-gray-200 whitespace-nowrap">${expense.amount_formatted}</td>
-                <td class="px-4 py-3 text-center">
-                    <div class="flex justify-center gap-2">
-                        <button
-                            type="button"
-                            class="action-btn autofill-btn text-blue-400 hover:text-blue-300 p-1"
-                            data-id="${expense.id}"
-                            data-action="autofill"
-                            title="Usar como template"
-                        >
-                            <i class="fas fa-copy"></i>
-                        </button>
-                        <button
-                            type="button"
-                            class="action-btn details-btn text-gray-400 hover:text-gray-300 p-1"
-                            data-id="${expense.id}"
-                            data-action="details"
-                            title="Ver detalhes"
-                        >
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <a
-                            href="/expense/${expense.id}/update/"
-                            class="action-btn edit-btn text-yellow-400 hover:text-yellow-300 p-1"
-                            title="Editar"
-                        >
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button
-                            type="button"
-                            class="action-btn delete-btn text-red-400 hover:text-red-300 p-1"
-                            data-id="${expense.id}"
-                            data-description="${expense.description}"
-                            data-action="delete"
-                            title="Excluir"
-                        >
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    },
-
-    /**
-     * Renderiza um card para layout mobile
+     * Renderiza um card de despesa
      */
     renderExpenseCard: function (expense) {
         return `
@@ -202,9 +143,9 @@ const RecentExpenses = {
                 <p class="text-white font-semibold text-base">${expense.description}</p>
                 <p class="text-green-400 font-bold text-xl">${expense.amount_formatted}</p>
                 <p class="text-gray-400 text-sm">${expense.date_formatted}</p>
-                <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-zinc-600">
+                <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-600">
                     <button type="button" class="action-btn flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="autofill">
-                        <i class="fas fa-copy"></i>Usar como template
+                        <i class="fas fa-copy"></i>Usar
                     </button>
                     <button type="button" class="action-btn flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="details">
                         <i class="fas fa-eye"></i>Ver detalhes
@@ -235,7 +176,14 @@ const RecentExpenses = {
                 this.autofillForm(id);
                 break;
             case 'details':
-                this.showDetailsModal(id);
+                // Find the expense to get its category_id
+                const expense = this.expenses.find(exp => exp.id == id);
+                if (expense && expense.category_id && window.expenseListModal) {
+                    // Open new modal with category filter
+                    window.expenseListModal.open('category', expense.category_id, id);
+                } else {
+                    console.error('Could not open expense list modal - expense or category not found');
+                }
                 break;
             case 'delete':
                 const description = btn.dataset.description;
@@ -324,125 +272,6 @@ const RecentExpenses = {
         }
     },
 
-    /**
-     * Exibe o modal de detalhes
-     */
-    showDetailsModal: function (expenseId) {
-        if (!this.elements.modal) return;
-
-        this.elements.modal.classList.remove('hidden');
-        this.elements.modalLoading.classList.remove('hidden');
-        this.elements.modalContent.classList.add('hidden');
-        this.elements.modalError.classList.add('hidden');
-
-        const url = this.ENDPOINTS.DETAILS.replace('{id}', expenseId);
-
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    this.renderModalContent(data.expense);
-                } else {
-                    this.showModalError(data.error || 'Erro ao carregar detalhes');
-                }
-            })
-            .catch((error) => {
-                console.error('Error loading expense details:', error);
-                this.showModalError('Erro de conexao');
-            });
-    },
-
-    /**
-     * Renderiza o conteudo do modal
-     */
-    renderModalContent: function (expense) {
-        const html = `
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-400">Descricao</label>
-                        <p class="text-white">${expense.description}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400">Valor</label>
-                        <p class="text-white text-lg font-semibold">${expense.amount_formatted}</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-400">Data</label>
-                        <p class="text-white">${expense.date_formatted}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400">Categoria</label>
-                        <p class="text-white">${expense.category_name || '-'}</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-400">Forma de Pagamento</label>
-                        <p class="text-white">${expense.payment_method_name || '-'}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400">Tipo</label>
-                        <p class="text-white">
-                            ${expense.is_installment ? '<span class="text-blue-400">Parcelamento</span>' : ''}
-                            ${expense.is_recurring ? '<span class="text-green-400">Recorrente</span>' : ''}
-                            ${!expense.is_installment && !expense.is_recurring ? 'Avulso' : ''}
-                        </p>
-                    </div>
-                </div>
-                ${
-                    expense.installment_info
-                        ? `
-                <div class="mt-4 p-3 bg-zinc-700/50 rounded">
-                    <label class="block text-sm text-gray-400 mb-2">Informacoes do Parcelamento</label>
-                    <p class="text-white">${expense.installment_info.description}</p>
-                    <p class="text-gray-300 text-sm">
-                        Total: ${expense.installment_info.total_amount_formatted} em ${expense.installment_info.total_installments}x
-                    </p>
-                </div>
-                `
-                        : ''
-                }
-            </div>
-
-            <div class="flex flex-wrap gap-2 mt-6 pt-4 border-t border-zinc-700">
-                <button
-                    type="button"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors text-sm flex-1 min-w-0"
-                    data-modal-action="autofill"
-                    data-id="${expense.id}"
-                >
-                    <i class="fas fa-copy mr-1"></i>Usar
-                </button>
-                <a
-                    href="/expense/${expense.id}/update/"
-                    class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded transition-colors text-sm text-center flex-1 min-w-0"
-                >
-                    <i class="fas fa-edit mr-1"></i>Editar
-                </a>
-                <button
-                    type="button"
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition-colors text-sm flex-1 min-w-0"
-                    data-modal-action="delete"
-                    data-id="${expense.id}"
-                    data-description="${expense.description}"
-                >
-                    <i class="fas fa-trash mr-1"></i>Excluir
-                </button>
-            </div>
-        `;
-
-        this.elements.modalContent.innerHTML = html;
-        this.elements.modalLoading.classList.add('hidden');
-        this.elements.modalContent.classList.remove('hidden');
-    },
 
     /**
      * Exclui uma despesa com confirmacao

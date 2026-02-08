@@ -26,27 +26,9 @@
         <span id="recentExpensesErrorMessage" class="text-red-300"></span>
     </div>
 
-    <!-- Table Content -->
+    <!-- Card Content -->
     <div id="recentExpensesContent" class="hidden">
-        <!-- Desktop table (hidden on mobile) -->
-        <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-zinc-700">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-gray-300 text-sm font-medium">Data</th>
-                        <th class="px-4 py-3 text-left text-gray-300 text-sm font-medium">Descricao</th>
-                        <th class="px-4 py-3 text-right text-gray-300 text-sm font-medium">Valor</th>
-                        <th class="px-4 py-3 text-center text-gray-300 text-sm font-medium">Acoes</th>
-                    </tr>
-                </thead>
-                <tbody id="recentExpensesList" class="divide-y divide-zinc-700">
-                    <!-- Rows populated via JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Mobile card list (hidden on desktop) -->
-        <div id="recentExpensesCardList" class="sm:hidden flex flex-col gap-3">
+        <div id="recentExpensesCardList" class="flex flex-col gap-3">
             <!-- Cards populated via JavaScript -->
         </div>
     </div>

@@ -83,7 +83,8 @@
         </div>
         <!-- Expenses list -->
         <div class="bg-zinc-700 rounded-lg overflow-hidden">
-          <div class="overflow-x-auto">
+          <!-- Desktop Table (hidden on mobile) -->
+          <div class="hidden sm:block overflow-x-auto">
             <table class="w-full">
               <thead class="bg-zinc-600">
                 <tr class="text-left">
@@ -95,9 +96,14 @@
                 </tr>
               </thead>
               <tbody id="expensesList" class="divide-y divide-zinc-600">
-                <!-- Expenses will be populated here -->
+                <!-- Expenses will be populated here via JavaScript -->
               </tbody>
             </table>
+          </div>
+
+          <!-- Mobile Card List (hidden on desktop) -->
+          <div id="expensesCardList" class="sm:hidden flex flex-col gap-3 p-3">
+            <!-- Cards will be populated via JavaScript -->
           </div>
         </div>
       </div>
@@ -659,11 +665,14 @@
       
       document.getElementById('modalExpenseCount').textContent = data.count;
 
-      // Populate expenses table
+      // Populate expenses table (desktop) and cards (mobile)
       const tableBody = document.getElementById('expensesList');
+      const cardContainer = document.getElementById('expensesCardList');
       tableBody.innerHTML = ''; // Clear existing content
+      cardContainer.innerHTML = ''; // Clear existing cards
 
       if (data.expenses.length === 0) {
+        // Empty state for table
         tableBody.innerHTML = `
           <tr>
             <td colspan="5" class="px-4 py-8 text-center text-gray-400">
@@ -672,8 +681,16 @@
             </td>
           </tr>
         `;
+        // Empty state for cards
+        cardContainer.innerHTML = `
+          <div class="text-center text-gray-400 py-8">
+            <i class="fas fa-info-circle mr-2"></i>
+            No expenses found for this date.
+          </div>
+        `;
       } else {
         data.expenses.forEach(expense => {
+          // Desktop table row
           const row = document.createElement('tr');
           row.className = 'hover:bg-zinc-600 transition-colors duration-150';
           row.innerHTML = `
@@ -695,14 +712,37 @@
             </td>
             <td class="px-4 py-3 text-right">
               <span class="font-semibold text-green-400">
-                ${new Intl.NumberFormat('pt-BR', { 
-                  style: 'currency', 
-                  currency: 'BRL' 
+                ${new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
                 }).format(expense.amount)}
               </span>
             </td>
           `;
           tableBody.appendChild(row);
+
+          // Mobile card
+          const card = document.createElement('div');
+          card.className = 'bg-zinc-600/50 rounded-lg p-4 flex flex-col gap-2';
+          card.innerHTML = `
+            <p class="text-white font-semibold text-base">${this.escapeHtml(expense.description)}</p>
+            <p class="text-green-400 font-bold text-xl">
+              ${new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+              }).format(expense.amount)}
+            </p>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-600 text-gray-200">
+                ${this.escapeHtml(expense.category)}
+              </span>
+              <span class="text-gray-400">${expense.created_at || '--:--'}</span>
+            </div>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-blue-100 w-fit">
+              ${this.escapeHtml(expense.payment_method)}
+            </span>
+          `;
+          cardContainer.appendChild(card);
         });
       }
     }

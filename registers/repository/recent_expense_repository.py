@@ -70,3 +70,29 @@ class RecentExpenseRepository:
             )
         except Expense.DoesNotExist:
             return None
+
+    def get_expenses_by_category(
+        self,
+        category_id: int,
+        user: User,
+        limit: int = 50
+    ) -> QuerySet:
+        """
+        Retorna despesas filtradas por categoria com queries otimizadas.
+
+        Args:
+            category_id: ID da categoria
+            user: Usuário logado
+            limit: Número máximo de registros (default: 50)
+
+        Returns:
+            QuerySet otimizado com select_related
+
+        Performance: Usa select_related para evitar N+1 queries
+        """
+        return (
+            Expense.objects
+            .filter(user=user, category_id=category_id)
+            .select_related('category', 'payment_method', 'installment_plan')
+            .order_by('-date', '-updated_at')[:limit]
+        )

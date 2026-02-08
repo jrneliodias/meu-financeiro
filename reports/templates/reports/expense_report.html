@@ -22,7 +22,7 @@
       </div>
 
       {# Expense Category Table Component #}
-      {% include "reports/components/expense_category_table.html" with all_months=all_months formatted_expenses_by_category=formatted_expenses_by_category formatted_totals=formatted_totals %}
+      {% include "reports/components/expense_category_table.html" with all_months=all_months formatted_expenses_by_category=formatted_expenses_by_category formatted_totals=formatted_totals selected_month=selected_month selected_year=selected_year %}
       {# Expense Details Table Component #}
       {% include "reports/components/expense_details_table.html" with monthly_expenses_queryset=monthly_expenses_queryset %}
     </section>
