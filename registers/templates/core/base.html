@@ -33,6 +33,11 @@
       <i class="fa-solid fa-coins text-xs"></i>
       <span class="text-sm hidden lg:block">Register Income</span>
     </a>
+    <a href="{% url 'quick_fill_preset_list' %}"
+      class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'quick-fill-presets' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-bolt text-xs"></i>
+      <span class="text-sm hidden lg:block">Quick Fill Presets</span>
+    </a>
     <a href="{% url 'recurring_expense_list' %}"
       class="font-semibold flex items-center gap-2 hover:bg-zinc-700 px-4 py-2 rounded-lg {% if 'recurring-expense' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
       <i class="fa-solid fa-repeat text-xs"></i>

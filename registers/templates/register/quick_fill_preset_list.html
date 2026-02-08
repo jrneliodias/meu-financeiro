@@ -1,0 +1,164 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Quick Fill Presets</h2>
+        <a href="{% url 'quick_fill_preset_create' %}"
+           class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>Add New
+        </a>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="hidden md:block">
+        <table class="w-full p-2">
+            <thead class="border-b border-zinc-700">
+                <tr>
+                    <th class="text-start p-2">Order</th>
+                    <th class="text-start p-2">Icon</th>
+                    <th class="text-start p-2">Name</th>
+                    <th class="text-start p-2">Description</th>
+                    <th class="text-start p-2">Amount</th>
+                    <th class="text-start p-2">Category</th>
+                    <th class="text-start p-2">Payment Method</th>
+                    <th class="text-center p-2">Active</th>
+                    <th class="text-end p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for preset in presets %}
+                <tr class="*:p-2 border-b border-zinc-700 {% if not preset.is_active %}opacity-50{% endif %}">
+                    <td>{{ preset.display_order }}</td>
+                    <td><i class="fas {{ preset.icon }}"></i></td>
+                    <td>{{ preset.name }}</td>
+                    <td>{{ preset.description }}</td>
+                    <td>{{ preset.default_amount }}</td>
+                    <td>{{ preset.category.name|default:"--" }}</td>
+                    <td>{{ preset.payment_method.name|default:"--" }}</td>
+                    <td class="text-center">
+                        <i class="fas fa-toggle-{{ preset.is_active|yesno:'on,off' }} text-2xl
+                           {{ preset.is_active|yesno:'text-green-500,text-gray-500' }}"></i>
+                    </td>
+                    <td class="text-end space-x-2">
+                        <a href="{% url 'quick_fill_preset_edit' preset.id %}"
+                           class="text-blue-600 hover:text-blue-800">
+                            <i class="fa-solid fa-edit"></i>
+                        </a>
+                        <button class="delete-preset-btn text-red-600 hover:text-red-800 cursor-pointer"
+                                data-id="{{ preset.id }}"
+                                data-name="{{ preset.name }}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center p-4">
+                        No presets found.
+                        <a href="{% url 'quick_fill_preset_create' %}"
+                           class="text-blue-400 hover:text-blue-300 ml-2">
+                            Create your first preset
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="md:hidden grid grid-cols-1 gap-4">
+        {% for preset in presets %}
+        <div class="bg-zinc-700/30 rounded-lg p-4 space-y-3 {% if not preset.is_active %}opacity-50{% endif %}">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas {{ preset.icon }} text-lg"></i>
+                    <h3 class="font-bold">{{ preset.name }}</h3>
+                </div>
+                <span class="font-bold">{{ preset.default_amount }}</span>
+            </div>
+            <div class="text-sm text-gray-400 border-t border-zinc-600 pt-2 space-y-1">
+                <p>{{ preset.description }}</p>
+                <p>{{ preset.category.name|default:"--" }} / {{ preset.payment_method.name|default:"--" }}</p>
+            </div>
+            <div class="flex justify-end gap-3 border-t border-zinc-600 pt-2">
+                <a href="{% url 'quick_fill_preset_edit' preset.id %}"
+                   class="text-blue-400 hover:text-blue-300">
+                    <i class="fa-solid fa-edit"></i>
+                </a>
+                <button class="delete-preset-btn text-red-400 hover:text-red-300 cursor-pointer"
+                        data-id="{{ preset.id }}"
+                        data-name="{{ preset.name }}">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center p-6 bg-zinc-700/30 rounded-lg">
+            No presets found.
+            <a href="{% url 'quick_fill_preset_create' %}"
+               class="text-blue-400 hover:text-blue-300">
+                Create your first preset
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if messages %}
+<aside class="mt-4">
+    <ul class="messages space-y-2">
+        {% for message in messages %}
+        <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
+        {% endfor %}
+    </ul>
+</aside>
+{% endif %}
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.querySelectorAll('.delete-preset-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const presetId = this.dataset.id;
+        const presetName = this.dataset.name;
+
+        if (!confirm('Delete preset "' + presetName + '"?')) return;
+
+        fetch('/register/quick-fill-presets/' + presetId + '/delete/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Error deleting preset.');
+            }
+        })
+        .catch(function() {
+            alert('Error deleting preset.');
+        });
+    });
+});
+</script>
+{% endblock content %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense, Income, Category, RecurringExpense, PaymentMethod
+from .models import Expense, Income, Category, RecurringExpense, PaymentMethod, QuickFillPreset
 from .components.expense_form.expense_form_component import ExpenseFormComponent
 from .components.expense_form.quick_fill_menu import QuickFillMenu
 
@@ -19,9 +19,12 @@ class ExpenseForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Initialize quick fill menu and form component
-        quick_fill_menu = QuickFillMenu()
+        # Initialize quick fill menu with user for database loading
+        quick_fill_menu = QuickFillMenu(user=user)
         self.form_component = ExpenseFormComponent(user, quick_fill_menu)
+
+        # Store quick fill options for template rendering
+        self.quick_fill_options = quick_fill_menu.get_all_options_with_keys()
 
         # Update form fields with component configuration
         self.fields.update(self.form_component.get_form_fields())
@@ -343,3 +346,30 @@ class CSVProcessorForm(forms.Form):
                 )
 
         return cleaned_data
+
+
+class QuickFillPresetForm(forms.ModelForm):
+    """Form for creating and editing Quick Fill Presets."""
+
+    class Meta:
+        model = QuickFillPreset
+        fields = [
+            'name', 'description', 'default_amount',
+            'category', 'payment_method', 'icon',
+            'is_active', 'display_order',
+        ]
+        widgets = {
+            'icon': forms.TextInput(attrs={
+                'placeholder': 'fa-car-side',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['category'].queryset = Category.objects.filter(
+            type='expense'
+        ).order_by('name')
+
+        self.fields['payment_method'].queryset = PaymentMethod.objects.order_by('name')

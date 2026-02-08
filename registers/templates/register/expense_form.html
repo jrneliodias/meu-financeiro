@@ -7,24 +7,30 @@
             <h1 class="text-2xl font-bold">Register Expense</h1>
             <nav class="py-1">
                 <ul class="flex flex-wrap gap-2">
+                    {% for key, option in quick_fill_options.items %}
                     <li>
-                        <a href="{% url 'register_expense' %}?quick_fill=uber"
+                        <a href="{% url 'register_expense' %}?quick_fill={{ key }}"
                            class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
-                            <i class="fas fa-car-side mr-2"></i>Uber Ride
+                            <i class="fas {{ option.icon }} mr-2"></i>{{ option.name }}
                         </a>
                     </li>
+                    {% endfor %}
+                    {% if quick_fill_options %}
                     <li>
-                        <a href="{% url 'register_expense' %}?quick_fill=food"
-                           class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
-                            <i class="fas fa-utensils mr-2"></i>Food
+                        <a href="{% url 'quick_fill_preset_list' %}"
+                           class="block px-4 py-2 text-gray-500 hover:bg-zinc-700 rounded-lg"
+                           title="Manage presets">
+                            <i class="fas fa-cog"></i>
                         </a>
                     </li>
+                    {% else %}
                     <li>
-                        <a href="{% url 'register_expense' %}?quick_fill=market"
-                           class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
-                            <i class="fas fa-shopping-cart mr-2"></i>Market
+                        <a href="{% url 'quick_fill_preset_create' %}"
+                           class="block px-4 py-2 text-gray-500 hover:bg-zinc-700 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Add Quick Fill
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
             </nav>
         </header>

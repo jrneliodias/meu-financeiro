@@ -102,6 +102,34 @@ class Income(models.Model):
         return f"{self.description} - {str(self.amount)}"
 
 
+class QuickFillPreset(models.Model):
+    """Pre-configured expense templates for rapid data entry via quick fill buttons."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=100)
+    default_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True,
+        limit_choices_to={'type': 'expense'}
+    )
+    payment_method = models.ForeignKey(
+        PaymentMethod, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    icon = models.CharField(max_length=50, default='fa-bolt')
+    is_active = models.BooleanField(default=True)
+    display_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name = 'Quick Fill Preset'
+        verbose_name_plural = 'Quick Fill Presets'
+
+    def __str__(self):
+        return self.name
+
+
 class Investment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=100)

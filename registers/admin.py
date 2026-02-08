@@ -117,6 +117,23 @@ class InvestmentAdmin(admin.ModelAdmin):
     actions = [duplicate_entries]
 
 
+class QuickFillPresetAdmin(admin.ModelAdmin):
+    list_display = (
+        'name', 'description', 'default_amount', 'category',
+        'payment_method', 'icon', 'is_active', 'display_order',
+        'created_at', 'updated_at',
+    )
+    list_filter = ('is_active', 'category', 'payment_method')
+    search_fields = ('name', 'description')
+    ordering = ['display_order', 'name']
+    list_editable = ('is_active', 'display_order')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'user', 'category', 'payment_method'
+        )
+
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Expense, ExpenseAdmin)
 admin.site.register(Income, IncomeAdmin)
@@ -124,3 +141,4 @@ admin.site.register(Investment, InvestmentAdmin)
 admin.site.register(PaymentMethod, PaymentMethodAdmin)
 admin.site.register(Installment, InstallmentAdmin)
 admin.site.register(RecurringExpense, RecurringExpenseAdmin)
+admin.site.register(QuickFillPreset, QuickFillPresetAdmin)

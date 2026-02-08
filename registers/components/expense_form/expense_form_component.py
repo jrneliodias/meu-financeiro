@@ -35,25 +35,13 @@ class ExpenseFormComponent(BaseFormComponent):
         }
 
     def apply_quick_fill(self, option_key: str, form):
-        """Apply quick fill option to form"""
+        """Apply quick fill option to form using preset FK IDs directly."""
         option = self.quick_fill_menu.get_option(option_key)
         if option:
             form.initial['description'] = option.description
             if option.default_amount:
                 form.initial['amount'] = option.default_amount
-
-            try:
-                category = Category.objects.get(
-                    name=option.category_name
-                )
-                form.initial['category'] = category.id
-            except Category.DoesNotExist:
-                pass
-
-            try:
-                payment_method = PaymentMethod.objects.get(
-                    name=option.payment_method_name
-                )
-                form.initial['payment_method'] = payment_method.id
-            except PaymentMethod.DoesNotExist:
-                pass
+            if option.category_id:
+                form.initial['category'] = option.category_id
+            if option.payment_method_id:
+                form.initial['payment_method'] = option.payment_method_id

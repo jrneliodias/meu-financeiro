@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
-from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm
+from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm, QuickFillPresetForm
 from .services import (
     ExpenseService,
     InstallmentService,
     IncomeService,
     CSVImportService,
     RecentExpenseService,
+    QuickFillPresetService,
 )
 from .constants import ApiStatus, ApiMessages
 from .services.csv_processor_service import CSVProcessorService
@@ -29,6 +30,7 @@ expense_service = ExpenseService()
 income_service = IncomeService()
 csv_import_service = CSVImportService()
 recent_expense_service = RecentExpenseService()
+quick_fill_preset_service = QuickFillPresetService()
 
 
 @login_required
@@ -44,7 +46,10 @@ def register_expense(request):
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
-            return render(request, 'register/expense_form.html', {'form': form})
+            return render(request, 'register/expense_form.html', {
+                'form': form,
+                'quick_fill_options': form.quick_fill_options,
+            })
 
         print(f"[DEBUG] Form is VALID. Cleaned data: {form.cleaned_data}")
         expense_data = form.cleaned_data
@@ -67,7 +72,10 @@ def register_expense(request):
             import traceback
             traceback.print_exc()
             messages.error(request, f"Error creating expense: {e}")
-            return render(request, 'register/expense_form.html', {'form': form})
+            return render(request, 'register/expense_form.html', {
+                'form': form,
+                'quick_fill_options': form.quick_fill_options,
+            })
 
         # Redirect after successful POST
         print(f"[DEBUG] Redirecting to register_expense")
@@ -80,7 +88,10 @@ def register_expense(request):
         if quick_fill:
             form.apply_quick_fill(quick_fill)
 
-    return render(request, 'register/expense_form.html', {'form': form})
+    return render(request, 'register/expense_form.html', {
+        'form': form,
+        'quick_fill_options': form.quick_fill_options,
+    })
 
 
 @login_required
@@ -587,3 +598,116 @@ def expense_autofill_ajax(request, pk):
             'success': False,
             'error': str(e),
         }, status=ApiStatus.SERVER_ERROR)
+
+
+@login_required
+def quick_fill_preset_list(request):
+    """List all quick fill presets for the current user."""
+    presets = quick_fill_preset_service.get_all_presets_for_user(request.user)
+    return render(request, 'register/quick_fill_preset_list.html', {
+        'presets': presets,
+    })
+
+
+@login_required
+def quick_fill_preset_create(request):
+    """Create a new quick fill preset."""
+    if request.method == 'POST':
+        form = QuickFillPresetForm(request.POST, user=request.user)
+
+        if not form.is_valid():
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return render(request, 'register/quick_fill_preset_form.html', {
+                'form': form,
+                'is_editing': False,
+            })
+
+        preset_data = form.cleaned_data
+        try:
+            preset = quick_fill_preset_service.create_preset(
+                request.user, preset_data
+            )
+            messages.success(
+                request,
+                f"Preset '{preset.name}' created successfully."
+            )
+            return redirect('quick_fill_preset_list')
+        except Exception as e:
+            messages.error(request, f"Error creating preset: {e}")
+            return render(request, 'register/quick_fill_preset_form.html', {
+                'form': form,
+                'is_editing': False,
+            })
+    else:
+        form = QuickFillPresetForm(user=request.user)
+
+    return render(request, 'register/quick_fill_preset_form.html', {
+        'form': form,
+        'is_editing': False,
+    })
+
+
+@login_required
+def quick_fill_preset_edit(request, pk):
+    """Edit an existing quick fill preset."""
+    preset = quick_fill_preset_service.get_preset_by_id_for_user(
+        pk, request.user
+    )
+    if preset is None:
+        messages.error(request, "Preset not found.")
+        return redirect('quick_fill_preset_list')
+
+    if request.method == 'POST':
+        form = QuickFillPresetForm(
+            request.POST, instance=preset, user=request.user
+        )
+
+        if not form.is_valid():
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return render(request, 'register/quick_fill_preset_form.html', {
+                'form': form,
+                'is_editing': True,
+            })
+
+        try:
+            form.save()
+            messages.success(
+                request,
+                f"Preset '{preset.name}' updated successfully."
+            )
+            return redirect('quick_fill_preset_list')
+        except Exception as e:
+            messages.error(request, f"Error updating preset: {e}")
+            return render(request, 'register/quick_fill_preset_form.html', {
+                'form': form,
+                'is_editing': True,
+            })
+    else:
+        form = QuickFillPresetForm(instance=preset, user=request.user)
+
+    return render(request, 'register/quick_fill_preset_form.html', {
+        'form': form,
+        'is_editing': True,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def quick_fill_preset_delete(request, pk):
+    """Delete a quick fill preset via AJAX."""
+    try:
+        is_deleted = quick_fill_preset_service.delete_preset(pk, request.user)
+        if not is_deleted:
+            return JsonResponse(
+                {'error': 'Preset not found'}, status=404
+            )
+        return JsonResponse({
+            'success': True,
+            'message': 'Preset deleted successfully.',
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

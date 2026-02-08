@@ -21,4 +21,9 @@ urlpatterns = [
     path("csv-processor", views.csv_processor, name="csv_processor"),
     path("csv-processor/download", views.csv_processor_download, name="csv_processor_download"),
     path("csv-processor/update", views.csv_processor_update_data, name="csv_processor_update_data"),
+    # Quick Fill Preset CRUD
+    path("quick-fill-presets/", views.quick_fill_preset_list, name="quick_fill_preset_list"),
+    path("quick-fill-presets/create/", views.quick_fill_preset_create, name="quick_fill_preset_create"),
+    path("quick-fill-presets/<int:pk>/edit/", views.quick_fill_preset_edit, name="quick_fill_preset_edit"),
+    path("quick-fill-presets/<int:pk>/delete/", views.quick_fill_preset_delete, name="quick_fill_preset_delete"),
 ]

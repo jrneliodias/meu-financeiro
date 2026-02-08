@@ -9,6 +9,7 @@ from .installment_service import InstallmentService
 from .income_service import IncomeService
 from .csv_import_service import CSVImportService
 from .recent_expense_service import RecentExpenseService
+from .quick_fill_preset_service import QuickFillPresetService
 
 __all__ = [
     'ExpenseService',
@@ -16,4 +17,5 @@ __all__ = [
     'IncomeService',
     'CSVImportService',
     'RecentExpenseService',
+    'QuickFillPresetService',
 ]
