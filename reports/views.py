@@ -478,6 +478,9 @@ def expense_details_ajax(request):
 
         expense_repo = ExpenseRepository()
         expenses = expense_repo.get_expenses_by_date(target_date)
+        recurring_total = expense_repo.get_recurring_total_by_date(target_date)
+        installment_total = expense_repo.get_installment_total_by_date(target_date)
+        category_totals = expense_repo.get_category_totals_by_date(target_date)
 
         # Convert QuerySet to list and ensure JSON serialization
         expenses_list = []
@@ -488,19 +491,29 @@ def expense_details_ajax(request):
                 'id': expense['id'],
                 'description': expense['description'],
                 'amount': float(expense['amount']),  # Convert Decimal to float for JSON
-                'category': expense['category__name'] or 'No Category',
-                'payment_method': expense['payment_method__name'] or 'No Payment Method',
-                'created_at': expense['created_at'].strftime('%H:%M') if expense['created_at'] else ''
+                'category': expense['category__name'] or 'Sem Categoria',
+                'payment_method': expense['payment_method__name'] or 'Sem Método',
+                'created_at': expense['created_at'].strftime('%H:%M') if expense['created_at'] else '',
+                'is_recurring': expense['reccurring_expense_id'] is not None,
+                'is_installment': expense['installment_plan_id'] is not None,
             }
             expenses_list.append(expense_data)
             total_amount += expense['amount']
+
+        categories = [
+            {'category': row['category__name'] or 'Sem Categoria', 'total': float(row['total'])}
+            for row in category_totals
+        ]
 
         return JsonResponse({
             'date': date_str,
             'expenses': expenses_list,
             'total_amount': float(total_amount),
             'count': len(expenses_list),
-            'formatted_date': target_date.strftime('%d/%m/%Y')  # Brazilian format
+            'formatted_date': target_date.strftime('%d/%m/%Y'),  # Brazilian format
+            'recurring_total': float(recurring_total),
+            'installment_total': float(installment_total),
+            'categories': categories,
         })
 
     except Exception as e:

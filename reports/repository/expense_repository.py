@@ -221,13 +221,40 @@ class ExpenseRepository:
             .select_related('category', 'payment_method')  # Efficient joins
             .values(
                 'id',
-                'description', 
+                'description',
                 'amount',
                 'category__name',
                 'payment_method__name',
-                'created_at'
+                'created_at',
+                'reccurring_expense_id',
+                'installment_plan_id',
             )
             .order_by('-amount', 'description')  # Highest amounts first
+        )
+
+    def get_recurring_total_by_date(self, target_date):
+        result = (
+            Expense.objects
+            .filter(date=target_date, reccurring_expense__isnull=False)
+            .aggregate(total=Sum('amount'))
+        )
+        return result['total'] or 0
+
+    def get_installment_total_by_date(self, target_date):
+        result = (
+            Expense.objects
+            .filter(date=target_date, installment_plan__isnull=False)
+            .aggregate(total=Sum('amount'))
+        )
+        return result['total'] or 0
+
+    def get_category_totals_by_date(self, target_date):
+        return (
+            Expense.objects
+            .filter(date=target_date)
+            .values('category__name')
+            .annotate(total=Sum('amount'))
+            .order_by('-total')
         )
 
     def get_expenses_by_category_and_month(

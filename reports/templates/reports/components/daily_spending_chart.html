@@ -71,15 +71,32 @@
       <!-- Success state -->
       <div id="modalContent" class="hidden">
         <!-- Summary section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Total Amount</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Total</h3>
             <p class="text-2xl font-bold text-blue-400" id="modalTotalAmount">R$ 0,00</p>
           </div>
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Number of Expenses</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Nº de Despesas</h3>
             <p class="text-2xl font-bold text-green-400" id="modalExpenseCount">0</p>
           </div>
+          <div class="bg-zinc-700 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Recorrentes</h3>
+            <p class="text-2xl font-bold text-orange-400" id="modalRecurringTotal">R$ 0,00</p>
+          </div>
+          <div class="bg-zinc-700 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Parcelas</h3>
+            <p class="text-2xl font-bold text-purple-400" id="modalInstallmentTotal">R$ 0,00</p>
+          </div>
+          <div class="bg-zinc-900 rounded-lg p-4 text-center border border-zinc-600">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Total do Dia</h3>
+            <p class="text-2xl font-bold text-white" id="modalDayTotal">R$ 0,00</p>
+          </div>
+        </div>
+        <!-- Category breakdown -->
+        <div class="mb-5">
+          <h3 class="text-sm font-medium text-gray-400 mb-2">Por Categoria</h3>
+          <div id="categoryCards" class="flex flex-wrap gap-2"></div>
         </div>
         <!-- Expenses list -->
         <div class="bg-zinc-700 rounded-lg overflow-hidden">
@@ -656,14 +673,29 @@
       document.getElementById('modalError').classList.add('hidden');
       document.getElementById('modalContent').classList.remove('hidden');
 
+      const formatBRL = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
       // Update summary cards
-      document.getElementById('modalTotalAmount').textContent = 
-        new Intl.NumberFormat('pt-BR', { 
-          style: 'currency', 
-          currency: 'BRL' 
-        }).format(data.total_amount);
-      
+      document.getElementById('modalTotalAmount').textContent = formatBRL(data.total_amount);
       document.getElementById('modalExpenseCount').textContent = data.count;
+      document.getElementById('modalRecurringTotal').textContent = formatBRL(data.recurring_total || 0);
+      document.getElementById('modalInstallmentTotal').textContent = formatBRL(data.installment_total || 0);
+
+      const dayTotal = data.total_amount - (data.recurring_total || 0) - (data.installment_total || 0);
+      document.getElementById('modalDayTotal').textContent = formatBRL(dayTotal);
+
+      // Category breakdown cards
+      const categoryCards = document.getElementById('categoryCards');
+      categoryCards.innerHTML = '';
+      (data.categories || []).forEach(cat => {
+        const el = document.createElement('div');
+        el.className = 'bg-zinc-600 rounded-lg px-3 py-2 text-sm flex flex-col items-center min-w-[100px]';
+        el.innerHTML = `
+          <span class="text-gray-300 text-xs text-center">${this.escapeHtml(cat.category || 'Sem Categoria')}</span>
+          <span class="text-blue-300 font-bold">${formatBRL(cat.total)}</span>
+        `;
+        categoryCards.appendChild(el);
+      });
 
       // Populate expenses table (desktop) and cards (mobile)
       const tableBody = document.getElementById('expensesList');
@@ -690,12 +722,21 @@
         `;
       } else {
         data.expenses.forEach(expense => {
+          const recurringBadge = expense.is_recurring
+            ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-700 text-orange-200">↻</span>`
+            : '';
+          const installmentBadge = expense.is_installment
+            ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-700 text-purple-200">parcela</span>`
+            : '';
+
           // Desktop table row
           const row = document.createElement('tr');
           row.className = 'hover:bg-zinc-600 transition-colors duration-150';
           row.innerHTML = `
             <td class="px-4 py-3">
-              <div class="font-medium text-white">${this.escapeHtml(expense.description)}</div>
+              <div class="font-medium text-white flex items-center">
+                ${this.escapeHtml(expense.description)}${recurringBadge}${installmentBadge}
+              </div>
             </td>
             <td class="px-4 py-3">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-600 text-gray-200">
@@ -712,10 +753,7 @@
             </td>
             <td class="px-4 py-3 text-right">
               <span class="font-semibold text-green-400">
-                ${new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL'
-                }).format(expense.amount)}
+                ${formatBRL(expense.amount)}
               </span>
             </td>
           `;
@@ -725,12 +763,11 @@
           const card = document.createElement('div');
           card.className = 'bg-zinc-600/50 rounded-lg p-4 flex flex-col gap-2';
           card.innerHTML = `
-            <p class="text-white font-semibold text-base">${this.escapeHtml(expense.description)}</p>
+            <p class="text-white font-semibold text-base flex items-center flex-wrap gap-1">
+              ${this.escapeHtml(expense.description)}${recurringBadge}${installmentBadge}
+            </p>
             <p class="text-green-400 font-bold text-xl">
-              ${new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-              }).format(expense.amount)}
+              ${formatBRL(expense.amount)}
             </p>
             <div class="flex items-center gap-2 text-sm">
               <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-600 text-gray-200">
@@ -842,7 +879,16 @@
     
     console.log('Data validation passed, initializing chart...');
     const dailyChart = new DailySpendingChart('dailySpendingChart', dailySpendingData);
-    
+
+    // On mobile (< 768px), default to 7 days instead of 30
+    if (window.innerWidth < 768) {
+      const periodSelector = document.getElementById('dailyChartPeriod');
+      if (periodSelector) {
+        periodSelector.value = '7';
+      }
+      dailyChart.updateChartPeriod(7);
+    }
+
   } catch (error) {
     console.error('Error initializing daily spending chart:', error);
     
@@ -857,6 +903,14 @@
       if (fallbackData && typeof fallbackData === 'object') {
         const dailyChart = new DailySpendingChart('dailySpendingChart', fallbackData);
         chartInitialized = true; // Success with fallback
+
+        if (window.innerWidth < 768) {
+          const periodSelector = document.getElementById('dailyChartPeriod');
+          if (periodSelector) {
+            periodSelector.value = '7';
+          }
+          dailyChart.updateChartPeriod(7);
+        }
       }
     } catch (fallbackError) {
       console.error('Fallback method also failed:', fallbackError);
