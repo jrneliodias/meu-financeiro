@@ -145,7 +145,7 @@ csvs/*_processed.csv
 csvs/*_processed_processed.csv
 
 # Backup files
-backups/
+
 *.dump
 *.sql
 backup_*.json
