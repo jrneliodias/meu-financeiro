@@ -9,7 +9,7 @@ from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepo
 from reports.services import ExpenseService, BalanceService
 from reports.services.recurring_expense_service import RecurringExpenseService
 from django.views.generic import UpdateView
-from registers.models import Expense, Income, PaymentMethod, RecurringExpense
+from registers.models import Category, Expense, Income, PaymentMethod, RecurringExpense
 from registers.forms import ExpenseForm, RecurringExpenseForm
 from utils.dates import get_all_months, get_current_date, get_all_months_tuples
 from django.http import JsonResponse
@@ -111,6 +111,7 @@ def expense_report(request):
         'formatted_totals': formatted_totals,
         'incomes_by_month': incomes_by_month,
         'categories': get_distinct_categories(),
+        'expense_categories': Category.objects.filter(type='expense').order_by('name'),
         'current_year': current_year,
         'distinct_years': distinct_years,
         'distinct_months': distinct_months,
@@ -417,9 +418,18 @@ def daily_spending_data_ajax(request):
         if days not in [7, 30, 60, 90]:
             return JsonResponse({'error': 'Invalid days parameter'}, status=400)
 
+        # Resolve optional category filter
+        category = None
+        category_id = request.GET.get('category_id', '').strip()
+        if category_id:
+            try:
+                category = Category.objects.get(id=int(category_id), type='expense')
+            except (Category.DoesNotExist, ValueError):
+                return JsonResponse({'error': 'Invalid category'}, status=400)
+
         # Create daily calculator and get data
         daily_calculator = DailyExpenseCalculator(expense_repository)
-        trend_data = daily_calculator.get_daily_spending_trends(days=days)
+        trend_data = daily_calculator.get_daily_spending_trends(days=days, category=category)
 
         # Format data for Chart.js
         sorted_dates = sorted(trend_data['daily_expenses'].keys())

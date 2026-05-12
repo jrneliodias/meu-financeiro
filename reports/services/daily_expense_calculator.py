@@ -80,10 +80,10 @@ class DailyExpenseCalculator:
         
         return self.calculate_daily_expenses_for_period(start_date, end_date)
     
-    def get_daily_spending_trends(self, days: int = 30) -> Dict[str, any]:
+    def get_daily_spending_trends(self, days: int = 30, category=None) -> Dict[str, any]:
         """
         Calculate spending trends for the last N days.
-        
+
         Returns comprehensive trend data including:
         - Daily totals
         - Moving averages
@@ -91,8 +91,8 @@ class DailyExpenseCalculator:
         """
         end_date = date.today()
         start_date = end_date - timedelta(days=days)
-        
-        daily_expenses = self.calculate_daily_expenses_for_period(start_date, end_date)
+
+        daily_expenses = self.calculate_daily_expenses_for_period(start_date, end_date, category=category)
         
         # Calculate moving average (7-day window)
         moving_averages = self._calculate_moving_average(daily_expenses, window=7)

@@ -9,6 +9,13 @@
         <option value="60">60 Days</option>
         <option value="90">90 Days</option>
       </select>
+      <select id="dailyCategoryFilter"
+              class="bg-zinc-700 text-white text-sm rounded px-2 py-1 col-span-2 md:col-span-1">
+        <option value="">Todas as Categorias</option>
+        {% for cat in expense_categories %}
+          <option value="{{ cat.id }}">{{ cat.name }}</option>
+        {% endfor %}
+      </select>
       <select id="dailyChartType" class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
         <option value="bar">Bar</option>
         <option value="line" selected>Line</option>
@@ -171,6 +178,8 @@
         }
       };
       
+      this.currentDays = 30;
+      this.currentCategory = '';
       this.initializeChart();
       this.setupEventListeners();
     }
@@ -358,23 +367,30 @@
           this.updateOutlierHandling(e.target.value);
         });
       }
+
+      const categorySelector = document.getElementById('dailyCategoryFilter');
+      if (categorySelector) {
+        categorySelector.addEventListener('change', (e) => {
+          this.updateChartCategory(e.target.value);
+        });
+      }
     }
     
-    updateChartPeriod(days) {
-      // Show loading indicator without destroying the canvas
+    fetchAndUpdate(days, categoryId = '') {
       const canvas = document.getElementById('dailySpendingChart');
       const loadingDiv = document.createElement('div');
       loadingDiv.id = 'loadingIndicator';
       loadingDiv.className = 'absolute inset-0 bg-zinc-800 bg-opacity-90 flex items-center justify-center text-white z-10';
       loadingDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>Loading new data...</div>';
-      
-      // Add loading overlay to the canvas container
+
       const canvasContainer = canvas.parentElement;
       canvasContainer.style.position = 'relative';
       canvasContainer.appendChild(loadingDiv);
-      
-      // Make AJAX request to get new data
-      fetch(`/daily-spending-data/?days=${days}`, {
+
+      let url = `/daily-spending-data/?days=${days}`;
+      if (categoryId) url += `&category_id=${categoryId}`;
+
+      fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -388,27 +404,26 @@
         return response.json();
       })
       .then(newData => {
-        // Remove loading indicator
         const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) {
-          loadingIndicator.remove();
-        }
-        
-        // Update chart with new data
+        if (loadingIndicator) loadingIndicator.remove();
         this.updateData(newData);
       })
       .catch(error => {
         console.error('Error fetching new data:', error);
-        
-        // Remove loading indicator
         const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) {
-          loadingIndicator.remove();
-        }
-        
-        // Show error message
+        if (loadingIndicator) loadingIndicator.remove();
         alert('Error loading new data. Please try again.');
       });
+    }
+
+    updateChartPeriod(days) {
+      this.currentDays = days;
+      this.fetchAndUpdate(days, this.currentCategory);
+    }
+
+    updateChartCategory(categoryId) {
+      this.currentCategory = categoryId;
+      this.fetchAndUpdate(this.currentDays, categoryId);
     }
     
     updateChartType(type) {
