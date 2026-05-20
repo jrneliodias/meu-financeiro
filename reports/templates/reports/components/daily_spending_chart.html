@@ -894,6 +894,7 @@
     
     console.log('Data validation passed, initializing chart...');
     const dailyChart = new DailySpendingChart('dailySpendingChart', dailySpendingData);
+    window.showExpenseDetailsForDate = (date) => dailyChart.showExpenseDetails(date);
 
     // On mobile (< 768px), default to 7 days instead of 30
     if (window.innerWidth < 768) {
@@ -917,6 +918,7 @@
       
       if (fallbackData && typeof fallbackData === 'object') {
         const dailyChart = new DailySpendingChart('dailySpendingChart', fallbackData);
+        window.showExpenseDetailsForDate = (date) => dailyChart.showExpenseDetails(date);
         chartInitialized = true; // Success with fallback
 
         if (window.innerWidth < 768) {
