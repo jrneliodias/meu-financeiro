@@ -1,0 +1,21 @@
+{% load currency_filters %}
+<div data-date="{{ today_date }}"
+     onclick="window.showExpenseDetailsForDate && window.showExpenseDetailsForDate(this.dataset.date)"
+     class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg cursor-pointer hover:bg-zinc-700/40 transition-colors duration-150">
+  <div class="flex flex-col items-start">
+    <p class="text-white text-xs md:text-sm">Gasto Hoje:</p>
+    <span id="dailyTotalDisplay" class="text-blue-400 text-xl md:text-2xl font-bold">
+      {{ today_total|format_brl }}
+    </span>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const value = {{ today_total|default:0 }};
+    const formatted = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+    document.getElementById('dailyTotalDisplay').textContent = formatted;
+});
+</script>
