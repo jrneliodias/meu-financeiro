@@ -42,3 +42,32 @@ class GetTotalByDateTest(TestCase):
         )
         total = self.repo.get_total_by_date(self.today)
         self.assertEqual(total, Decimal('0.00'))
+
+
+class ExpenseReportContextTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testview', password='pass')
+        self.client.login(username='testview', password='pass')
+        self.category = Category.objects.create(name='Teste', type='expense')
+        self.payment = PaymentMethod.objects.create(name='PIX', start_billing_day=1)
+
+    def test_context_has_today_date_string(self):
+        response = self.client.get(reverse('expense_report'))
+        self.assertIn('today_date', response.context)
+        today_str = date.today().strftime('%Y-%m-%d')
+        self.assertEqual(response.context['today_date'], today_str)
+
+    def test_context_has_today_total_as_float(self):
+        response = self.client.get(reverse('expense_report'))
+        self.assertIn('today_total', response.context)
+        self.assertIsInstance(response.context['today_total'], float)
+
+    def test_today_total_reflects_todays_expenses(self):
+        Expense.objects.create(
+            description='Despesa hoje', amount=Decimal('42.00'),
+            date=date.today(), category=self.category, payment_method=self.payment,
+            user=self.user
+        )
+        response = self.client.get(reverse('expense_report'))
+        self.assertEqual(response.context['today_total'], 42.0)

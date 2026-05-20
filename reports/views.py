@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from collections import defaultdict
 import calendar
-from datetime import datetime
+from datetime import datetime, date as date_type
 from decimal import Decimal
 from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
@@ -104,6 +104,11 @@ def expense_report(request):
         reference_year=selected_year
     )
 
+    # 7. Get today's total expenses for the daily card
+    today = date_type.today()
+    today_total = float(expense_repository.get_total_by_date(today))
+    today_date = today.strftime('%Y-%m-%d')
+
     # Prepare the context
     context = {
         'all_months': all_months,
@@ -126,6 +131,8 @@ def expense_report(request):
         'daily_spending_data': daily_spending_data,
         'fixed_expenses_summary': fixed_expenses_summary,
         'installments_progress': installments_progress,
+        'today_total': today_total,
+        'today_date': today_date,
     }
 
     return render(request, 'reports/expense_report.html', context)
