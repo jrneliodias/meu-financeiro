@@ -7,6 +7,7 @@
       <span id="balanceDisplay" class="text-white text-xl md:text-2xl font-bold">{{ global_balance|format_brl }}</span>
     </div>
     {% include "reports/components/fixed_expenses_card.html" %}
+    {% include "reports/components/daily_total_card.html" with today_total=today_total today_date=today_date %}
   </div>
   <form method="get"
         class="flex bg-zinc-800/40 p-3 md:p-4 rounded-lg space-x-2 md:space-x-4 w-full sm:w-fit">
