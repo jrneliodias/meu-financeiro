@@ -1,6 +1,7 @@
 from registers.models import Expense
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth, TruncYear, TruncDate
+from decimal import Decimal
 
 import calendar
 
@@ -256,6 +257,11 @@ class ExpenseRepository:
             .annotate(total=Sum('amount'))
             .order_by('-total')
         )
+
+    def get_total_by_date(self, target_date):
+        """Return the total sum of all expenses for a specific date."""
+        result = Expense.objects.filter(date=target_date).aggregate(total=Sum('amount'))
+        return result['total'] or Decimal('0.00')
 
     def get_expenses_by_category_and_month(
         self,
