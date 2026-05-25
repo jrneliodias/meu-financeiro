@@ -1,6 +1,6 @@
 from django.db.models import Sum
 from registers.models import Income, Expense
-from django.utils import timezone
+from utils.dates import get_last_day_of_current_month
 
 
 class BalanceService:
@@ -8,9 +8,9 @@ class BalanceService:
         self.balance = 0
 
     def calculate_global_balance(self):
-        today = timezone.now().date()
-        total_incomes = Income.objects.filter(date__lte=today).aggregate(
+        end_date = get_last_day_of_current_month()
+        total_incomes = Income.objects.filter(date__lte=end_date).aggregate(
             total_incomes=Sum('amount'))['total_incomes'] or 0
-        total_expenses = Expense.objects.filter(date__lte=today).aggregate(
+        total_expenses = Expense.objects.filter(date__lte=end_date).aggregate(
             total_expenses=Sum('amount'))['total_expenses'] or 0
         return total_incomes - total_expenses
