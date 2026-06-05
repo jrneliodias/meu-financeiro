@@ -1,0 +1,132 @@
+{% extends "core/base.html" %}
+{% load currency_filters %}
+
+{% block content %}
+<div class="bg-zinc-800/50 rounded-lg p-3 md:p-4 w-full space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+    <h2 class="text-2xl font-bold text-white">Estimativas de Gastos</h2>
+    <a href="/" class="text-sm text-gray-400 hover:text-gray-200 transition-colors">
+      ← Voltar ao Dashboard
+    </a>
+  </div>
+
+  <!-- Month/Year Selector -->
+  <form method="get" class="flex flex-wrap gap-3 items-end">
+    <div>
+      <label class="block text-xs text-gray-400 mb-1">Mês</label>
+      <select name="month"
+              class="bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
+              onchange="this.form.submit()">
+        <option value="1" {% if selected_month == 1 %}selected{% endif %}>Janeiro</option>
+        <option value="2" {% if selected_month == 2 %}selected{% endif %}>Fevereiro</option>
+        <option value="3" {% if selected_month == 3 %}selected{% endif %}>Março</option>
+        <option value="4" {% if selected_month == 4 %}selected{% endif %}>Abril</option>
+        <option value="5" {% if selected_month == 5 %}selected{% endif %}>Maio</option>
+        <option value="6" {% if selected_month == 6 %}selected{% endif %}>Junho</option>
+        <option value="7" {% if selected_month == 7 %}selected{% endif %}>Julho</option>
+        <option value="8" {% if selected_month == 8 %}selected{% endif %}>Agosto</option>
+        <option value="9" {% if selected_month == 9 %}selected{% endif %}>Setembro</option>
+        <option value="10" {% if selected_month == 10 %}selected{% endif %}>Outubro</option>
+        <option value="11" {% if selected_month == 11 %}selected{% endif %}>Novembro</option>
+        <option value="12" {% if selected_month == 12 %}selected{% endif %}>Dezembro</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs text-gray-400 mb-1">Ano</label>
+      <input type="number" name="year" value="{{ selected_year }}" min="2020" max="2100"
+             class="bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 w-24"
+             onchange="this.form.submit()">
+    </div>
+  </form>
+
+  <!-- Messages -->
+  {% for message in messages %}
+  <div class="p-3 rounded-lg {% if message.tags == 'success' %}bg-green-900/30 text-green-400 border border-green-500/30{% else %}bg-red-900/30 text-red-400 border border-red-500/30{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+
+  <!-- Create Form -->
+  <div class="bg-zinc-700/50 rounded-lg p-4">
+    <h3 class="text-sm font-semibold text-gray-300 mb-3">Nova Estimativa</h3>
+    <form method="post" class="flex flex-wrap gap-3 items-end">
+      {% csrf_token %}
+      <div class="flex-1 min-w-40">
+        <label class="block text-xs text-gray-400 mb-1">Categoria</label>
+        {{ form.category }}
+      </div>
+      <div class="w-36">
+        <label class="block text-xs text-gray-400 mb-1">Valor Estimado (R$)</label>
+        {{ form.amount }}
+      </div>
+      <div class="w-20">
+        <label class="block text-xs text-gray-400 mb-1">Mês</label>
+        {{ form.month }}
+      </div>
+      <div class="w-24">
+        <label class="block text-xs text-gray-400 mb-1">Ano</label>
+        {{ form.year }}
+      </div>
+      <button type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm">
+        Salvar
+      </button>
+    </form>
+    {% if form.errors %}
+    <div class="mt-2 text-red-400 text-sm">
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+          <p>{{ field }}: {{ error }}</p>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Estimates Table -->
+  {% if estimates %}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-gray-400 text-xs uppercase border-b border-zinc-700">
+          <th class="text-left pb-2">Categoria</th>
+          <th class="text-right pb-2 pr-4">Valor Estimado</th>
+          <th class="text-center pb-2">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-700/50">
+        {% for estimate in estimates %}
+        <tr>
+          <td class="py-3 text-white font-medium">{{ estimate.category.name }}</td>
+          <td class="py-3 text-right pr-4 text-gray-200">{{ estimate.amount|format_brl }}</td>
+          <td class="py-3 text-center">
+            <div class="flex justify-center gap-2">
+              <a href="{% url 'budget_estimate_update' estimate.pk %}"
+                 class="text-xs bg-zinc-600 hover:bg-zinc-500 text-white px-3 py-1 rounded transition-colors">
+                Editar
+              </a>
+              <form method="post" action="{% url 'budget_estimate_delete' estimate.pk %}"
+                    onsubmit="return confirm('Remover estimativa de {{ estimate.category.name }}?')">
+                {% csrf_token %}
+                <button type="submit"
+                        class="text-xs bg-red-800/60 hover:bg-red-700 text-red-200 px-3 py-1 rounded transition-colors">
+                  Excluir
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-gray-500 text-sm text-center py-6">
+    Nenhuma estimativa para {{ selected_month }}/{{ selected_year }}.
+  </p>
+  {% endif %}
+
+</div>
+{% endblock content %}
