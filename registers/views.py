@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm, QuickFillPresetForm
+from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm, QuickFillPresetForm, CategoryBudgetEstimateForm
 from .services import (
     ExpenseService,
     InstallmentService,
@@ -19,7 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Expense, Category
+from .models import Expense, Category, CategoryBudgetEstimate
 import json
 import pandas as pd
 import io
@@ -824,3 +824,68 @@ def category_create_ajax(request):
         })
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON.'}, status=400)
+
+
+@login_required
+def budget_estimate_list(request):
+    from datetime import date
+    today = date.today()
+    selected_month = int(request.GET.get('month', today.month))
+    selected_year = int(request.GET.get('year', today.year))
+
+    if request.method == 'POST':
+        form = CategoryBudgetEstimateForm(request.POST)
+        if form.is_valid():
+            estimate = form.save(commit=False)
+            estimate.user = request.user
+            try:
+                estimate.save()
+                messages.success(request, 'Estimativa criada com sucesso.')
+            except Exception:
+                messages.error(request, 'Já existe uma estimativa para esta categoria neste mês.')
+            return redirect(
+                f"{request.path}?month={estimate.month}&year={estimate.year}"
+            )
+    else:
+        form = CategoryBudgetEstimateForm(initial={'month': selected_month, 'year': selected_year})
+
+    estimates = CategoryBudgetEstimate.objects.filter(
+        user=request.user, month=selected_month, year=selected_year
+    ).select_related('category').order_by('category__name')
+
+    return render(request, 'register/budget_estimate_list.html', {
+        'estimates': estimates,
+        'form': form,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+    })
+
+
+@login_required
+def budget_estimate_update(request, pk):
+    estimate = CategoryBudgetEstimate.objects.get(pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = CategoryBudgetEstimateForm(request.POST, instance=estimate)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Estimativa atualizada.')
+            return redirect(
+                f"/register/estimativas/?month={estimate.month}&year={estimate.year}"
+            )
+    else:
+        form = CategoryBudgetEstimateForm(instance=estimate)
+
+    return render(request, 'register/budget_estimate_update.html', {
+        'form': form,
+        'estimate': estimate,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def budget_estimate_delete(request, pk):
+    estimate = CategoryBudgetEstimate.objects.get(pk=pk, user=request.user)
+    month, year = estimate.month, estimate.year
+    estimate.delete()
+    messages.success(request, 'Estimativa removida.')
+    return redirect(f"/register/estimativas/?month={month}&year={year}")

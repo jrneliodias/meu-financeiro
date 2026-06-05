@@ -30,4 +30,8 @@ urlpatterns = [
     # Category autocomplete
     path("categories/search/", views.category_search_ajax, name="category_search_ajax"),
     path("categories/create/", views.category_create_ajax, name="category_create_ajax"),
+    # Budget Estimates CRUD
+    path("estimativas/", views.budget_estimate_list, name="budget_estimate_list"),
+    path("estimativas/<int:pk>/editar/", views.budget_estimate_update, name="budget_estimate_update"),
+    path("estimativas/<int:pk>/excluir/", views.budget_estimate_delete, name="budget_estimate_delete"),
 ]
