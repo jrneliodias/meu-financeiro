@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "*.html": "django-html"
+  },
+  "djlint.profile": "django",
+  "[django-html]": {
+    "editor.defaultFormatter": "monosans.djlint",
+    "editor.formatOnSave": true
+  }
+}
