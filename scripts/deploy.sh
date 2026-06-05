@@ -24,6 +24,8 @@ echo -e "${YELLOW}==> Construindo imagens Docker...${NC}"
 docker compose build
 
 # Executa migrations
+echo -e "${YELLOW}==> Criando migrations pendentes...${NC}"
+docker compose run --rm web python manage.py makemigrations --noinput
 echo -e "${YELLOW}==> Executando migrations...${NC}"
 docker compose run --rm web python manage.py migrate --noinput
 
