@@ -72,3 +72,22 @@ class InstallmentProgress:
         return "R$ {:,.2f}".format(float(value)).replace(
             ",", "X"
         ).replace(".", ",").replace("X", ".")
+
+
+@dataclass
+class BudgetEstimateItem:
+    category_name: str
+    estimated_amount: Decimal
+    actual_amount: Decimal
+    progress_percentage: float
+    is_over_budget: bool
+
+
+@dataclass
+class BudgetSummary:
+    estimates: List
+    total_estimated: Decimal
+    total_fixed: Decimal
+    total_expected: Decimal
+    total_actual: Decimal
+    overall_progress: float
