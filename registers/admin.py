@@ -142,3 +142,13 @@ admin.site.register(PaymentMethod, PaymentMethodAdmin)
 admin.site.register(Installment, InstallmentAdmin)
 admin.site.register(RecurringExpense, RecurringExpenseAdmin)
 admin.site.register(QuickFillPreset, QuickFillPresetAdmin)
+
+
+@admin.register(CategoryBudgetEstimate)
+class CategoryBudgetEstimateAdmin(admin.ModelAdmin):
+    list_display = ['user', 'category', 'amount', 'month', 'year']
+    list_filter = ['year', 'month', 'category']
+    search_fields = ['user__username', 'category__name']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user', 'category')
