@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense, Income, Category, RecurringExpense, PaymentMethod, QuickFillPreset
+from .models import Expense, Income, Category, RecurringExpense, PaymentMethod, QuickFillPreset, CategoryBudgetEstimate
 from .components.expense_form.expense_form_component import ExpenseFormComponent
 from .components.expense_form.quick_fill_menu import QuickFillMenu
 
@@ -373,3 +373,32 @@ class QuickFillPresetForm(forms.ModelForm):
         ).order_by('name')
 
         self.fields['payment_method'].queryset = PaymentMethod.objects.order_by('name')
+
+
+class CategoryBudgetEstimateForm(forms.ModelForm):
+    class Meta:
+        model = CategoryBudgetEstimate
+        fields = ['category', 'amount', 'month', 'year']
+        widgets = {
+            'category': forms.Select(attrs={
+                'class': 'bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'month': forms.Select(attrs={
+                'class': 'bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+            }, choices=[(i, i) for i in range(1, 13)]),
+            'year': forms.NumberInput(attrs={
+                'class': 'bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5',
+                'min': '2020',
+                'max': '2100'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.filter(type='expense').order_by('name')
