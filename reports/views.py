@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
 from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
-from reports.services import ExpenseService, BalanceService
+from reports.services import ExpenseService, BalanceService, BudgetEstimateService
 from reports.services.recurring_expense_service import RecurringExpenseService
 from django.views.generic import UpdateView
 from registers.models import Category, Expense, Income, PaymentMethod, RecurringExpense
@@ -27,6 +27,7 @@ income_repository = IncomeRepository()
 category_repository = CategoryRepository()
 balance_service = BalanceService()
 recurring_expense_service = RecurringExpenseService()
+budget_estimate_service = BudgetEstimateService()
 
 
 def index(request):
@@ -109,6 +110,11 @@ def expense_report(request):
     today_total = float(expense_repository.get_total_by_date(today))
     today_date = today.strftime('%Y-%m-%d')
 
+    # 8. Get budget estimates summary for selected month/year
+    budget_summary = budget_estimate_service.get_monthly_budget_summary(
+        request.user, selected_month, selected_year
+    )
+
     # Prepare the context
     context = {
         'all_months': all_months,
@@ -133,6 +139,7 @@ def expense_report(request):
         'installments_progress': installments_progress,
         'today_total': today_total,
         'today_date': today_date,
+        'budget_summary': budget_summary,
     }
 
     return render(request, 'reports/expense_report.html', context)

@@ -11,6 +11,11 @@
         {# Payment Method Chart Component #}
         {% include "reports/components/payment_method_chart.html" %}
       </div>
+
+      {# Budget Estimate Card #}
+      <div class="w-full">
+        {% include "reports/components/budget_estimate_card.html" with budget_summary=budget_summary selected_month=selected_month selected_year=selected_year %}
+      </div>
       {# Daily Spending Chart #}
       <div class="w-full">
         {% include "reports/components/daily_spending_chart.html" %}
@@ -20,6 +25,8 @@
       <div class="w-full">
         {% include "reports/components/installment_progress_card.html" with installments_progress=installments_progress %}
       </div>
+
+      
 
       {# Expense Category Table Component #}
       {% include "reports/components/expense_category_table.html" with all_months=all_months formatted_expenses_by_category=formatted_expenses_by_category formatted_totals=formatted_totals selected_month=selected_month selected_year=selected_year %}
