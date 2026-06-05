@@ -23,11 +23,10 @@ git pull origin master
 echo -e "${YELLOW}==> Construindo imagens Docker...${NC}"
 docker compose build
 
-# Executa migrations
-echo -e "${YELLOW}==> Criando migrations pendentes...${NC}"
-docker compose run --rm web python manage.py makemigrations --noinput
-echo -e "${YELLOW}==> Executando migrations...${NC}"
-docker compose run --rm web python manage.py migrate --noinput
+# Executa migrations no mesmo container para o arquivo gerado pelo makemigrations
+# ser visivel pelo migrate
+echo -e "${YELLOW}==> Criando e executando migrations...${NC}"
+docker compose run --rm web sh -c "python manage.py makemigrations --noinput && python manage.py migrate --noinput"
 
 # Coleta static files
 echo -e "${YELLOW}==> Coletando arquivos estaticos...${NC}"
