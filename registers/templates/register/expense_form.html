@@ -35,7 +35,7 @@
         </header>
 
         <section class="bg-zinc-800/40 p-4 sm:p-6 rounded-lg shadow-lg">
-            <form method="post" class="space-y-4">
+            <form id="expense-form" method="post" class="space-y-4">
                 {% csrf_token %}
                 <fieldset>
                     <div class="mb-4 space-y-2">
@@ -99,6 +99,18 @@
     <script src="{% static 'js/expense_card_renderer.js' %}"></script>
     <script src="{% static 'js/expense_list_modal.js' %}"></script>
     <script>
+        window.RecentExpensesI18n = {
+            use: "{% trans 'Use' %}",
+            viewDetails: "{% trans 'View details' %}",
+            edit: "{% trans 'Edit' %}",
+            delete: "{% trans 'Delete' %}",
+            confirmDelete: "{% trans 'Do you really want to delete the expense' %}",
+            loadError: "{% trans 'Error loading expenses' %}",
+            connectionError: "{% trans 'Connection error' %}",
+            deleteError: "{% trans 'Error deleting expense' %}",
+            autofillError: "{% trans 'Error loading data' %}",
+        };
+
         // Initialize expense list modal with dependency injection
         document.addEventListener('DOMContentLoaded', () => {
             const expenseListApiClient = new ExpenseListApiClient();

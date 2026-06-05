@@ -8,6 +8,8 @@
  * - Exclusao com confirmacao
  */
 
+const i18n = window.RecentExpensesI18n || {};
+
 const RecentExpenses = {
     // Endpoints da API
     ENDPOINTS: {
@@ -108,12 +110,12 @@ const RecentExpenses = {
                 if (data.success) {
                     this.renderExpenses(data.expenses);
                 } else {
-                    this.showError(data.error || 'Erro ao carregar despesas');
+                    this.showError(data.error || i18n.loadError || 'Erro ao carregar despesas');
                 }
             })
             .catch((error) => {
                 console.error('Error loading recent expenses:', error);
-                this.showError('Erro de conexao ao carregar despesas');
+                this.showError(i18n.connectionError || 'Erro de conexao ao carregar despesas');
             });
     },
 
@@ -145,16 +147,16 @@ const RecentExpenses = {
                 <p class="text-gray-400 text-sm">${expense.date_formatted}</p>
                 <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-600">
                     <button type="button" class="action-btn flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="autofill">
-                        <i class="fas fa-copy"></i>Usar
+                        <i class="fas fa-copy"></i>${i18n.use || 'Usar'}
                     </button>
                     <button type="button" class="action-btn flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="details">
-                        <i class="fas fa-eye"></i>Ver detalhes
+                        <i class="fas fa-eye"></i>${i18n.viewDetails || 'Ver detalhes'}
                     </button>
                     <a href="/expense/${expense.id}/update/" class="flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm transition-colors">
-                        <i class="fas fa-edit"></i>Editar
+                        <i class="fas fa-edit"></i>${i18n.edit || 'Editar'}
                     </a>
                     <button type="button" class="action-btn flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-description="${expense.description}" data-action="delete">
-                        <i class="fas fa-trash"></i>Excluir
+                        <i class="fas fa-trash"></i>${i18n.delete || 'Excluir'}
                     </button>
                 </div>
             </div>
@@ -232,12 +234,12 @@ const RecentExpenses = {
                     this.populateForm(data.form_data);
                     this.scrollToForm();
                 } else {
-                    alert(data.error || 'Erro ao carregar dados');
+                    alert(data.error || i18n.autofillError || 'Erro ao carregar dados');
                 }
             })
             .catch((error) => {
                 console.error('Error loading autofill data:', error);
-                alert('Erro de conexao');
+                alert(i18n.connectionError || 'Erro de conexao');
             });
     },
 
@@ -249,7 +251,6 @@ const RecentExpenses = {
             id_description: formData.description,
             id_amount: formData.amount,
             id_date: formData.date,
-            id_category: formData.category_id,
             id_payment_method: formData.payment_method_id,
             id_installments: formData.installments,
         };
@@ -260,16 +261,17 @@ const RecentExpenses = {
                 field.value = value;
             }
         }
+
+        if (formData.category_id && formData.category_name && typeof CategoryAutocomplete !== 'undefined') {
+            CategoryAutocomplete.selectCategory(formData.category_id, formData.category_name);
+        }
     },
 
     /**
      * Rola a pagina ate o formulario
      */
     scrollToForm: function () {
-        const form = document.querySelector('form');
-        if (form) {
-            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
 
@@ -277,7 +279,8 @@ const RecentExpenses = {
      * Exclui uma despesa com confirmacao
      */
     deleteExpense: function (expenseId, description) {
-        if (!confirm(`Deseja realmente excluir a despesa "${description}"?`)) {
+        const msg = `${i18n.confirmDelete || 'Deseja realmente excluir a despesa'} "${description}"?`;
+        if (!confirm(msg)) {
             return;
         }
 
@@ -296,12 +299,12 @@ const RecentExpenses = {
                     this.closeModal();
                     this.loadRecentExpenses();
                 } else {
-                    alert(data.error || 'Erro ao excluir despesa');
+                    alert(data.error || i18n.deleteError || 'Erro ao excluir despesa');
                 }
             })
             .catch((error) => {
                 console.error('Error deleting expense:', error);
-                alert('Erro de conexao');
+                alert(i18n.connectionError || 'Erro de conexao');
             });
     },
 

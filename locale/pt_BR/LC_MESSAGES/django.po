@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Meu Financeiro\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-05 14:03-0300\n"
+"POT-Creation-Date: 2026-06-05 18:40-0300\n"
 "PO-Revision-Date: 2026-06-05 14:03-0300\n"
 "Last-Translator: jrneliodias\n"
 "Language-Team: Portuguese (Brazil)\n"
@@ -33,6 +33,7 @@ msgstr "Inglês"
 #: registers/templates/register/quick_fill_preset_form.html:29
 #: registers/templates/register/quick_fill_preset_list.html:22
 #: registers/templates/register/recurring_expense_form.html:21
+#: reports/templates/reports/components/daily_spending_chart.html:116
 #: reports/templates/reports/components/expense_category_table.html:114
 #: reports/templates/reports/components/expense_details_table.html:10
 #: reports/templates/reports/components/recurring_expense_modal.html:61
@@ -49,6 +50,7 @@ msgstr "Descrição"
 #: registers/templates/register/income_form.html:13
 #: registers/templates/register/quick_fill_preset_list.html:23
 #: registers/templates/register/recurring_expense_form.html:29
+#: reports/templates/reports/components/daily_spending_chart.html:120
 #: reports/templates/reports/components/expense_category_table.html:116
 #: reports/templates/reports/components/expense_details_table.html:11
 #: reports/templates/reports/components/recurring_expense_modal.html:64
@@ -60,6 +62,7 @@ msgstr "Valor"
 
 #: registers/components/expense_form/expense_form_component.py:28
 #: registers/templates/register/expense_form.html:53
+#: reports/templates/reports/components/daily_spending_chart.html:96
 msgid "Installments"
 msgstr "Parcelas"
 
@@ -68,6 +71,7 @@ msgstr "Parcelas"
 #: registers/templates/register/csv_processor_preview.html:55
 #: registers/templates/register/expense_form.html:60
 #: registers/templates/register/income_form.html:17
+#: reports/templates/reports/components/daily_spending_chart.html:154
 #: reports/templates/reports/components/expense_category_table.html:113
 #: reports/templates/reports/components/expense_details_table.html:12
 #: reports/templates/reports/components/recurring_expense_modal.html:60
@@ -86,6 +90,7 @@ msgstr "Data"
 #: registers/templates/register/quick_fill_preset_list.html:24
 #: registers/templates/register/recurring_expense_form.html:41
 #: reports/templates/reports/components/budget_estimate_card.html:24
+#: reports/templates/reports/components/daily_spending_chart.html:117
 #: reports/templates/reports/components/expense_category_table.html:7
 #: reports/templates/reports/components/expense_category_table.html:44
 #: reports/templates/reports/components/expense_details_table.html:13
@@ -103,6 +108,7 @@ msgstr "Categoria"
 #: registers/templates/register/quick_fill_preset_form.html:52
 #: registers/templates/register/quick_fill_preset_list.html:25
 #: registers/templates/register/recurring_expense_form.html:45
+#: reports/templates/reports/components/daily_spending_chart.html:118
 #: reports/templates/reports/components/expense_category_table.html:115
 #: reports/templates/reports/components/expense_details_table.html:14
 #: reports/templates/reports/components/recurring_expense_modal.html:63
@@ -157,7 +163,9 @@ msgstr "Texto CSV"
 #: registers/forms.py:94 registers/forms.py:220
 msgid ""
 "Paste your CSV data directly here. Use this as an alternative to file upload."
-msgstr "Cole seus dados CSV diretamente aqui. Use como alternativa ao envio de arquivo."
+msgstr ""
+"Cole seus dados CSV diretamente aqui. Use como alternativa ao envio de "
+"arquivo."
 
 #: registers/forms.py:103 registers/forms.py:229
 msgid "CSV Separator"
@@ -189,7 +197,8 @@ msgstr "Ignorar Linha de Cabeçalho"
 
 #: registers/forms.py:121
 msgid "Check if your CSV file has a header row that should be skipped"
-msgstr "Marque se o arquivo CSV possui linha de cabeçalho que deve ser ignorada"
+msgstr ""
+"Marque se o arquivo CSV possui linha de cabeçalho que deve ser ignorada"
 
 #: registers/forms.py:128
 msgid "Auto-create Categories"
@@ -249,7 +258,8 @@ msgstr "Detectar Formato Nubank Automaticamente"
 
 #: registers/forms.py:247
 msgid "Automatically detect Nubank CSV columns (Data, Valor, Description)"
-msgstr "Detecta automaticamente as colunas do CSV Nubank (Data, Valor, Descrição)"
+msgstr ""
+"Detecta automaticamente as colunas do CSV Nubank (Data, Valor, Descrição)"
 
 #: registers/forms.py:256
 msgid "Date Column Name"
@@ -290,7 +300,9 @@ msgstr "Coluna de Descrição"
 #: registers/forms.py:346
 #, python-format
 msgid "When auto-detect is disabled, you must specify: %(fields)s"
-msgstr "Quando a detecção automática está desativada, você deve especificar: %(fields)s"
+msgstr ""
+"Quando a detecção automática está desativada, você deve especificar: "
+"%(fields)s"
 
 #: registers/models.py:11
 msgid "Income"
@@ -367,7 +379,8 @@ msgstr "Campos obrigatórios ausentes"
 
 #: registers/services/csv_import_service.py:228
 msgid "No strategy found to handle this row (amount is zero or invalid)"
-msgstr "Nenhuma estratégia encontrada para esta linha (valor é zero ou inválido)"
+msgstr ""
+"Nenhuma estratégia encontrada para esta linha (valor é zero ou inválido)"
 
 #: registers/services/csv_import_service.py:251
 #, python-format
@@ -397,7 +410,9 @@ msgstr[1] "Não foi possível converter datas em %(count)s linhas: %(rows)s"
 #: registers/services/csv_processor_service.py:291 registers/views.py:437
 #, python-format
 msgid "Could not auto-detect Nubank format. Available columns: %(columns)s"
-msgstr "Não foi possível detectar o formato Nubank automaticamente. Colunas disponíveis: %(columns)s"
+msgstr ""
+"Não foi possível detectar o formato Nubank automaticamente. Colunas "
+"disponíveis: %(columns)s"
 
 #: registers/services/csv_processor_service.py:299
 #, python-format
@@ -559,61 +574,73 @@ msgstr "Mês"
 
 #: registers/templates/register/budget_estimate_list.html:22
 #: reports/templatetags/currency_filters.py:36
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:25
 msgid "January"
 msgstr "Janeiro"
 
 #: registers/templates/register/budget_estimate_list.html:23
 #: reports/templatetags/currency_filters.py:37
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:26
 msgid "February"
 msgstr "Fevereiro"
 
 #: registers/templates/register/budget_estimate_list.html:24
 #: reports/templatetags/currency_filters.py:38
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:27
 msgid "March"
 msgstr "Março"
 
 #: registers/templates/register/budget_estimate_list.html:25
 #: reports/templatetags/currency_filters.py:39
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:28
 msgid "April"
 msgstr "Abril"
 
 #: registers/templates/register/budget_estimate_list.html:26
 #: reports/templatetags/currency_filters.py:40
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:29
 msgid "May"
 msgstr "Maio"
 
 #: registers/templates/register/budget_estimate_list.html:27
 #: reports/templatetags/currency_filters.py:41
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:30
 msgid "June"
 msgstr "Junho"
 
 #: registers/templates/register/budget_estimate_list.html:28
 #: reports/templatetags/currency_filters.py:42
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:31
 msgid "July"
 msgstr "Julho"
 
 #: registers/templates/register/budget_estimate_list.html:29
 #: reports/templatetags/currency_filters.py:43
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:32
 msgid "August"
 msgstr "Agosto"
 
 #: registers/templates/register/budget_estimate_list.html:30
 #: reports/templatetags/currency_filters.py:44
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:33
 msgid "September"
 msgstr "Setembro"
 
 #: registers/templates/register/budget_estimate_list.html:31
 #: reports/templatetags/currency_filters.py:45
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:34
 msgid "October"
 msgstr "Outubro"
 
 #: registers/templates/register/budget_estimate_list.html:32
 #: reports/templatetags/currency_filters.py:46
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:35
 msgid "November"
 msgstr "Novembro"
 
 #: registers/templates/register/budget_estimate_list.html:33
 #: reports/templatetags/currency_filters.py:47
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:36
 msgid "December"
 msgstr "Dezembro"
 
@@ -652,6 +679,7 @@ msgid "Actions"
 msgstr "Ações"
 
 #: registers/templates/register/budget_estimate_list.html:108
+#: registers/templates/register/expense_form.html:105
 msgid "Edit"
 msgstr "Editar"
 
@@ -661,6 +689,8 @@ msgid "Remove estimate for %(category)s?"
 msgstr "Remover estimativa para %(category)s?"
 
 #: registers/templates/register/budget_estimate_list.html:115
+#: registers/templates/register/expense_form.html:106
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:499
 msgid "Delete"
 msgstr "Excluir"
 
@@ -711,6 +741,7 @@ msgid "Number of Expenses"
 msgstr "Número de Despesas"
 
 #: registers/templates/register/components/expense_details_modal.html:88
+#: reports/templates/reports/components/daily_spending_chart.html:141
 #: reports/templates/reports/components/expense_category_table.html:138
 #: reports/templates/reports/components/recurring_expense_modal.html:81
 msgid "Close"
@@ -732,7 +763,9 @@ msgstr "Nenhuma despesa recente encontrada"
 msgid ""
 "Import your financial data from CSV files with validation and preview "
 "options."
-msgstr "Importe seus dados financeiros de arquivos CSV com validação e opções de prévia."
+msgstr ""
+"Importe seus dados financeiros de arquivos CSV com validação e opções de "
+"prévia."
 
 #: registers/templates/register/csv_import.html:21
 #: registers/templates/register/csv_processor.html:21
@@ -806,7 +839,8 @@ msgstr "Prévia de Importação CSV"
 msgid "Review your data before importing. %(count)s record found."
 msgid_plural "Review your data before importing. %(count)s records found."
 msgstr[0] "Revise seus dados antes de importar. %(count)s registro encontrado."
-msgstr[1] "Revise seus dados antes de importar. %(count)s registros encontrados."
+msgstr[1] ""
+"Revise seus dados antes de importar. %(count)s registros encontrados."
 
 #: registers/templates/register/csv_import_preview.html:14
 msgid "Import Summary"
@@ -851,11 +885,13 @@ msgstr "Criar Categorias Automaticamente:"
 
 #: registers/templates/register/csv_import_preview.html:97
 #: registers/templates/register/csv_import_preview.html:101
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:801
 msgid "Yes"
 msgstr "Sim"
 
 #: registers/templates/register/csv_import_preview.html:97
 #: registers/templates/register/csv_import_preview.html:101
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:802
 msgid "No"
 msgstr "Não"
 
@@ -871,7 +907,9 @@ msgstr "Processador CSV"
 msgid ""
 "Transform Nubank CSV exports to standardized format. Converts dates, parses "
 "descriptions, and reorganizes columns."
-msgstr "Transforma exportações CSV do Nubank para o formato padronizado. Converte datas, processa descrições e reorganiza colunas."
+msgstr ""
+"Transforma exportações CSV do Nubank para o formato padronizado. Converte "
+"datas, processa descrições e reorganiza colunas."
 
 #: registers/templates/register/csv_processor.html:98
 msgid "Manual Column Mapping"
@@ -879,7 +917,9 @@ msgstr "Mapeamento Manual de Colunas"
 
 #: registers/templates/register/csv_processor.html:99
 msgid "Specify column names when auto-detect is disabled"
-msgstr "Especifique os nomes das colunas quando a detecção automática estiver desativada"
+msgstr ""
+"Especifique os nomes das colunas quando a detecção automática estiver "
+"desativada"
 
 #: registers/templates/register/csv_processor.html:137
 msgid "Process CSV"
@@ -896,7 +936,9 @@ msgstr "Formato Detectado Automaticamente"
 #: registers/templates/register/csv_processor.html:150
 msgid ""
 "The processor automatically detects Nubank CSV exports with these columns:"
-msgstr "O processador detecta automaticamente exportações CSV do Nubank com estas colunas:"
+msgstr ""
+"O processador detecta automaticamente exportações CSV do Nubank com estas "
+"colunas:"
 
 #: registers/templates/register/csv_processor.html:152
 msgid "Date in DD/MM/YYYY format"
@@ -922,7 +964,9 @@ msgstr "Datas convertidas: DD/MM/AAAA para AAAA-MM-DD"
 msgid ""
 "Descriptions parsed: \"Uber - Trip\" to payment_method=\"Uber\", "
 "description=\"Trip\""
-msgstr "Descrições processadas: \"Uber - Viagem\" para forma_pagamento=\"Uber\", descrição=\"Viagem\""
+msgstr ""
+"Descrições processadas: \"Uber - Viagem\" para forma_pagamento=\"Uber\", "
+"descrição=\"Viagem\""
 
 #: registers/templates/register/csv_processor.html:163
 msgid "Columns reorganized to: date, amount, payment_method, description"
@@ -945,8 +989,10 @@ msgstr "Processamento CSV Concluído"
 msgid "Review and edit your processed data. %(count)s record transformed."
 msgid_plural ""
 "Review and edit your processed data. %(count)s records transformed."
-msgstr[0] "Revise e edite seus dados processados. %(count)s registro transformado."
-msgstr[1] "Revise e edite seus dados processados. %(count)s registros transformados."
+msgstr[0] ""
+"Revise e edite seus dados processados. %(count)s registro transformado."
+msgstr[1] ""
+"Revise e edite seus dados processados. %(count)s registros transformados."
 
 #: registers/templates/register/csv_processor_preview.html:14
 msgid "Processing Summary"
@@ -977,8 +1023,12 @@ msgstr "Clique em qualquer célula para editar"
 msgid "Showing first 100 rows. Download CSV to get all %(count)s record."
 msgid_plural ""
 "Showing first 100 rows. Download CSV to get all %(count)s records."
-msgstr[0] "Exibindo as primeiras 100 linhas. Baixe o CSV para obter todos os %(count)s registro."
-msgstr[1] "Exibindo as primeiras 100 linhas. Baixe o CSV para obter todos os %(count)s registros."
+msgstr[0] ""
+"Exibindo as primeiras 100 linhas. Baixe o CSV para obter todos os %(count)s "
+"registro."
+msgstr[1] ""
+"Exibindo as primeiras 100 linhas. Baixe o CSV para obter todos os %(count)s "
+"registros."
 
 #: registers/templates/register/csv_processor_preview.html:100
 msgid "Copy to Clipboard"
@@ -1000,7 +1050,9 @@ msgstr "Editar Dados"
 msgid ""
 "Click any cell in the table to edit its content. Changes are saved "
 "automatically."
-msgstr "Clique em qualquer célula da tabela para editar seu conteúdo. As alterações são salvas automaticamente."
+msgstr ""
+"Clique em qualquer célula da tabela para editar seu conteúdo. As alterações "
+"são salvas automaticamente."
 
 #: registers/templates/register/csv_processor_preview.html:119
 msgid "Copy"
@@ -1010,7 +1062,9 @@ msgstr "Copiar"
 msgid ""
 "Click \"Copy to Clipboard\" to copy all processed data (including edits) to "
 "your clipboard."
-msgstr "Clique em \"Copiar para Área de Transferência\" para copiar todos os dados processados (incluindo edições)."
+msgstr ""
+"Clique em \"Copiar para Área de Transferência\" para copiar todos os dados "
+"processados (incluindo edições)."
 
 #: registers/templates/register/csv_processor_preview.html:123
 msgid "Download"
@@ -1020,7 +1074,9 @@ msgstr "Baixar"
 msgid ""
 "Click \"Download CSV\" to download a CSV file with all your processed data "
 "and edits."
-msgstr "Clique em \"Baixar CSV\" para baixar um arquivo CSV com todos os seus dados processados e edições."
+msgstr ""
+"Clique em \"Baixar CSV\" para baixar um arquivo CSV com todos os seus dados "
+"processados e edições."
 
 #: registers/templates/register/expense_form.html:21
 msgid "Manage presets"
@@ -1035,6 +1091,34 @@ msgstr "Adicionar Atalho"
 #: reports/templates/reports/expense_update.html:35
 msgid "Submit"
 msgstr "Enviar"
+
+#: registers/templates/register/expense_form.html:103
+msgid "Use"
+msgstr "Usar"
+
+#: registers/templates/register/expense_form.html:104
+msgid "View details"
+msgstr "Ver detalhes"
+
+#: registers/templates/register/expense_form.html:107
+msgid "Do you really want to delete the expense"
+msgstr "Deseja realmente excluir a despesa"
+
+#: registers/templates/register/expense_form.html:108
+msgid "Error loading expenses"
+msgstr "Erro ao carregar despesas"
+
+#: registers/templates/register/expense_form.html:109
+msgid "Connection error"
+msgstr "Erro de conexão"
+
+#: registers/templates/register/expense_form.html:110
+msgid "Error deleting expense"
+msgstr "Erro ao excluir despesa"
+
+#: registers/templates/register/expense_form.html:111
+msgid "Error loading data"
+msgstr "Erro ao carregar dados"
 
 #: registers/templates/register/expense_success.html:5
 msgid "Expense registered successfully!"
@@ -1089,6 +1173,8 @@ msgid "Add New"
 msgstr "Adicionar Novo"
 
 #: registers/templates/register/quick_fill_preset_list.html:19
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr "Ordem"
 
@@ -1156,7 +1242,8 @@ msgstr[1] "Importação concluída! %(count)s registros importados com sucesso."
 
 #: registers/views.py:240
 msgid "No import data found. Please upload a file again."
-msgstr "Nenhum dado de importação encontrado. Por favor, envie o arquivo novamente."
+msgstr ""
+"Nenhum dado de importação encontrado. Por favor, envie o arquivo novamente."
 
 #: registers/views.py:283
 #, python-format
@@ -1205,7 +1292,9 @@ msgstr "Processamento falhou. Nenhum dado para exibir."
 
 #: registers/views.py:511
 msgid "No processed data found. Please upload and process a file first."
-msgstr "Nenhum dado processado encontrado. Por favor, envie e processe um arquivo primeiro."
+msgstr ""
+"Nenhum dado processado encontrado. Por favor, envie e processe um arquivo "
+"primeiro."
 
 #: registers/views.py:535
 msgid "No row data provided"
@@ -1294,6 +1383,7 @@ msgid "Estimate removed."
 msgstr "Estimativa removida."
 
 #: reports/services/expense_service.py:359
+#: reports/templates/reports/components/daily_spending_chart.html:160
 msgid "No Category"
 msgstr "Sem Categoria"
 
@@ -1346,6 +1436,144 @@ msgstr "Despesas Fixas"
 msgid "Expected Total"
 msgstr "Total Esperado"
 
+#: reports/templates/reports/components/daily_spending_chart.html:4
+msgid "Daily Spending Chart"
+msgstr "Gráfico de Gastos Diários"
+
+#: reports/templates/reports/components/daily_spending_chart.html:8
+msgid "7 Days"
+msgstr "7 Dias"
+
+#: reports/templates/reports/components/daily_spending_chart.html:9
+msgid "30 Days"
+msgstr "30 Dias"
+
+#: reports/templates/reports/components/daily_spending_chart.html:10
+msgid "60 Days"
+msgstr "60 Dias"
+
+#: reports/templates/reports/components/daily_spending_chart.html:11
+msgid "90 Days"
+msgstr "90 Dias"
+
+#: reports/templates/reports/components/daily_spending_chart.html:15
+msgid "All Categories"
+msgstr "Todas as Categorias"
+
+#: reports/templates/reports/components/daily_spending_chart.html:21
+msgid "Bar"
+msgstr "Barras"
+
+#: reports/templates/reports/components/daily_spending_chart.html:22
+msgid "Line"
+msgstr "Linha"
+
+#: reports/templates/reports/components/daily_spending_chart.html:26
+msgid "Linear"
+msgstr "Linear"
+
+#: reports/templates/reports/components/daily_spending_chart.html:27
+msgid "Log"
+msgstr "Log"
+
+#: reports/templates/reports/components/daily_spending_chart.html:31
+msgid "All Data"
+msgstr "Todos os Dados"
+
+#: reports/templates/reports/components/daily_spending_chart.html:32
+msgid "Highlight"
+msgstr "Destacar"
+
+#: reports/templates/reports/components/daily_spending_chart.html:33
+msgid "Hide Outliers"
+msgstr "Ocultar Outliers"
+
+#: reports/templates/reports/components/daily_spending_chart.html:56
+#: reports/templates/reports/components/expense_category_table.html:67
+msgid "Expense Details"
+msgstr "Detalhes da Despesa"
+
+#: reports/templates/reports/components/daily_spending_chart.html:69
+#: reports/templates/reports/components/expense_category_table.html:80
+msgid "Loading expense details..."
+msgstr "Carregando detalhes da despesa..."
+
+#: reports/templates/reports/components/daily_spending_chart.html:76
+#: reports/templates/reports/components/expense_category_table.html:88
+msgid "Failed to load expense details."
+msgstr "Falha ao carregar detalhes da despesa."
+
+#: reports/templates/reports/components/daily_spending_chart.html:84
+#: reports/templates/reports/components/expense_category_table.html:13
+#: reports/templates/reports/components/expense_category_table.html:50
+msgid "Total"
+msgstr "Total"
+
+#: reports/templates/reports/components/daily_spending_chart.html:88
+msgid "No. of Expenses"
+msgstr "Nº de Despesas"
+
+#: reports/templates/reports/components/daily_spending_chart.html:92
+msgid "Recurring"
+msgstr "Recorrentes"
+
+#: reports/templates/reports/components/daily_spending_chart.html:100
+msgid "Day Total"
+msgstr "Total do Dia"
+
+#: reports/templates/reports/components/daily_spending_chart.html:106
+msgid "By Category"
+msgstr "Por Categoria"
+
+#: reports/templates/reports/components/daily_spending_chart.html:119
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2529
+msgid "Time"
+msgstr "Hora"
+
+#: reports/templates/reports/components/daily_spending_chart.html:152
+msgid "Daily Spending"
+msgstr "Gastos Diários"
+
+#: reports/templates/reports/components/daily_spending_chart.html:153
+msgid "7-Day Average"
+msgstr "Média de 7 Dias"
+
+#: reports/templates/reports/components/daily_spending_chart.html:155
+msgid "Amount (R$)"
+msgstr "Valor (R$)"
+
+#: reports/templates/reports/components/daily_spending_chart.html:156
+msgid "Loading new data..."
+msgstr "Carregando novos dados..."
+
+#: reports/templates/reports/components/daily_spending_chart.html:157
+msgid "Error loading new data. Please try again."
+msgstr "Erro ao carregar novos dados. Tente novamente."
+
+#: reports/templates/reports/components/daily_spending_chart.html:158
+msgid "No expenses found for this date."
+msgstr "Nenhuma despesa encontrada para esta data."
+
+#: reports/templates/reports/components/daily_spending_chart.html:159
+msgid "Outliers (>R$ 1,000)"
+msgstr "Outliers (>R$ 1.000)"
+
+#: reports/templates/reports/components/daily_spending_chart.html:161
+msgid "Failed to load expense details"
+msgstr "Falha ao carregar detalhes da despesa"
+
+#: reports/templates/reports/components/daily_spending_chart.html:162
+msgid "Error loading daily spending chart"
+msgstr "Erro ao carregar gráfico de gastos diários"
+
+#: reports/templates/reports/components/daily_spending_chart.html:163
+msgid "Check browser console for more details"
+msgstr "Verifique o console do navegador para mais detalhes"
+
+#: reports/templates/reports/components/daily_spending_chart.html:164
+msgid "Show Debug Info"
+msgstr "Mostrar Informações de Debug"
+
 #: reports/templates/reports/components/daily_total_card.html:6
 msgid "Spent Today:"
 msgstr "Gasto Hoje:"
@@ -1353,23 +1581,6 @@ msgstr "Gasto Hoje:"
 #: reports/templates/reports/components/expense_category_table.html:3
 msgid "Expenses by Category"
 msgstr "Despesas por Categoria"
-
-#: reports/templates/reports/components/expense_category_table.html:13
-#: reports/templates/reports/components/expense_category_table.html:50
-msgid "Total"
-msgstr "Total"
-
-#: reports/templates/reports/components/expense_category_table.html:67
-msgid "Expense Details"
-msgstr "Detalhes da Despesa"
-
-#: reports/templates/reports/components/expense_category_table.html:80
-msgid "Loading expense details..."
-msgstr "Carregando detalhes da despesa..."
-
-#: reports/templates/reports/components/expense_category_table.html:88
-msgid "Failed to load expense details."
-msgstr "Falha ao carregar detalhes da despesa."
 
 #: reports/templates/reports/components/expense_details_table.html:3
 msgid "Monthly Expenses Details Table"
@@ -1640,7 +1851,8 @@ msgstr "Parâmetros obrigatórios ausentes: %(params)s"
 msgid ""
 "Invalid month name: %(month)s. Expected English month name (e.g., "
 "\"January\")"
-msgstr "Nome de mês inválido: %(month)s. Esperado nome em inglês (ex.: \"January\")"
+msgstr ""
+"Nome de mês inválido: %(month)s. Esperado nome em inglês (ex.: \"January\")"
 
 #: reports/views.py:676 reports/views.py:946 reports/views.py:947
 msgid "N/A"
@@ -1683,3 +1895,1539 @@ msgstr "Parâmetro ID é obrigatório"
 #: reports/views.py:982
 msgid "Invalid month and year"
 msgstr "Mês e ano inválidos"
+
+#: venv/lib/python3.10/site-packages/click/_termui_impl.py:518
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/_termui_impl.py:522
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1120
+msgid "Aborted!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1309
+#: venv/lib/python3.10/site-packages/click/decorators.py:559
+msgid "Show this message and exit."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1340
+#: venv/lib/python3.10/site-packages/click/core.py:1370
+#, python-brace-format
+msgid "(Deprecated) {text}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1387
+#, fuzzy
+#| msgid "Actions"
+msgid "Options"
+msgstr "Ações"
+
+#: venv/lib/python3.10/site-packages/click/core.py:1413
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1429
+msgid "DeprecationWarning: The command {name!r} is deprecated."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1636
+msgid "Commands"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1668
+msgid "Missing command."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1746
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2310
+msgid "Value must be an iterable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2331
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2778
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2808
+msgid "(dynamic)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2821
+#, python-brace-format
+msgid "default: {default}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2834
+msgid "required"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:465
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:528
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:44
+#: venv/lib/python3.10/site-packages/click/exceptions.py:80
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:72
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:121
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:123
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:179
+msgid "Missing argument"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:181
+msgid "Missing option"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:183
+#, fuzzy
+#| msgid "Invalid days parameter"
+msgid "Missing parameter"
+msgstr "Parâmetro de dias inválido"
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:185
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:192
+#, fuzzy, python-brace-format
+#| msgid "Missing required parameters: %(params)s"
+msgid "Missing parameter: {param_name}"
+msgstr "Parâmetros obrigatórios ausentes: %(params)s"
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:212
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:224
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:262
+msgid "unknown error"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:269
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:231
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:413
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:474
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/shell_completion.py:319
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/shell_completion.py:326
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:158
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:174
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:176
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:187
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:243
+msgid "Error: invalid input"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:773
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:266
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:298
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:392
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:414
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:470
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:611
+msgid "{value!r} is not a valid boolean."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:635
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:822
+msgid "file"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:824
+msgid "directory"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:826
+msgid "path"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:877
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:886
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:894
+#, python-brace-format
+msgid "{name} '{filename}' is a directory."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:903
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:912
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:921
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:988
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/contrib/messages/apps.py:16
+msgid "Messages"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/contrib/staticfiles/apps.py:9
+#, fuzzy
+#| msgid "CSV File"
+msgid "Static Files"
+msgstr "Arquivo CSV"
+
+#: venv/lib/python3.10/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr ""
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:70
+msgid "Enter a valid domain name."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:152
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:768
+msgid "Enter a valid URL."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:213
+msgid "Enter a valid integer."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:224
+msgid "Enter a valid email address."
+msgstr ""
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.10/site-packages/django/core/validators.py:307
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:315
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:327
+#: venv/lib/python3.10/site-packages/django/core/validators.py:336
+#: venv/lib/python3.10/site-packages/django/core/validators.py:350
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2215
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:329
+msgid "IPv4"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:338
+#: venv/lib/python3.10/site-packages/django/utils/ipv6.py:30
+msgid "IPv6"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:352
+msgid "IPv4 or IPv6"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:393
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:399
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:434
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:443
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:452
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:459
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:509
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:532
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:359
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:398
+msgid "Enter a number."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:534
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:539
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:544
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:615
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:677
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/base.py:1571
+#: venv/lib/python3.10/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/base.py:1573
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:180
+#, fuzzy, python-format
+#| msgid "Invalid filter type: %(filter_type)s"
+msgid "Field of type: %(field_type)s"
+msgstr "Tipo de filtro inválido: %(filter_type)s"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1156
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1157
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1159
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1209
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1211
+msgid "String (unlimited)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1320
+msgid "Comma-separated integers"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1421
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1425
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1560
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1429
+msgid "Date (without time)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1556
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1564
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1569
+msgid "Date (with time)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1696
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1698
+#, fuzzy
+#| msgid "December"
+msgid "Decimal number"
+msgstr "Dezembro"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1859
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1863
+#, fuzzy
+#| msgid "Description"
+msgid "Duration"
+msgstr "Descrição"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1915
+msgid "Email address"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1940
+msgid "File path"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2018
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2020
+msgid "Floating point number"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2060
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2062
+msgid "Integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2158
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2175
+msgid "Small integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2183
+msgid "IPv4 address"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2214
+msgid "IP address"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2305
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2306
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2308
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2359
+msgid "Positive big integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2374
+msgid "Positive integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2389
+msgid "Positive small integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2405
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2441
+#, fuzzy
+#| msgid "CSV Text"
+msgid "Text"
+msgstr "Texto CSV"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2521
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2525
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2637
+msgid "URL"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2661
+msgid "Raw binary data"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2726
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2728
+msgid "Universally unique identifier"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/files.py:244
+#, fuzzy
+#| msgid "CSV File"
+msgid "File"
+msgstr "Arquivo CSV"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:932
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r does not exist."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:934
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1228
+msgid "One-to-one relationship"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1285
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1287
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1335
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/lib/python3.10/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:95
+#, fuzzy
+#| msgid "Category name is required."
+msgid "This field is required."
+msgstr "O nome da categoria é obrigatório."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:308
+msgid "Enter a whole number."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:479
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1260
+msgid "Enter a valid date."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:502
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1261
+msgid "Enter a valid time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:529
+msgid "Enter a valid date/time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:563
+#, fuzzy
+#| msgid "Invalid action"
+msgid "Enter a valid duration."
+msgstr "Ação inválida"
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:564
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:633
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:634
+msgid "No file was submitted."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:635
+#, fuzzy
+#| msgid "CSV file is empty"
+msgid "The submitted file is empty."
+msgstr "O arquivo CSV está vazio"
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:637
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:642
+#, fuzzy
+#| msgid "Please provide either a CSV file OR CSV text, not both."
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr "Por favor, forneça um arquivo CSV OU texto CSV, não ambos."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:710
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:882
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:968
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:970
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1089
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1090
+msgid "Enter a complete value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1329
+msgid "Enter a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1359
+#, fuzzy
+#| msgid "Invalid JSON."
+msgid "Enter a valid JSON."
+msgstr "JSON inválido."
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.10/site-packages/django/forms/forms.py:94
+msgid ":"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/forms.py:230
+#, fuzzy, python-format
+#| msgid "%(field)s: %(error)s"
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "%(field)s: %(error)s"
+
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:901
+#, fuzzy, python-format
+#| msgid "Please correct the errors below:"
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Por favor, corrija os erros abaixo:"
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:922
+#, fuzzy
+#| msgid "Please correct the errors below:"
+msgid "Please correct the duplicate values below."
+msgstr "Por favor, corrija os erros abaixo:"
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/utils.py:227
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:461
+msgid "Clear"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:462
+msgid "Currently"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:463
+#, fuzzy
+#| msgid "Save Changes"
+msgid "Change"
+msgstr "Salvar Alterações"
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:800
+msgid "Unknown"
+msgstr ""
+
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:16
+#, fuzzy
+#| msgid "Month"
+msgid "Mon"
+msgstr "Mês"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:21
+msgid "Sat"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:43
+#, fuzzy
+#| msgid "May"
+msgid "may"
+msgstr "Maio"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:48
+msgid "oct"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:55
+#, fuzzy
+#| msgid "March"
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Março"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:56
+#, fuzzy
+#| msgid "April"
+msgctxt "abbrev. month"
+msgid "April"
+msgstr "Abril"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:57
+#, fuzzy
+#| msgid "May"
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "Maio"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:58
+#, fuzzy
+#| msgid "June"
+msgctxt "abbrev. month"
+msgid "June"
+msgstr "Junho"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:59
+#, fuzzy
+#| msgid "July"
+msgctxt "abbrev. month"
+msgid "July"
+msgstr "Julho"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:67
+#, fuzzy
+#| msgid "January"
+msgctxt "alt. month"
+msgid "January"
+msgstr "Janeiro"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:68
+#, fuzzy
+#| msgid "February"
+msgctxt "alt. month"
+msgid "February"
+msgstr "Fevereiro"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:69
+#, fuzzy
+#| msgid "March"
+msgctxt "alt. month"
+msgid "March"
+msgstr "Março"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:70
+#, fuzzy
+#| msgid "April"
+msgctxt "alt. month"
+msgid "April"
+msgstr "Abril"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:71
+#, fuzzy
+#| msgid "May"
+msgctxt "alt. month"
+msgid "May"
+msgstr "Maio"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:72
+#, fuzzy
+#| msgid "June"
+msgctxt "alt. month"
+msgid "June"
+msgstr "Junho"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:73
+#, fuzzy
+#| msgid "July"
+msgctxt "alt. month"
+msgid "July"
+msgstr "Julho"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:74
+#, fuzzy
+#| msgid "August"
+msgctxt "alt. month"
+msgid "August"
+msgstr "Agosto"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:75
+#, fuzzy
+#| msgid "September"
+msgctxt "alt. month"
+msgid "September"
+msgstr "Setembro"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:76
+#, fuzzy
+#| msgid "October"
+msgctxt "alt. month"
+msgid "October"
+msgstr "Outubro"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:77
+#, fuzzy
+#| msgid "November"
+msgctxt "alt. month"
+msgid "November"
+msgstr "Novembro"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:78
+#, fuzzy
+#| msgid "December"
+msgctxt "alt. month"
+msgid "December"
+msgstr "Dezembro"
+
+#: venv/lib/python3.10/site-packages/django/utils/ipv6.py:8
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/text.py:75
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/text.py:286
+msgid "or"
+msgstr ""
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.10/site-packages/django/utils/text.py:305
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:214
+#, fuzzy
+#| msgid "Date Column Name"
+msgid "Date out of range"
+msgstr "Nome da Coluna de Data"
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:349
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:380
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:652
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:692
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:169
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:68
+#: venv/lib/python3.10/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.10/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:407
+#, python-format
+msgid "Content purported to be compressed with %s but failed to decompress."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:571
+#, python-format
+msgid "Unsupported value for qop: %s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:575
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:653
+#, python-format
+msgid "Unsupported value for algorithm: %s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:648
+msgid "The challenge doesn't contain a server nonce, or this one is empty."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:658
+#, python-format
+msgid "Unsupported value for pw-algorithm: %s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/httplib2/__init__.py:1471
+msgid "Redirected but the response is missing a Location: header."
+msgstr ""

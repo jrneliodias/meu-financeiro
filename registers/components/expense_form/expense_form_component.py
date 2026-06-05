@@ -26,7 +26,7 @@ class ExpenseFormComponent(BaseFormComponent):
             'description': forms.CharField(label=_('Description'), max_length=200),
             'amount': forms.DecimalField(label=_('Amount'), max_digits=10, decimal_places=2),
             'installments': forms.IntegerField(label=_('Installments'), min_value=1, initial=1),
-            'date': forms.DateField(label=_('Date'), widget=forms.DateInput(attrs={'type': 'date'})),
+            'date': forms.DateField(label=_('Date'), widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')),
             'category': forms.ModelChoiceField(
                 label=_('Category'),
                 queryset=Category.objects

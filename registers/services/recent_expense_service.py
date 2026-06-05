@@ -132,6 +132,7 @@ class RecentExpenseService:
             'amount': str(expense.amount),
             'date': expense.date.isoformat(),
             'category_id': expense.category.id if expense.category else '',
+            'category_name': expense.category.name if expense.category else '',
             'payment_method_id': (
                 expense.payment_method.id if expense.payment_method else ''
             ),

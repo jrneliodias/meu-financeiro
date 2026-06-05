@@ -13,7 +13,7 @@ class ExpenseForm(forms.ModelForm):
         fields = ['description', 'amount', 'installment_plan',
                   'date', 'category', 'payment_method']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'})
+            'date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }
 
     def __init__(self, *args, **kwargs):
@@ -47,7 +47,7 @@ class IncomeForm(forms.ModelForm):
         model = Income
         fields = ['description', 'amount', 'date', 'category']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'})
+            'date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }
 
 
@@ -59,7 +59,7 @@ class RecurringExpenseForm(forms.ModelForm):
         fields = ['description', 'total_amount', 'start_date',
                   'category', 'payment_method', 'generate_debit']
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date'})
+            'start_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }
 
     def __init__(self, *args, **kwargs):

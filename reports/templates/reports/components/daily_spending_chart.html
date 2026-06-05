@@ -1,35 +1,36 @@
+{% load i18n %}
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full">
   <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4">
-    <h2 class="text-xl md:text-2xl font-bold">Daily Spending Chart</h2>
+    <h2 class="text-xl md:text-2xl font-bold">{% trans "Daily Spending Chart" %}</h2>
     <div class="grid grid-cols-2 md:flex gap-2">
       <select id="dailyChartPeriod"
               class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
-        <option value="7">7 Days</option>
-        <option value="30" selected>30 Days</option>
-        <option value="60">60 Days</option>
-        <option value="90">90 Days</option>
+        <option value="7">{% trans "7 Days" %}</option>
+        <option value="30" selected>{% trans "30 Days" %}</option>
+        <option value="60">{% trans "60 Days" %}</option>
+        <option value="90">{% trans "90 Days" %}</option>
       </select>
       <select id="dailyCategoryFilter"
               class="bg-zinc-700 text-white text-sm rounded px-2 py-1 col-span-2 md:col-span-1">
-        <option value="">Todas as Categorias</option>
+        <option value="">{% trans "All Categories" %}</option>
         {% for cat in expense_categories %}
           <option value="{{ cat.id }}">{{ cat.name }}</option>
         {% endfor %}
       </select>
       <select id="dailyChartType" class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
-        <option value="bar">Bar</option>
-        <option value="line" selected>Line</option>
+        <option value="bar">{% trans "Bar" %}</option>
+        <option value="line" selected>{% trans "Line" %}</option>
       </select>
       <select id="dailyChartScale"
               class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
-        <option value="linear" selected>Linear</option>
-        <option value="logarithmic">Log</option>
+        <option value="linear" selected>{% trans "Linear" %}</option>
+        <option value="logarithmic">{% trans "Log" %}</option>
       </select>
       <select id="outlierHandling"
               class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
-        <option value="show" selected>All Data</option>
-        <option value="highlight">Highlight</option>
-        <option value="separate">Hide Outliers</option>
+        <option value="show" selected>{% trans "All Data" %}</option>
+        <option value="highlight">{% trans "Highlight" %}</option>
+        <option value="separate">{% trans "Hide Outliers" %}</option>
       </select>
     </div>
   </div>
@@ -52,7 +53,7 @@
     <div class="flex items-center justify-between p-6 border-b border-zinc-700">
       <h2 class="text-xl font-semibold text-white flex items-center">
         <i class="fas fa-calendar-day mr-3 text-blue-400"></i>
-        Expense Details - <span id="modalDateTitle" class="ml-2 text-blue-300"></span>
+        {% trans "Expense Details" %} - <span id="modalDateTitle" class="ml-2 text-blue-300"></span>
       </h2>
       <button id="modalCloseBtn"
               class="text-gray-400 hover:text-white transition-colors duration-200">
@@ -65,14 +66,14 @@
       <!-- Loading state -->
       <div id="modalLoading" class="text-center py-8">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
-        <p class="text-gray-300">Loading expense details...</p>
+        <p class="text-gray-300">{% trans "Loading expense details..." %}</p>
       </div>
       <!-- Error state -->
       <div id="modalError"
            class="hidden bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
         <div class="flex items-center">
           <i class="fas fa-exclamation-triangle mr-2"></i>
-          <span id="modalErrorMessage">Failed to load expense details.</span>
+          <span id="modalErrorMessage">{% trans "Failed to load expense details." %}</span>
         </div>
       </div>
       <!-- Success state -->
@@ -80,29 +81,29 @@
         <!-- Summary section -->
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Total</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "Total" %}</h3>
             <p class="text-2xl font-bold text-blue-400" id="modalTotalAmount">R$ 0,00</p>
           </div>
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Nº de Despesas</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "No. of Expenses" %}</h3>
             <p class="text-2xl font-bold text-green-400" id="modalExpenseCount">0</p>
           </div>
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Recorrentes</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "Recurring" %}</h3>
             <p class="text-2xl font-bold text-orange-400" id="modalRecurringTotal">R$ 0,00</p>
           </div>
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Parcelas</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "Installments" %}</h3>
             <p class="text-2xl font-bold text-purple-400" id="modalInstallmentTotal">R$ 0,00</p>
           </div>
           <div class="bg-zinc-900 rounded-lg p-4 text-center border border-zinc-600">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Total do Dia</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "Day Total" %}</h3>
             <p class="text-2xl font-bold text-white" id="modalDayTotal">R$ 0,00</p>
           </div>
         </div>
         <!-- Category breakdown -->
         <div class="mb-5">
-          <h3 class="text-sm font-medium text-gray-400 mb-2">Por Categoria</h3>
+          <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "By Category" %}</h3>
           <div id="categoryCards" class="flex flex-wrap gap-2"></div>
         </div>
         <!-- Expenses list -->
@@ -112,11 +113,11 @@
             <table class="w-full">
               <thead class="bg-zinc-600">
                 <tr class="text-left">
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Description</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Category</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Payment Method</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Time</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">Amount</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Description" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Category" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Payment Method" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Time" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">{% trans "Amount" %}</th>
                 </tr>
               </thead>
               <tbody id="expensesList" class="divide-y divide-zinc-600">
@@ -137,7 +138,7 @@
       <button id="modalCloseFooterBtn"
               class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
         <i class="fas fa-times mr-2"></i>
-        Close
+        {% trans "Close" %}
       </button>
     </div>
   </div>
@@ -147,11 +148,28 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
+  window.DailyChartI18n = {
+    dailySpending: "{% trans 'Daily Spending' %}",
+    sevenDayAverage: "{% trans '7-Day Average' %}",
+    dateLabel: "{% trans 'Date' %}",
+    amountLabel: "{% trans 'Amount (R$)' %}",
+    loadingData: "{% trans 'Loading new data...' %}",
+    errorLoadingData: "{% trans 'Error loading new data. Please try again.' %}",
+    noExpenses: "{% trans 'No expenses found for this date.' %}",
+    outliersLabel: "{% trans 'Outliers (>R$ 1,000)' %}",
+    noCategory: "{% trans 'No Category' %}",
+    failedToLoad: "{% trans 'Failed to load expense details' %}",
+    errorLoadingChart: "{% trans 'Error loading daily spending chart' %}",
+    checkConsole: "{% trans 'Check browser console for more details' %}",
+    showDebugInfo: "{% trans 'Show Debug Info' %}",
+  };
+  const dc = window.DailyChartI18n;
+
   // Debug function to show data information
   function showDebugInfo(data, message) {
     const debugDiv = document.getElementById('debugInfo');
     const debugContent = document.getElementById('debugContent');
-    
+
     debugDiv.style.display = 'block';
     debugContent.innerHTML = `
       <p><strong>Message:</strong> ${message}</p>
@@ -177,52 +195,52 @@
           borderWidth: 1
         }
       };
-      
+
       this.currentDays = 30;
       this.currentCategory = '';
       this.initializeChart();
       this.setupEventListeners();
     }
-    
+
     initializeChart() {
       const ctx = document.getElementById(this.canvasId);
       if (!ctx) {
         console.error('Canvas element not found:', this.canvasId);
         return;
       }
-      
+
       // Validate data
       if (!this.data || !this.data.labels || !this.data.dailyExpenses) {
         console.error('Invalid data structure:', this.data);
         showDebugInfo(this.data, 'Invalid data structure');
         return;
       }
-      
+
       // Store original labels for tooltip access
       this.originalLabels = this.data.labels;
-      
+
       // Format dates for better display - fix timezone issues
       const formattedLabels = this.data.labels.map(dateStr => {
         try {
           // Parse date string directly to avoid timezone issues
           const [year, month, day] = dateStr.split('-');
           const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-          return date.toLocaleDateString('pt-BR', { 
-            day: '2-digit', 
-            month: '2-digit' 
+          return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit'
           });
         } catch (e) {
           console.warn('Date formatting error for:', dateStr, e);
           return dateStr;
         }
       });
-      
+
       this.chart = new Chart(ctx.getContext('2d'), {
         type: 'line',
         data: {
           labels: formattedLabels,
           datasets: [{
-            label: 'Daily Spending',
+            label: dc.dailySpending,
             data: this.data.dailyExpenses,
             backgroundColor: this.colors.primary.backgroundColor,
             borderColor: this.colors.primary.borderColor,
@@ -232,7 +250,7 @@
             pointRadius: 3,
             pointHoverRadius: 6
           }, {
-            label: '7-Day Average',
+            label: dc.sevenDayAverage,
             data: this.data.movingAverages || [],
             backgroundColor: this.colors.trend.backgroundColor,
             borderColor: this.colors.trend.borderColor,
@@ -279,13 +297,13 @@
               callbacks: {
                 title: function(context) {
                   // Simple approach: just show the formatted date from the chart
-                  return context[0].label || 'Date';
+                  return context[0].label || dc.dateLabel;
                 },
                 label: function(context) {
-                  return context.dataset.label + ': ' + 
-                    new Intl.NumberFormat('pt-BR', { 
-                      style: 'currency', 
-                      currency: 'BRL' 
+                  return context.dataset.label + ': ' +
+                    new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
                     }).format(context.parsed.y);
                 }
               }
@@ -296,7 +314,7 @@
               display: true,
               title: {
                 display: true,
-                text: 'Date',
+                text: dc.dateLabel,
                 color: 'white',
                 font: { size: 14, weight: 'bold' }
               },
@@ -314,7 +332,7 @@
               beginAtZero: true,
               title: {
                 display: true,
-                text: 'Amount (R$)',
+                text: dc.amountLabel,
                 color: 'white',
                 font: { size: 14, weight: 'bold' }
               },
@@ -322,8 +340,8 @@
                 color: 'white',
                 font: { size: 11 },
                 callback: function(value) {
-                  return new Intl.NumberFormat('pt-BR', { 
-                    style: 'currency', 
+                  return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
                     currency: 'BRL',
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
@@ -338,7 +356,7 @@
         }
       });
     }
-    
+
     setupEventListeners() {
       const periodSelector = document.getElementById('dailyChartPeriod');
       if (periodSelector) {
@@ -346,21 +364,21 @@
           this.updateChartPeriod(parseInt(e.target.value));
         });
       }
-      
+
       const typeSelector = document.getElementById('dailyChartType');
       if (typeSelector) {
         typeSelector.addEventListener('change', (e) => {
           this.updateChartType(e.target.value);
         });
       }
-      
+
       const scaleSelector = document.getElementById('dailyChartScale');
       if (scaleSelector) {
         scaleSelector.addEventListener('change', (e) => {
           this.updateChartScale(e.target.value);
         });
       }
-      
+
       const outlierSelector = document.getElementById('outlierHandling');
       if (outlierSelector) {
         outlierSelector.addEventListener('change', (e) => {
@@ -375,13 +393,13 @@
         });
       }
     }
-    
+
     fetchAndUpdate(days, categoryId = '') {
       const canvas = document.getElementById('dailySpendingChart');
       const loadingDiv = document.createElement('div');
       loadingDiv.id = 'loadingIndicator';
       loadingDiv.className = 'absolute inset-0 bg-zinc-800 bg-opacity-90 flex items-center justify-center text-white z-10';
-      loadingDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>Loading new data...</div>';
+      loadingDiv.innerHTML = `<div class="text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>${dc.loadingData}</div>`;
 
       const canvasContainer = canvas.parentElement;
       canvasContainer.style.position = 'relative';
@@ -412,7 +430,7 @@
         console.error('Error fetching new data:', error);
         const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) loadingIndicator.remove();
-        alert('Error loading new data. Please try again.');
+        alert(dc.errorLoadingData);
       });
     }
 
@@ -425,12 +443,12 @@
       this.currentCategory = categoryId;
       this.fetchAndUpdate(this.currentDays, categoryId);
     }
-    
+
     updateChartType(type) {
       if (!this.chart) return;
-      
+
       this.chart.config.type = type;
-      
+
       if (type === 'bar') {
         this.chart.data.datasets[0].tension = 0;
         this.chart.data.datasets[0].fill = false;
@@ -442,24 +460,24 @@
         this.chart.data.datasets[0].pointRadius = 3;
         this.chart.data.datasets[1].pointRadius = 2;
       }
-      
+
       this.chart.update('active');
     }
-    
+
     updateChartScale(scaleType) {
       if (!this.chart) return;
-      
+
       // Update the Y-axis scale type
       this.chart.options.scales.y.type = scaleType;
-      
+
       if (scaleType === 'logarithmic') {
         // Configure logarithmic scale
         this.chart.options.scales.y.min = 1; // Start from 1 to avoid log(0)
         this.chart.options.scales.y.ticks.callback = function(value) {
           // Format logarithmic scale labels
           if (value === 1 || value === 10 || value === 100 || value === 1000 || value === 10000) {
-            return new Intl.NumberFormat('pt-BR', { 
-              style: 'currency', 
+            return new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
               currency: 'BRL',
               minimumFractionDigits: 0,
               maximumFractionDigits: 0
@@ -471,29 +489,29 @@
         // Reset to linear scale
         this.chart.options.scales.y.min = 0;
         this.chart.options.scales.y.ticks.callback = function(value) {
-          return new Intl.NumberFormat('pt-BR', { 
-            style: 'currency', 
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
             currency: 'BRL',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
           }).format(value);
         };
       }
-      
+
       this.chart.update('active');
     }
-    
+
     updateOutlierHandling(outlierType) {
       if (!this.chart || !this.data) return;
-      
+
       // Fixed outlier threshold - change this value to adjust what's considered an outlier
       const outlierThreshold = 1000; // R$ 1,000 and above are considered outliers
-      
+
       if (outlierType === 'highlight') {
         // Create separate datasets for normal and outlier data
         const normalData = [];
         const outlierData = [];
-        
+
         this.data.dailyExpenses.forEach((value, index) => {
           if (value > outlierThreshold) {
             normalData.push(null);
@@ -503,14 +521,14 @@
             outlierData.push(null);
           }
         });
-        
+
         // Update datasets
         this.chart.data.datasets[0].data = normalData;
-        
+
         // Add or update outlier dataset
         if (this.chart.data.datasets.length < 3) {
           this.chart.data.datasets.push({
-            label: 'Outliers (>R$ 1,000)',
+            label: dc.outliersLabel,
             data: outlierData,
             backgroundColor: 'rgba(255, 99, 132, 0.3)',
             borderColor: 'rgba(255, 99, 132, 1)',
@@ -523,10 +541,10 @@
         } else {
           this.chart.data.datasets[2].data = outlierData;
         }
-        
+
       } else if (outlierType === 'separate') {
         // Filter out outliers from main dataset (both expenses and moving averages)
-        const filteredData = this.data.dailyExpenses.map(value => 
+        const filteredData = this.data.dailyExpenses.map(value =>
           value > outlierThreshold ? null : value
         );
         const filteredMovingAverages = this.data.dailyExpenses.map((value, index) => {
@@ -534,89 +552,79 @@
           // Hide if either daily expense OR moving average is above threshold
           return (value > outlierThreshold || movingAvgValue > outlierThreshold) ? null : movingAvgValue;
         });
-        
+
         this.chart.data.datasets[0].data = filteredData;
         this.chart.data.datasets[1].data = filteredMovingAverages;
-        
+
         // Remove outlier dataset if it exists
         if (this.chart.data.datasets.length > 2) {
           this.chart.data.datasets.splice(2, 1);
         }
-        
-        // Show outlier info in chart title or subtitle
-        const outlierCount = this.data.dailyExpenses.filter(v => v > outlierThreshold).length;
-        const outlierSum = this.data.dailyExpenses.filter(v => v > outlierThreshold).reduce((a, b) => a + b, 0);
-        
-        // You could update a subtitle or add annotation here
-        
+
       } else {
         // Show all data normally
         this.chart.data.datasets[0].data = this.data.dailyExpenses;
-        
+
         // Remove outlier dataset if it exists
         if (this.chart.data.datasets.length > 2) {
           this.chart.data.datasets.splice(2, 1);
         }
       }
-      
+
       this.chart.update('active');
     }
-    
+
     updateData(newData) {
       if (!this.chart) {
         console.error('Chart not initialized - cannot update data');
         return;
       }
-      
+
       if (!newData || !newData.labels || !newData.dailyExpenses) {
         console.error('Invalid data structure received:', newData);
         return;
       }
-      
+
       try {
         this.data = newData;
         this.originalLabels = newData.labels;
-        
+
         // Format new labels - fix timezone issues
         const formattedLabels = newData.labels.map(dateStr => {
           try {
             // Parse date string directly to avoid timezone issues
             const [year, month, day] = dateStr.split('-');
             const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            return date.toLocaleDateString('pt-BR', { 
-              day: '2-digit', 
-              month: '2-digit' 
+            return date.toLocaleDateString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit'
             });
           } catch (e) {
             console.warn('Date formatting error for:', dateStr, e);
             return dateStr;
           }
         });
-        
+
         // Update chart data
         this.chart.data.labels = formattedLabels;
         this.chart.data.datasets[0].data = newData.dailyExpenses;
         this.chart.data.datasets[1].data = newData.movingAverages || [];
-        
+
         // Reapply current outlier handling after data update
         const outlierSelect = document.getElementById('outlierHandling');
         if (outlierSelect) {
           this.updateOutlierHandling(outlierSelect.value);
         }
-        
+
         // Force chart update
         this.chart.update('active');
-        
+
       } catch (error) {
         console.error('Error updating chart data:', error);
       }
     }
 
     showExpenseDetails(dateString) {
-      /**
-       * Show expense details modal for a specific date.
-       * Handles AJAX loading, error states, and modal population.
-       */
       if (!dateString) {
         console.error('No date provided to showExpenseDetails');
         return;
@@ -656,23 +664,17 @@
       })
       .catch(error => {
         console.error('Error fetching expense details:', error);
-        this.showModalError(error.message || 'Failed to load expense details');
+        this.showModalError(error.message || dc.failedToLoad);
       });
     }
 
     resetModalState() {
-      /**
-       * Reset modal to initial loading state
-       */
       document.getElementById('modalLoading').classList.remove('hidden');
       document.getElementById('modalError').classList.add('hidden');
       document.getElementById('modalContent').classList.add('hidden');
     }
 
     showModalError(message) {
-      /**
-       * Show error state in modal
-       */
       document.getElementById('modalLoading').classList.add('hidden');
       document.getElementById('modalContent').classList.add('hidden');
       document.getElementById('modalError').classList.remove('hidden');
@@ -680,9 +682,6 @@
     }
 
     populateModal(data) {
-      /**
-       * Populate modal with expense data
-       */
       // Hide loading, show content
       document.getElementById('modalLoading').classList.add('hidden');
       document.getElementById('modalError').classList.add('hidden');
@@ -706,7 +705,7 @@
         const el = document.createElement('div');
         el.className = 'bg-zinc-600 rounded-lg px-3 py-2 text-sm flex flex-col items-center min-w-[100px]';
         el.innerHTML = `
-          <span class="text-gray-300 text-xs text-center">${this.escapeHtml(cat.category || 'Sem Categoria')}</span>
+          <span class="text-gray-300 text-xs text-center">${this.escapeHtml(cat.category || dc.noCategory)}</span>
           <span class="text-blue-300 font-bold">${formatBRL(cat.total)}</span>
         `;
         categoryCards.appendChild(el);
@@ -715,8 +714,8 @@
       // Populate expenses table (desktop) and cards (mobile)
       const tableBody = document.getElementById('expensesList');
       const cardContainer = document.getElementById('expensesCardList');
-      tableBody.innerHTML = ''; // Clear existing content
-      cardContainer.innerHTML = ''; // Clear existing cards
+      tableBody.innerHTML = '';
+      cardContainer.innerHTML = '';
 
       if (data.expenses.length === 0) {
         // Empty state for table
@@ -724,7 +723,7 @@
           <tr>
             <td colspan="5" class="px-4 py-8 text-center text-gray-400">
               <i class="fas fa-info-circle mr-2"></i>
-              No expenses found for this date.
+              ${dc.noExpenses}
             </td>
           </tr>
         `;
@@ -732,7 +731,7 @@
         cardContainer.innerHTML = `
           <div class="text-center text-gray-400 py-8">
             <i class="fas fa-info-circle mr-2"></i>
-            No expenses found for this date.
+            ${dc.noExpenses}
           </div>
         `;
       } else {
@@ -800,17 +799,14 @@
     }
 
     formatDateForDisplay(dateString) {
-      /**
-       * Format date string for display in modal title
-       */
       try {
         const [year, month, day] = dateString.split('-');
         const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        return date.toLocaleDateString('pt-BR', { 
+        return date.toLocaleDateString('pt-BR', {
           weekday: 'long',
           year: 'numeric',
-          month: 'long', 
-          day: 'numeric' 
+          month: 'long',
+          day: 'numeric'
         });
       } catch (e) {
         return dateString;
@@ -818,33 +814,30 @@
     }
 
     setupModalCloseHandlers() {
-      /**
-       * Setup event listeners for modal close buttons
-       */
       const modal = document.getElementById('expenseDetailsModal');
       const closeBtn = document.getElementById('modalCloseBtn');
       const closeFooterBtn = document.getElementById('modalCloseFooterBtn');
-      
+
       // Close modal function
       const closeModal = () => {
         modal.classList.add('hidden');
       };
-      
+
       // Remove existing listeners to prevent duplicates
       closeBtn.removeEventListener('click', closeModal);
       closeFooterBtn.removeEventListener('click', closeModal);
-      
+
       // Add click listeners
       closeBtn.addEventListener('click', closeModal);
       closeFooterBtn.addEventListener('click', closeModal);
-      
+
       // Close on background click
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           closeModal();
         }
       });
-      
+
       // Close on Escape key
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
@@ -854,15 +847,12 @@
     }
 
     escapeHtml(text) {
-      /**
-       * Simple HTML escaping for security
-       */
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
   }
-  
+
   // Initialize the chart with proper JSON handling
   try {
     // Use Django's json_script filter for safe JSON handling
@@ -871,27 +861,24 @@
       throw new Error('Daily spending data script element not found');
     }
     const dailySpendingData = JSON.parse(dailySpendingDataElement.textContent);
-    
-    // Show debug info on page (only in development)
-    // showDebugInfo(dailySpendingData, 'Data received from Django');
-    
+
     // Validate data structure
     if (!dailySpendingData) {
       throw new Error('No data received from Django');
     }
-    
+
     if (typeof dailySpendingData !== 'object') {
       throw new Error('Data is not an object: ' + typeof dailySpendingData);
     }
-    
+
     if (!dailySpendingData.labels) {
       throw new Error('Missing labels in data');
     }
-    
+
     if (!dailySpendingData.dailyExpenses) {
       throw new Error('Missing dailyExpenses in data');
     }
-    
+
     console.log('Data validation passed, initializing chart...');
     const dailyChart = new DailySpendingChart('dailySpendingChart', dailySpendingData);
     window.showExpenseDetailsForDate = (date) => dailyChart.showExpenseDetails(date);
@@ -907,19 +894,19 @@
 
   } catch (error) {
     console.error('Error initializing daily spending chart:', error);
-    
+
     let chartInitialized = false;
-    
+
     // Try fallback method if json_script fails
     try {
       console.log('Trying fallback data parsing method...');
       const fallbackData = {{ daily_spending_data|safe }};
       console.log('Fallback data:', fallbackData);
-      
+
       if (fallbackData && typeof fallbackData === 'object') {
         const dailyChart = new DailySpendingChart('dailySpendingChart', fallbackData);
         window.showExpenseDetailsForDate = (date) => dailyChart.showExpenseDetails(date);
-        chartInitialized = true; // Success with fallback
+        chartInitialized = true;
 
         if (window.innerWidth < 768) {
           const periodSelector = document.getElementById('dailyChartPeriod');
@@ -932,25 +919,25 @@
     } catch (fallbackError) {
       console.error('Fallback method also failed:', fallbackError);
     }
-    
+
     // Only show error message if both methods failed
     if (!chartInitialized) {
       showDebugInfo({
-        error: error.message, 
+        error: error.message,
         stack: error.stack,
         elementFound: !!document.getElementById('daily-spending-data'),
         elementContent: document.getElementById('daily-spending-data')?.textContent || 'No content'
       }, 'Chart initialization error');
-      
+
       // Show error message to user
       const chartContainer = document.getElementById('dailySpendingChart').parentElement;
       chartContainer.innerHTML = `
         <div class="text-center text-red-400 p-8">
-          <h3 class="text-lg font-bold mb-2">Error loading daily spending chart</h3>
+          <h3 class="text-lg font-bold mb-2">${dc.errorLoadingChart}</h3>
           <p class="text-sm">${error.message}</p>
-          <p class="text-xs mt-2">Check browser console for more details</p>
+          <p class="text-xs mt-2">${dc.checkConsole}</p>
           <button onclick="document.getElementById('debugInfo').style.display='block'" class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-            Show Debug Info
+            ${dc.showDebugInfo}
           </button>
         </div>
       `;
