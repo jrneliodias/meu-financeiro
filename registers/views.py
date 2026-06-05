@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.utils.translation import gettext as _, ngettext
 from .models import Expense, Category, CategoryBudgetEstimate
 import json
 import pandas as pd
@@ -47,7 +48,10 @@ def register_expense(request):
             # Show errors to user
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                    messages.error(request, _("%(field)s: %(error)s") % {
+                        'field': field,
+                        'error': error,
+                    })
             return render(request, 'register/expense_form.html', {
                 'form': form,
                 'quick_fill_options': form.quick_fill_options,
@@ -62,18 +66,28 @@ def register_expense(request):
                 print(f"[DEBUG] Creating {expense_data['installments']} installments")
                 installment_service.create_installments(user, expense_data)
                 messages.success(
-                    request, f"{expense_data['installments']} installments have been registered.")
+                    request,
+                    ngettext(
+                        "%(count)s installment has been registered.",
+                        "%(count)s installments have been registered.",
+                        expense_data['installments'],
+                    ) % {'count': expense_data['installments']}
+                )
             else:
                 print(f"[DEBUG] Creating single expense")
                 expense = expense_service.create_single_expense(user, expense_data)
                 print(f"[DEBUG] Expense created with ID: {expense.id}")
                 messages.success(
-                    request, f"Expense {expense.__str__()} has been registered.")
+                    request,
+                    _("Expense %(expense)s has been registered.") % {
+                        'expense': str(expense)
+                    }
+                )
         except Exception as e:
             print(f"[DEBUG] ERROR creating expense: {e}")
             import traceback
             traceback.print_exc()
-            messages.error(request, f"Error creating expense: {e}")
+            messages.error(request, _("Error creating expense: %(error)s") % {'error': e})
             return render(request, 'register/expense_form.html', {
                 'form': form,
                 'quick_fill_options': form.quick_fill_options,
@@ -186,8 +200,12 @@ def csv_import(request):
                 # Show results
                 stats = result['stats']
                 messages.success(
-                    request, 
-                    f"Import completed! {stats['imported']} records imported successfully."
+                    request,
+                    ngettext(
+                        "Import completed! %(count)s record imported successfully.",
+                        "Import completed! %(count)s records imported successfully.",
+                        stats['imported'],
+                    ) % {'count': stats['imported']}
                 )
                 
                 if result['errors']:
@@ -202,7 +220,10 @@ def csv_import(request):
         else:
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                    messages.error(request, _("%(field)s: %(error)s") % {
+                        'field': field,
+                        'error': error,
+                    })
     else:
         form = CSVImportForm()
     
@@ -216,7 +237,7 @@ def csv_import_confirm(request):
         # Get stored data from session
         import_data = request.session.get('csv_import_data')
         if not import_data:
-            messages.error(request, "No import data found. Please upload a file again.")
+            messages.error(request, _("No import data found. Please upload a file again."))
             return redirect('csv_import')
         
         try:
@@ -240,8 +261,12 @@ def csv_import_confirm(request):
             # Show results
             stats = result['stats']
             messages.success(
-                request, 
-                f"Import completed! {stats['imported']} records imported successfully."
+                request,
+                ngettext(
+                    "Import completed! %(count)s record imported successfully.",
+                    "Import completed! %(count)s records imported successfully.",
+                    stats['imported'],
+                ) % {'count': stats['imported']}
             )
             
             if result['errors']:
@@ -255,7 +280,7 @@ def csv_import_confirm(request):
             return redirect('csv_import')
             
         except Exception as e:
-            messages.error(request, f"Error during import: {str(e)}")
+            messages.error(request, _("Error during import: %(error)s") % {'error': str(e)})
             return redirect('csv_import')
     
     return redirect('csv_import')
@@ -274,23 +299,23 @@ def csv_import_ajax(request):
             # Handle preview request
             return JsonResponse({
                 'status': 'success',
-                'message': 'Preview functionality would be implemented here'
+                'message': _('Preview functionality would be implemented here')
             })
         elif action == 'import':
             # Handle import request
             return JsonResponse({
                 'status': 'success',
-                'message': 'Import functionality would be implemented here'
+                'message': _('Import functionality would be implemented here')
             })
         else:
             return JsonResponse({
                 'status': 'error',
-                'message': 'Invalid action'
+                'message': _('Invalid action')
             })
     except json.JSONDecodeError:
         return JsonResponse({
             'status': 'error',
-            'message': 'Invalid JSON data'
+            'message': _('Invalid JSON data')
         })
 
 
@@ -321,7 +346,10 @@ def register_recurring_expense(request):
         if not form.is_valid():
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                    messages.error(request, _("%(field)s: %(error)s") % {
+                        'field': field,
+                        'error': error,
+                    })
             return render(request, 'register/recurring_expense_form.html', {'form': form})
 
         recurring_expense_data = form.cleaned_data
@@ -334,11 +362,13 @@ def register_recurring_expense(request):
             )
             messages.success(
                 request,
-                f"Recurring expense '{recurring_expense.description}' registered successfully."
+                _("Recurring expense '%(description)s' registered successfully.") % {
+                    'description': recurring_expense.description
+                }
             )
             return redirect('recurring_expense_list')
         except Exception as e:
-            messages.error(request, f"Error creating recurring expense: {e}")
+            messages.error(request, _("Error creating recurring expense: %(error)s") % {'error': e})
             return render(request, 'register/recurring_expense_form.html', {'form': form})
     else:
         form = RecurringExpenseForm(user=request.user)
@@ -355,17 +385,19 @@ def delete_expense(request, pk):
 
         # Verify if user owns the expense
         if expense.user != request.user:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            return JsonResponse({'error': _('Unauthorized')}, status=403)
 
         description = expense.description
         expense.delete()
 
         return JsonResponse({
             'success': True,
-            'message': f"Expense '{description}' deleted successfully."
+            'message': _("Expense '%(description)s' deleted successfully.") % {
+                'description': description
+            }
         })
     except Expense.DoesNotExist:
-        return JsonResponse({'error': 'Expense not found'}, status=404)
+        return JsonResponse({'error': _('Expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -402,7 +434,9 @@ def csv_processor(request):
                 if column_mapping is None:
                     messages.error(
                         request,
-                        f"Could not auto-detect Nubank format. Available columns: {', '.join(df.columns.tolist())}"
+                        _("Could not auto-detect Nubank format. Available columns: %(columns)s") % {
+                            'columns': ', '.join(df.columns.tolist())
+                        }
                     )
                     return render(request, 'register/csv_processor.html', {'form': form})
             else:
@@ -417,7 +451,7 @@ def csv_processor(request):
             processed_df, warnings = csv_processor_service.process_csv(df, column_mapping)
 
             if processed_df is None or processed_df.empty:
-                messages.error(request, "Processing failed. No data to display.")
+                messages.error(request, _("Processing failed. No data to display."))
                 for warning in warnings:
                     messages.warning(request, warning)
                 return render(request, 'register/csv_processor.html', {'form': form})
@@ -457,7 +491,10 @@ def csv_processor(request):
             # Show form errors
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                    messages.error(request, _("%(field)s: %(error)s") % {
+                        'field': field,
+                        'error': error,
+                    })
     else:
         form = CSVProcessorForm()
 
@@ -471,7 +508,7 @@ def csv_processor_download(request):
     processed_data = request.session.get('processed_csv_data')
 
     if not processed_data:
-        messages.error(request, "No processed data found. Please upload and process a file first.")
+        messages.error(request, _("No processed data found. Please upload and process a file first."))
         return redirect('csv_processor')
 
     csv_string = processed_data['csv_string']
@@ -495,7 +532,7 @@ def csv_processor_update_data(request):
         if not rows:
             return JsonResponse({
                 'success': False,
-                'error': 'No row data provided'
+                'error': _('No row data provided')
             }, status=400)
 
         # Update session data
@@ -516,14 +553,14 @@ def csv_processor_update_data(request):
 
         return JsonResponse({
             'success': True,
-            'message': 'Data updated successfully',
+            'message': _('Data updated successfully'),
             'row_count': len(rows)
         })
 
     except json.JSONDecodeError:
         return JsonResponse({
             'success': False,
-            'error': 'Invalid JSON data'
+            'error': _('Invalid JSON data')
         }, status=400)
     except Exception as e:
         return JsonResponse({
@@ -541,7 +578,7 @@ def recent_expenses_ajax(request):
 
         return JsonResponse({
             'success': True,
-            'message': ApiMessages.RECENT_EXPENSES_SUCCESS,
+            'message': _(ApiMessages.RECENT_EXPENSES_SUCCESS),
             'expenses': expenses,
             'count': len(expenses),
         })
@@ -562,12 +599,12 @@ def expense_details_ajax(request, pk):
         if expense is None:
             return JsonResponse({
                 'success': False,
-                'error': ApiMessages.EXPENSE_NOT_FOUND,
+                'error': _(ApiMessages.EXPENSE_NOT_FOUND),
             }, status=ApiStatus.NOT_FOUND)
 
         return JsonResponse({
             'success': True,
-            'message': ApiMessages.DETAILS_SUCCESS,
+            'message': _(ApiMessages.DETAILS_SUCCESS),
             'expense': expense,
         })
     except Exception as e:
@@ -587,12 +624,12 @@ def expense_autofill_ajax(request, pk):
         if form_data is None:
             return JsonResponse({
                 'success': False,
-                'error': ApiMessages.EXPENSE_NOT_FOUND,
+                'error': _(ApiMessages.EXPENSE_NOT_FOUND),
             }, status=ApiStatus.NOT_FOUND)
 
         return JsonResponse({
             'success': True,
-            'message': ApiMessages.AUTOFILL_SUCCESS,
+            'message': _(ApiMessages.AUTOFILL_SUCCESS),
             'form_data': form_data,
         })
     except Exception as e:
@@ -615,7 +652,7 @@ def expense_list_details_ajax(request):
             if not filter_value:
                 return JsonResponse({
                     'success': False,
-                    'error': 'Category ID is required for category filter',
+                    'error': _('Category ID is required for category filter'),
                 }, status=ApiStatus.BAD_REQUEST)
 
             expenses = expense_list_service.get_expenses_by_category(
@@ -628,16 +665,18 @@ def expense_list_details_ajax(request):
                 category = Category.objects.get(id=filter_value)
                 filter_title = category.name
             except Category.DoesNotExist:
-                filter_title = 'Categoria não encontrada'
+                filter_title = _('Category not found')
 
         elif filter_type == 'recent':
             expenses = expense_list_service.get_recent_expenses(request.user)
-            filter_title = 'Recentes'
+            filter_title = _('Recent')
 
         else:
             return JsonResponse({
                 'success': False,
-                'error': f'Invalid filter type: {filter_type}',
+                'error': _('Invalid filter type: %(filter_type)s') % {
+                    'filter_type': filter_type
+                },
             }, status=ApiStatus.BAD_REQUEST)
 
         # Calculate total amount
@@ -651,7 +690,9 @@ def expense_list_details_ajax(request):
             'filter_info': {
                 'type': filter_type,
                 'value': filter_title,
-                'title': f'Despesas - {filter_title}'
+                'title': _('Expenses - %(filter_title)s') % {
+                    'filter_title': filter_title
+                }
             }
         })
 
@@ -680,7 +721,10 @@ def quick_fill_preset_create(request):
         if not form.is_valid():
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                    messages.error(request, _("%(field)s: %(error)s") % {
+                        'field': field,
+                        'error': error,
+                    })
             return render(request, 'register/quick_fill_preset_form.html', {
                 'form': form,
                 'is_editing': False,
@@ -693,11 +737,11 @@ def quick_fill_preset_create(request):
             )
             messages.success(
                 request,
-                f"Preset '{preset.name}' created successfully."
+                _("Preset '%(name)s' created successfully.") % {'name': preset.name}
             )
             return redirect('quick_fill_preset_list')
         except Exception as e:
-            messages.error(request, f"Error creating preset: {e}")
+            messages.error(request, _("Error creating preset: %(error)s") % {'error': e})
             return render(request, 'register/quick_fill_preset_form.html', {
                 'form': form,
                 'is_editing': False,
@@ -718,7 +762,7 @@ def quick_fill_preset_edit(request, pk):
         pk, request.user
     )
     if preset is None:
-        messages.error(request, "Preset not found.")
+        messages.error(request, _("Preset not found."))
         return redirect('quick_fill_preset_list')
 
     if request.method == 'POST':
@@ -729,7 +773,10 @@ def quick_fill_preset_edit(request, pk):
         if not form.is_valid():
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                    messages.error(request, _("%(field)s: %(error)s") % {
+                        'field': field,
+                        'error': error,
+                    })
             return render(request, 'register/quick_fill_preset_form.html', {
                 'form': form,
                 'is_editing': True,
@@ -739,11 +786,11 @@ def quick_fill_preset_edit(request, pk):
             form.save()
             messages.success(
                 request,
-                f"Preset '{preset.name}' updated successfully."
+                _("Preset '%(name)s' updated successfully.") % {'name': preset.name}
             )
             return redirect('quick_fill_preset_list')
         except Exception as e:
-            messages.error(request, f"Error updating preset: {e}")
+            messages.error(request, _("Error updating preset: %(error)s") % {'error': e})
             return render(request, 'register/quick_fill_preset_form.html', {
                 'form': form,
                 'is_editing': True,
@@ -765,11 +812,11 @@ def quick_fill_preset_delete(request, pk):
         is_deleted = quick_fill_preset_service.delete_preset(pk, request.user)
         if not is_deleted:
             return JsonResponse(
-                {'error': 'Preset not found'}, status=404
+                {'error': _('Preset not found')}, status=404
             )
         return JsonResponse({
             'success': True,
-            'message': 'Preset deleted successfully.',
+            'message': _('Preset deleted successfully.'),
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -803,7 +850,7 @@ def category_create_ajax(request):
 
         if not category_name:
             return JsonResponse(
-                {'error': 'Category name is required.'}, status=400
+                {'error': _('Category name is required.')}, status=400
             )
 
         existing = Category.objects.filter(
@@ -823,7 +870,7 @@ def category_create_ajax(request):
             'category': {'id': category.id, 'name': category.name},
         })
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
+        return JsonResponse({'error': _('Invalid JSON.')}, status=400)
 
 
 @login_required
@@ -840,9 +887,9 @@ def budget_estimate_list(request):
             estimate.user = request.user
             try:
                 estimate.save()
-                messages.success(request, 'Estimativa criada com sucesso.')
+                messages.success(request, _('Estimate created successfully.'))
             except Exception:
-                messages.error(request, 'Já existe uma estimativa para esta categoria neste mês.')
+                messages.error(request, _('An estimate already exists for this category this month.'))
             return redirect(
                 f"{request.path}?month={estimate.month}&year={estimate.year}"
             )
@@ -868,7 +915,7 @@ def budget_estimate_update(request, pk):
         form = CategoryBudgetEstimateForm(request.POST, instance=estimate)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Estimativa atualizada.')
+            messages.success(request, _('Estimate updated.'))
             return redirect(
                 f"/register/estimativas/?month={estimate.month}&year={estimate.year}"
             )
@@ -887,5 +934,5 @@ def budget_estimate_delete(request, pk):
     estimate = CategoryBudgetEstimate.objects.get(pk=pk, user=request.user)
     month, year = estimate.month, estimate.year
     estimate.delete()
-    messages.success(request, 'Estimativa removida.')
+    messages.success(request, _('Estimate removed.'))
     return redirect(f"/register/estimativas/?month={month}&year={year}")

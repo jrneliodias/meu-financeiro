@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from .models import Expense, Income, Category, RecurringExpense, PaymentMethod, QuickFillPreset, CategoryBudgetEstimate
 from .components.expense_form.expense_form_component import ExpenseFormComponent
 from .components.expense_form.quick_fill_menu import QuickFillMenu
@@ -78,9 +79,9 @@ class CSVImportForm(forms.Form):
     """Form for CSV file import with validation and configuration options"""
     
     csv_file = forms.FileField(
-        label='CSV File',
+        label=_('CSV File'),
         required=False,
-        help_text='Select a CSV file to import. Supported formats: .csv',
+        help_text=_('Select a CSV file to import. Supported formats: .csv'),
         widget=forms.FileInput(attrs={
             'class': 'block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400',
             'accept': '.csv'
@@ -88,9 +89,9 @@ class CSVImportForm(forms.Form):
     )
     
     csv_text = forms.CharField(
-        label='CSV Text',
+        label=_('CSV Text'),
         required=False,
-        help_text='Paste your CSV data directly here. Use this as an alternative to file upload.',
+        help_text=_('Paste your CSV data directly here. Use this as an alternative to file upload.'),
         widget=forms.Textarea(attrs={
             'class': 'block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 font-mono p-3',
             'rows': 10,
@@ -99,55 +100,55 @@ class CSVImportForm(forms.Form):
     )
     
     separator = forms.ChoiceField(
-        label='CSV Separator',
+        label=_('CSV Separator'),
         choices=[
-            (',', 'Comma (,)'),
-            (';', 'Semicolon (;)'),
-            ('\t', 'Tab'),
-            ('|', 'Pipe (|)'),
+            (',', _('Comma (,)')),
+            (';', _('Semicolon (;)')),
+            ('\t', _('Tab')),
+            ('|', _('Pipe (|)')),
         ],
         initial=',',
-        help_text='Select the character used to separate columns in your CSV file',
+        help_text=_('Select the character used to separate columns in your CSV file'),
         widget=forms.Select(attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
         })
     )
     
     skip_header = forms.BooleanField(
-        label='Skip Header Row',
+        label=_('Skip Header Row'),
         initial=True,
         required=False,
-        help_text='Check if your CSV file has a header row that should be skipped',
+        help_text=_('Check if your CSV file has a header row that should be skipped'),
         widget=forms.CheckboxInput(attrs={
             'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
         })
     )
     
     auto_create_categories = forms.BooleanField(
-        label='Auto-create Categories',
+        label=_('Auto-create Categories'),
         initial=True,
         required=False,
-        help_text='Automatically create new categories if they don\'t exist',
+        help_text=_("Automatically create new categories if they don't exist"),
         widget=forms.CheckboxInput(attrs={
             'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
         })
     )
     
     auto_create_payment_methods = forms.BooleanField(
-        label='Auto-create Payment Methods',
+        label=_('Auto-create Payment Methods'),
         initial=True,
         required=False,
-        help_text='Automatically create new payment methods if they don\'t exist',
+        help_text=_("Automatically create new payment methods if they don't exist"),
         widget=forms.CheckboxInput(attrs={
             'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
         })
     )
     
     preview_mode = forms.BooleanField(
-        label='Preview Mode',
+        label=_('Preview Mode'),
         initial=True,
         required=False,
-        help_text='Show a preview of the data before importing',
+        help_text=_('Show a preview of the data before importing'),
         widget=forms.CheckboxInput(attrs={
             'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
         })
@@ -160,11 +161,11 @@ class CSVImportForm(forms.Form):
         if csv_file:
             # Check file extension
             if not csv_file.name.endswith('.csv'):
-                raise forms.ValidationError('Please upload a valid CSV file.')
+                raise forms.ValidationError(_('Please upload a valid CSV file.'))
             
             # Check file size (limit to 10MB)
             if csv_file.size > 10 * 1024 * 1024:  # 10MB
-                raise forms.ValidationError('File size must be less than 10MB.')
+                raise forms.ValidationError(_('File size must be less than 10MB.'))
         
         return csv_file
     
@@ -176,12 +177,12 @@ class CSVImportForm(forms.Form):
             # Basic validation - check if it has at least one line with commas
             lines = csv_text.strip().split('\n')
             if len(lines) < 2:  # At least header + one data row
-                raise forms.ValidationError('CSV text must contain at least 2 lines (header and data).')
+                raise forms.ValidationError(_('CSV text must contain at least 2 lines (header and data).'))
             
             # Check if it looks like CSV (has separators)
             first_line = lines[0]
             if ',' not in first_line and ';' not in first_line and '\t' not in first_line:
-                raise forms.ValidationError('CSV text does not appear to contain valid separators.')
+                raise forms.ValidationError(_('CSV text does not appear to contain valid separators.'))
         
         return csv_text
     
@@ -192,10 +193,10 @@ class CSVImportForm(forms.Form):
         csv_text = cleaned_data.get('csv_text')
 
         if not csv_file and not csv_text:
-            raise forms.ValidationError('Please provide either a CSV file or CSV text.')
+            raise forms.ValidationError(_('Please provide either a CSV file or CSV text.'))
 
         if csv_file and csv_text:
-            raise forms.ValidationError('Please provide either a CSV file OR CSV text, not both.')
+            raise forms.ValidationError(_('Please provide either a CSV file OR CSV text, not both.'))
 
         return cleaned_data
 
@@ -204,9 +205,9 @@ class CSVProcessorForm(forms.Form):
     """Form for CSV processing and transformation (no database writes)"""
 
     csv_file = forms.FileField(
-        label='CSV File',
+        label=_('CSV File'),
         required=False,
-        help_text='Select a CSV file to process. Supported formats: .csv',
+        help_text=_('Select a CSV file to process. Supported formats: .csv'),
         widget=forms.FileInput(attrs={
             'class': 'block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400',
             'accept': '.csv'
@@ -214,9 +215,9 @@ class CSVProcessorForm(forms.Form):
     )
 
     csv_text = forms.CharField(
-        label='CSV Text',
+        label=_('CSV Text'),
         required=False,
-        help_text='Paste your CSV data directly here. Use this as an alternative to file upload.',
+        help_text=_('Paste your CSV data directly here. Use this as an alternative to file upload.'),
         widget=forms.Textarea(attrs={
             'class': 'block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 font-mono p-3',
             'rows': 10,
@@ -225,25 +226,25 @@ class CSVProcessorForm(forms.Form):
     )
 
     separator = forms.ChoiceField(
-        label='CSV Separator',
+        label=_('CSV Separator'),
         choices=[
-            (',', 'Comma (,)'),
-            (';', 'Semicolon (;)'),
-            ('\t', 'Tab'),
-            ('|', 'Pipe (|)'),
+            (',', _('Comma (,)')),
+            (';', _('Semicolon (;)')),
+            ('\t', _('Tab')),
+            ('|', _('Pipe (|)')),
         ],
         initial=',',
-        help_text='Select the character used to separate columns in your CSV file',
+        help_text=_('Select the character used to separate columns in your CSV file'),
         widget=forms.Select(attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
         })
     )
 
     auto_detect = forms.BooleanField(
-        label='Auto-detect Nubank Format',
+        label=_('Auto-detect Nubank Format'),
         initial=True,
         required=False,
-        help_text='Automatically detect Nubank CSV columns (Data, Valor, Descrição)',
+        help_text=_('Automatically detect Nubank CSV columns (Data, Valor, Description)'),
         widget=forms.CheckboxInput(attrs={
             'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600',
             'id': 'id_auto_detect'
@@ -252,9 +253,9 @@ class CSVProcessorForm(forms.Form):
 
     # Manual column mapping fields (shown when auto_detect is False)
     date_column = forms.CharField(
-        label='Date Column Name',
+        label=_('Date Column Name'),
         required=False,
-        help_text='Name of the column containing dates (e.g., "Data")',
+        help_text=_('Name of the column containing dates (e.g., "Data")'),
         widget=forms.TextInput(attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
             'placeholder': 'Data'
@@ -262,9 +263,9 @@ class CSVProcessorForm(forms.Form):
     )
 
     amount_column = forms.CharField(
-        label='Amount Column Name',
+        label=_('Amount Column Name'),
         required=False,
-        help_text='Name of the column containing amounts (e.g., "Valor")',
+        help_text=_('Name of the column containing amounts (e.g., "Valor")'),
         widget=forms.TextInput(attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
             'placeholder': 'Valor'
@@ -272,9 +273,9 @@ class CSVProcessorForm(forms.Form):
     )
 
     description_column = forms.CharField(
-        label='Description Column Name',
+        label=_('Description Column Name'),
         required=False,
-        help_text='Name of the column containing descriptions (e.g., "Descrição")',
+        help_text=_('Name of the column containing descriptions (e.g., "Description")'),
         widget=forms.TextInput(attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
             'placeholder': 'Descrição'
@@ -288,11 +289,11 @@ class CSVProcessorForm(forms.Form):
         if csv_file:
             # Check file extension
             if not csv_file.name.endswith('.csv'):
-                raise forms.ValidationError('Please upload a valid CSV file.')
+                raise forms.ValidationError(_('Please upload a valid CSV file.'))
 
             # Check file size (limit to 10MB)
             if csv_file.size > 10 * 1024 * 1024:  # 10MB
-                raise forms.ValidationError('File size must be less than 10MB.')
+                raise forms.ValidationError(_('File size must be less than 10MB.'))
 
         return csv_file
 
@@ -304,12 +305,12 @@ class CSVProcessorForm(forms.Form):
             # Basic validation - check if it has at least one line
             lines = csv_text.strip().split('\n')
             if len(lines) < 2:  # At least header + one data row
-                raise forms.ValidationError('CSV text must contain at least 2 lines (header and data).')
+                raise forms.ValidationError(_('CSV text must contain at least 2 lines (header and data).'))
 
             # Check if it looks like CSV (has separators)
             first_line = lines[0]
             if ',' not in first_line and ';' not in first_line and '\t' not in first_line:
-                raise forms.ValidationError('CSV text does not appear to contain valid separators.')
+                raise forms.ValidationError(_('CSV text does not appear to contain valid separators.'))
 
         return csv_text
 
@@ -325,24 +326,26 @@ class CSVProcessorForm(forms.Form):
 
         # Validate that either file or text is provided, but not both
         if not csv_file and not csv_text:
-            raise forms.ValidationError('Please provide either a CSV file or CSV text.')
+            raise forms.ValidationError(_('Please provide either a CSV file or CSV text.'))
 
         if csv_file and csv_text:
-            raise forms.ValidationError('Please provide either a CSV file OR CSV text, not both.')
+            raise forms.ValidationError(_('Please provide either a CSV file OR CSV text, not both.'))
 
         # If auto_detect is disabled, require manual column mapping
         if not auto_detect:
             missing_fields = []
             if not date_column:
-                missing_fields.append('Date Column')
+                missing_fields.append(str(_('Date Column')))
             if not amount_column:
-                missing_fields.append('Amount Column')
+                missing_fields.append(str(_('Amount Column')))
             if not description_column:
-                missing_fields.append('Description Column')
+                missing_fields.append(str(_('Description Column')))
 
             if missing_fields:
                 raise forms.ValidationError(
-                    f"When auto-detect is disabled, you must specify: {', '.join(missing_fields)}"
+                    _("When auto-detect is disabled, you must specify: %(fields)s") % {
+                        'fields': ', '.join(missing_fields)
+                    }
                 )
 
         return cleaned_data

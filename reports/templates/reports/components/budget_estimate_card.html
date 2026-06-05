@@ -1,4 +1,4 @@
-{% load currency_filters %}
+{% load currency_filters i18n %}
 {% if budget_summary.estimates %}
 <div class="bg-zinc-800/50 rounded-lg p-3 md:p-4 w-full">
   <!-- Header -->
@@ -8,11 +8,11 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
       </svg>
-      Estimado do Mês
+      {% trans "Monthly Estimate" %}
     </h2>
     <a href="{% url 'budget_estimate_list' %}?month={{ selected_month }}&year={{ selected_year }}"
        class="text-xs md:text-sm text-blue-400 hover:text-blue-300 transition-colors">
-      Gerenciar estimativas →
+      {% trans "Manage estimates" %}
     </a>
   </div>
 
@@ -21,10 +21,10 @@
     <table class="w-full text-sm">
       <thead>
         <tr class="text-gray-400 text-xs uppercase border-b border-zinc-700">
-          <th class="text-left pb-2">Categoria</th>
-          <th class="text-right pb-2 pr-3">Estimado</th>
-          <th class="text-right pb-2 pr-3">Realizado</th>
-          <th class="text-left pb-2 w-40">Progresso</th>
+          <th class="text-left pb-2">{% trans "Category" %}</th>
+          <th class="text-right pb-2 pr-3">{% trans "Estimated" %}</th>
+          <th class="text-right pb-2 pr-3">{% trans "Actual" %}</th>
+          <th class="text-left pb-2 w-40">{% trans "Progress" %}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-zinc-700/50">
@@ -57,15 +57,15 @@
   <!-- Summary footer -->
   <div class="mt-4 pt-3 border-t border-zinc-700 space-y-1 text-sm">
     <div class="flex justify-between text-gray-400">
-      <span>Estimativas</span>
+      <span>{% trans "Estimates" %}</span>
       <span>{{ budget_summary.total_estimated|format_brl }}</span>
     </div>
     <div class="flex justify-between text-gray-400">
-      <span>Gastos Fixos</span>
+      <span>{% trans "Fixed Expenses" %}</span>
       <span>{{ budget_summary.total_fixed|format_brl }}</span>
     </div>
     <div class="flex justify-between font-semibold text-white border-t border-zinc-700 pt-2 mt-2">
-      <span>Total Esperado</span>
+      <span>{% trans "Expected Total" %}</span>
       <span class="text-blue-400">{{ budget_summary.total_expected|format_brl }}</span>
     </div>
     <div class="flex items-center gap-3 mt-2">

@@ -1,10 +1,9 @@
 {% extends "core/base.html" %}
-{% load custom_filters %}
-{% load static %}
+{% load custom_filters i18n static %}
 {% block content %}
     <main class="mx-auto mt-10 max-w-lg w-full px-1 sm:px-0">
         <header class="flex flex-col  gap-4 mb-6">
-            <h1 class="text-2xl font-bold">Register Expense</h1>
+            <h1 class="text-2xl font-bold">{% trans "Register Expense" %}</h1>
             <nav class="py-1">
                 <ul class="flex flex-wrap gap-2 justify-between">
                     {% for key, option in quick_fill_options.items %}
@@ -19,7 +18,7 @@
                     <li>
                         <a href="{% url 'quick_fill_preset_list' %}"
                            class="block px-4 py-2 text-gray-500 hover:bg-zinc-700 rounded-lg "
-                           title="Manage presets">
+                           title="{% trans 'Manage presets' %}">
                             <i class="fas fa-cog"></i>
                         </a>
                     </li>
@@ -27,7 +26,7 @@
                     <li>
                         <a href="{% url 'quick_fill_preset_create' %}"
                            class="block px-4 py-2 text-gray-500 hover:bg-zinc-700 rounded-lg">
-                            <i class="fas fa-plus mr-2"></i>Add Quick Fill
+                            <i class="fas fa-plus mr-2"></i>{% trans "Add Quick Fill" %}
                         </a>
                     </li>
                     {% endif %}
@@ -40,43 +39,43 @@
                 {% csrf_token %}
                 <fieldset>
                     <div class="mb-4 space-y-2">
-                        <label for="id_description" class="text-gray-400">Description</label>
+                        <label for="id_description" class="text-gray-400">{% trans "Description" %}</label>
                         {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                 </fieldset>
 
                 <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label for="id_amount" class="text-gray-400">Amount</label>
+                        <label for="id_amount" class="text-gray-400">{% trans "Amount" %}</label>
                         {{ form.amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                     <div class="space-y-2">
-                        <label for="id_installments" class="text-gray-400">Installments</label>
+                        <label for="id_installments" class="text-gray-400">{% trans "Installments" %}</label>
                         {{ form.installments|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                 </fieldset>
 
                 <fieldset>
                     <div class="mb-4 space-y-2">
-                        <label for="id_date" class="text-gray-400">Date</label>
+                        <label for="id_date" class="text-gray-400">{% trans "Date" %}</label>
                         {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                     </div>
                 </fieldset>
 
                 <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label for="category-search-input" class="text-gray-400">Category</label>
+                        <label for="category-search-input" class="text-gray-400">{% trans "Category" %}</label>
                         {% include "register/components/category_autocomplete.html" %}
                     </div>
                     <div class="space-y-2">
-                        <label for="id_payment_method" class="text-gray-400">Payment Method</label>
+                        <label for="id_payment_method" class="text-gray-400">{% trans "Payment Method" %}</label>
                         {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
                     </div>
                 </fieldset>
 
                 <button type="submit"
                         class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">
-                    Submit
+                    {% trans "Submit" %}
                 </button>
             </form>
         </section>

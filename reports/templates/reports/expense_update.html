@@ -1,39 +1,38 @@
 {% extends "core/base.html" %}
-{% load custom_filters %}
-{% load static %}
+{% load custom_filters i18n static %}
 {% block content %}
     <div class="container mx-auto mt-10 max-w-lg ">
-        <h2 class="text-2xl font-bold mb-6 ">Edit Expense</h2>
+        <h2 class="text-2xl font-bold mb-6 ">{% trans "Edit Expense" %}</h2>
         <form method="post" class="bg-zinc-800/40 p-6 rounded-lg shadow-lg">
             {% csrf_token %}
             {% if form.errors %}
                 <div class="mb-4 p-4 bg-red-900/30 border border-red-500 rounded-lg">
-                    <p class="text-red-400 font-semibold mb-2">Please correct the errors below:</p>
+                    <p class="text-red-400 font-semibold mb-2">{% trans "Please correct the errors below:" %}</p>
                     {{ form.errors }}
                 </div>
             {% endif %}
             <div class="mb-4 space-y-2">
-                <label for="id_description" class=" text-gray-400">Description</label>
+                <label for="id_description" class=" text-gray-400">{% trans "Description" %}</label>
                 {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
             </div>
             <div class="mb-4 space-y-2">
-                <label for="id_amount" class=" text-gray-400">Amount</label>
+                <label for="id_amount" class=" text-gray-400">{% trans "Amount" %}</label>
                 {{ form.amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
             </div>
             <div class="mb-4 space-y-2">
-                <label for="id_date" class=" text-gray-400">Date</label>
+                <label for="id_date" class=" text-gray-400">{% trans "Date" %}</label>
                 {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
             </div>
             <div class="mb-4 space-y-2">
-                <label for="category-search-input" class=" text-gray-400">Category</label>
+                <label for="category-search-input" class=" text-gray-400">{% trans "Category" %}</label>
                 {% include "register/components/category_autocomplete.html" %}
             </div>
             <div class="mb-4 space-y-2">
-                <label for="id_payment_method" class=" text-gray-400">Payment Method</label>
+                <label for="id_payment_method" class=" text-gray-400">{% trans "Payment Method" %}</label>
                 {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
             </div>
             <button type="submit"
-                    class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">Submit</button>
+                    class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">{% trans "Submit" %}</button>
         </form>
     </div>
     {% if messages %}

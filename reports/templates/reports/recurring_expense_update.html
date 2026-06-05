@@ -1,13 +1,13 @@
 {% extends "core/base.html" %}
-{% load custom_filters %}
+{% load custom_filters i18n %}
 
 {% block content %}
 <main class="container mx-auto mt-10 max-w-lg">
     <header class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Edit Recurring Expense</h1>
+        <h1 class="text-2xl font-bold">{% trans "Edit Recurring Expense" %}</h1>
         <a href="{% url 'recurring_expense_list' %}"
            class="text-blue-400 hover:text-blue-300">
-            <i class="fas fa-arrow-left mr-2"></i>Back
+            <i class="fas fa-arrow-left mr-2"></i>{% trans "Back" %}
         </a>
     </header>
 
@@ -18,7 +18,7 @@
             <!-- Description -->
             <fieldset>
                 <div class="mb-4 space-y-2">
-                    <label for="id_description" class="text-gray-400">Description</label>
+                    <label for="id_description" class="text-gray-400">{% trans "Description" %}</label>
                     {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                 </div>
             </fieldset>
@@ -26,11 +26,11 @@
             <!-- Amount and Start Date -->
             <fieldset class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label for="id_total_amount" class="text-gray-400">Amount</label>
+                    <label for="id_total_amount" class="text-gray-400">{% trans "Amount" %}</label>
                     {{ form.total_amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                 </div>
                 <div class="space-y-2">
-                    <label for="id_start_date" class="text-gray-400">Start Date</label>
+                    <label for="id_start_date" class="text-gray-400">{% trans "Start Date" %}</label>
                     {{ form.start_date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
                 </div>
             </fieldset>
@@ -38,11 +38,11 @@
             <!-- Category and Payment Method -->
             <fieldset class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label for="id_category" class="text-gray-400">Category</label>
+                    <label for="id_category" class="text-gray-400">{% trans "Category" %}</label>
                     {{ form.category|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
                 </div>
                 <div class="space-y-2">
-                    <label for="id_payment_method" class="text-gray-400">Payment Method</label>
+                    <label for="id_payment_method" class="text-gray-400">{% trans "Payment Method" %}</label>
                     {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
                 </div>
             </fieldset>
@@ -51,12 +51,12 @@
             <fieldset>
                 <div class="mb-4 space-y-2 flex items-center gap-2">
                     {{ form.generate_debit|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
-                    <label for="id_generate_debit" class="text-gray-400">Generate Monthly Debit</label>
+                    <label for="id_generate_debit" class="text-gray-400">{% trans "Generate Monthly Debit" %}</label>
                 </div>
             </fieldset>
 
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-save mr-2"></i>Update
+                <i class="fas fa-save mr-2"></i>{% trans "Update" %}
             </button>
         </form>
     </section>

@@ -1,12 +1,12 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load i18n static %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">CSV Import</h1>
-        <p class="text-gray-400">Import your financial data from CSV files with validation and preview options.</p>
+        <h1 class="text-3xl font-bold text-white mb-2">{% trans "CSV Import" %}</h1>
+        <p class="text-gray-400">{% trans "Import your financial data from CSV files with validation and preview options." %}</p>
     </div>
 
     <!-- Import Form -->
@@ -18,10 +18,10 @@
             <div class="mb-6">
                 <div class="flex space-x-4">
                     <button type="button" id="fileToggle" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-file mr-2"></i>Upload File
+                        <i class="fas fa-file mr-2"></i>{% trans "Upload File" %}
                     </button>
                     <button type="button" id="textToggle" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-paste mr-2"></i>Paste Text
+                        <i class="fas fa-paste mr-2"></i>{% trans "Paste Text" %}
                     </button>
                 </div>
             </div>
@@ -70,7 +70,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- CSV Settings -->
                 <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-white">CSV Settings</h3>
+                    <h3 class="text-lg font-semibold text-white">{% trans "CSV Settings" %}</h3>
 
                     <div>
                         <label for="{{ form.separator.id_for_label }}" class="block text-sm font-medium text-white mb-2">
@@ -95,7 +95,7 @@
 
                 <!-- Import Options -->
                 <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-white">Import Options</h3>
+                    <h3 class="text-lg font-semibold text-white">{% trans "Import Options" %}</h3>
 
                     <div class="flex items-center">
                         {{ form.auto_create_categories }}
@@ -133,7 +133,7 @@
             <div class="flex justify-end pt-4">
                 <button type="submit" id="importCsvBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
                     <i class="fas fa-upload mr-2" id="importIcon"></i>
-                    <span id="importText">Import CSV</span>
+                    <span id="importText">{% trans "Import CSV" %}</span>
                 </button>
             </div>
         </form>
@@ -141,28 +141,28 @@
 
     <!-- CSV Format Guide -->
     <div class="bg-zinc-800 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-white mb-4">CSV Format Guide</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% trans "CSV Format Guide" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <h4 class="font-medium text-white mb-2">Required Columns</h4>
+                <h4 class="font-medium text-white mb-2">{% trans "Required Columns" %}</h4>
                 <ul class="text-sm text-gray-400 space-y-1">
-                    <li><code class="bg-zinc-700 px-1 rounded">date</code> - Date in YYYY-MM-DD format</li>
-                    <li><code class="bg-zinc-700 px-1 rounded">description</code> - Transaction description</li>
-                    <li><code class="bg-zinc-700 px-1 rounded">amount</code> - Transaction amount (numeric)</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">date</code> - {% trans "Date in YYYY-MM-DD format" %}</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">description</code> - {% trans "Transaction description" %}</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">amount</code> - {% trans "Transaction amount (numeric)" %}</li>
                 </ul>
             </div>
             <div>
-                <h4 class="font-medium text-white mb-2">Optional Columns</h4>
+                <h4 class="font-medium text-white mb-2">{% trans "Optional Columns" %}</h4>
                 <ul class="text-sm text-gray-400 space-y-1">
-                    <li><code class="bg-zinc-700 px-1 rounded">category</code> - Expense category</li>
-                    <li><code class="bg-zinc-700 px-1 rounded">type</code> - Transaction type (default: expense)</li>
-                    <li><code class="bg-zinc-700 px-1 rounded">payment_method</code> - Payment method</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">category</code> - {% trans "Expense category" %}</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">type</code> - {% trans "Transaction type (default: expense)" %}</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">payment_method</code> - {% trans "Payment method" %}</li>
                 </ul>
             </div>
         </div>
 
         <div class="mt-4 p-4 bg-zinc-700 rounded-lg">
-            <h5 class="font-medium text-white mb-2">Example CSV Format:</h5>
+            <h5 class="font-medium text-white mb-2">{% trans "Example CSV Format:" %}</h5>
             <pre class="text-sm text-gray-300 overflow-x-auto"><code>date,description,amount,category,type,payment_method
 2025-01-15,Grocery Store,45.67,Supermercado,expense,Crédito - Nubank
 2025-01-16,Uber Trip,12.50,Uber,expense,Crédito - Nubank</code></pre>
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset file label if it was changed
             const label = fileInput.parentElement.querySelector('label');
             if (label && label.textContent.startsWith('Selected:')) {
-                label.textContent = fileInput.getAttribute('data-original-label') || 'CSV File';
+                label.textContent = fileInput.getAttribute('data-original-label') || gettext('CSV File');
             }
         }
     });
@@ -246,9 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && label) {
-                label.textContent = `Selected: ${file.name}`;
+                label.textContent = interpolate(gettext('Selected: %(name)s'), {name: file.name}, true);
             } else if (label) {
-                label.textContent = fileInput.getAttribute('data-original-label') || 'CSV File';
+                label.textContent = fileInput.getAttribute('data-original-label') || gettext('CSV File');
             }
         });
     }
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasText = textInput && textInput.value.trim() !== '';
 
             if (!hasFile && !hasText) {
-                alert('Please select a CSV file or paste CSV text before importing.');
+                alert(gettext('Please select a CSV file or paste CSV text before importing.'));
                 e.preventDefault();
                 return;
             }
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
             importIcon.className = 'fas fa-spinner fa-spin mr-2';
 
             // Update text
-            importText.textContent = 'Processing...';
+            importText.textContent = gettext('Processing...');
         });
     }
 });

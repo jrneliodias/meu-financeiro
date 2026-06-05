@@ -1,4 +1,5 @@
 from django import template
+from django.utils.translation import gettext as _
 
 register = template.Library()
 
@@ -26,3 +27,23 @@ def get_item(dictionary, key):
     if dictionary is None:
         return None
     return dictionary.get(key)
+
+
+@register.filter
+def translate_month(month_name):
+    """Translate English month names used internally for display."""
+    month_translations = {
+        'January': _('January'),
+        'February': _('February'),
+        'March': _('March'),
+        'April': _('April'),
+        'May': _('May'),
+        'June': _('June'),
+        'July': _('July'),
+        'August': _('August'),
+        'September': _('September'),
+        'October': _('October'),
+        'November': _('November'),
+        'December': _('December'),
+    }
+    return month_translations.get(month_name, month_name)

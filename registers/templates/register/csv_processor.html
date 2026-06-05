@@ -1,12 +1,12 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load i18n static %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">CSV Processor</h1>
-        <p class="text-gray-400">Transform Nubank CSV exports to standardized format. Converts dates, parses descriptions, and reorganizes columns.</p>
+        <h1 class="text-3xl font-bold text-white mb-2">{% trans "CSV Processor" %}</h1>
+        <p class="text-gray-400">{% trans "Transform Nubank CSV exports to standardized format. Converts dates, parses descriptions, and reorganizes columns." %}</p>
     </div>
 
     <!-- Processor Form -->
@@ -18,10 +18,10 @@
             <div class="mb-6">
                 <div class="flex space-x-4">
                     <button type="button" id="fileToggle" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-file mr-2"></i>Upload File
+                        <i class="fas fa-file mr-2"></i>{% trans "Upload File" %}
                     </button>
                     <button type="button" id="textToggle" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-paste mr-2"></i>Paste Text
+                        <i class="fas fa-paste mr-2"></i>{% trans "Paste Text" %}
                     </button>
                 </div>
             </div>
@@ -70,7 +70,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- CSV Settings -->
                 <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-white">CSV Settings</h3>
+                    <h3 class="text-lg font-semibold text-white">{% trans "CSV Settings" %}</h3>
 
                     <div>
                         <label for="{{ form.separator.id_for_label }}" class="block text-sm font-medium text-white mb-2">
@@ -95,8 +95,8 @@
 
                 <!-- Manual Column Mapping (hidden when auto_detect is true) -->
                 <div class="space-y-4" id="manualMappingSection">
-                    <h3 class="text-lg font-semibold text-white">Manual Column Mapping</h3>
-                    <p class="text-sm text-gray-400">Specify column names when auto-detect is disabled</p>
+                    <h3 class="text-lg font-semibold text-white">{% trans "Manual Column Mapping" %}</h3>
+                    <p class="text-sm text-gray-400">{% trans "Specify column names when auto-detect is disabled" %}</p>
 
                     <div>
                         <label for="{{ form.date_column.id_for_label }}" class="block text-sm font-medium text-white mb-2">
@@ -134,7 +134,7 @@
             <div class="flex justify-end pt-4">
                 <button type="submit" id="processBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
                     <i class="fas fa-cogs mr-2" id="processIcon"></i>
-                    <span id="processText">Process CSV</span>
+                    <span id="processText">{% trans "Process CSV" %}</span>
                 </button>
             </div>
         </form>
@@ -142,30 +142,30 @@
 
     <!-- CSV Format Guide -->
     <div class="bg-zinc-800 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-white mb-4">Nubank CSV Format Guide</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% trans "Nubank CSV Format Guide" %}</h3>
 
         <div class="space-y-4">
             <div>
-                <h4 class="font-medium text-white mb-2">Auto-Detected Format</h4>
-                <p class="text-sm text-gray-400 mb-2">The processor automatically detects Nubank CSV exports with these columns:</p>
+                <h4 class="font-medium text-white mb-2">{% trans "Auto-Detected Format" %}</h4>
+                <p class="text-sm text-gray-400 mb-2">{% trans "The processor automatically detects Nubank CSV exports with these columns:" %}</p>
                 <ul class="text-sm text-gray-400 space-y-1">
-                    <li><code class="bg-zinc-700 px-1 rounded">Data</code> - Date in DD/MM/YYYY format</li>
-                    <li><code class="bg-zinc-700 px-1 rounded">Valor</code> - Amount (numeric)</li>
-                    <li><code class="bg-zinc-700 px-1 rounded">Descrição</code> - Full description</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">Data</code> - {% trans "Date in DD/MM/YYYY format" %}</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">Valor</code> - {% trans "Amount (numeric)" %}</li>
+                    <li><code class="bg-zinc-700 px-1 rounded">Descrição</code> - {% trans "Full description" %}</li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="font-medium text-white mb-2">Transformations Applied</h4>
+                <h4 class="font-medium text-white mb-2">{% trans "Transformations Applied" %}</h4>
                 <ul class="text-sm text-gray-400 space-y-1">
-                    <li><i class="fas fa-check text-green-400 mr-2"></i>Dates converted: DD/MM/YYYY → YYYY-MM-DD</li>
-                    <li><i class="fas fa-check text-green-400 mr-2"></i>Descriptions parsed: "Uber - Trip" → payment_method="Uber", description="Trip"</li>
-                    <li><i class="fas fa-check text-green-400 mr-2"></i>Columns reorganized to: date, amount, payment_method, description</li>
+                    <li><i class="fas fa-check text-green-400 mr-2"></i>{% trans "Dates converted: DD/MM/YYYY to YYYY-MM-DD" %}</li>
+                    <li><i class="fas fa-check text-green-400 mr-2"></i>{% trans 'Descriptions parsed: "Uber - Trip" to payment_method="Uber", description="Trip"' %}</li>
+                    <li><i class="fas fa-check text-green-400 mr-2"></i>{% trans "Columns reorganized to: date, amount, payment_method, description" %}</li>
                 </ul>
             </div>
 
             <div class="mt-4 p-4 bg-zinc-700 rounded-lg">
-                <h5 class="font-medium text-white mb-2">Example Nubank CSV Input:</h5>
+                <h5 class="font-medium text-white mb-2">{% trans "Example Nubank CSV Input:" %}</h5>
                 <pre class="text-sm text-gray-300 overflow-x-auto"><code>Data,Valor,Descrição
 02/11/2024,8.96,Uber - Trip
 02/11/2024,50.00,Supermercado - Compras
@@ -173,7 +173,7 @@
             </div>
 
             <div class="mt-4 p-4 bg-zinc-700 rounded-lg">
-                <h5 class="font-medium text-white mb-2">Processed Output:</h5>
+                <h5 class="font-medium text-white mb-2">{% trans "Processed Output:" %}</h5>
                 <pre class="text-sm text-gray-300 overflow-x-auto"><code>date,amount,payment_method,description
 2024-11-02,8.96,Uber,Trip
 2024-11-02,50.00,Supermercado,Compras
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fileInput.value = '';
             const label = fileInput.parentElement.querySelector('label');
             if (label && label.textContent.startsWith('Selected:')) {
-                label.textContent = fileInput.getAttribute('data-original-label') || 'CSV File';
+                label.textContent = fileInput.getAttribute('data-original-label') || gettext('CSV File');
             }
         }
     });
@@ -257,9 +257,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && label) {
-                label.textContent = `Selected: ${file.name}`;
+                label.textContent = interpolate(gettext('Selected: %(name)s'), {name: file.name}, true);
             } else if (label) {
-                label.textContent = fileInput.getAttribute('data-original-label') || 'CSV File';
+                label.textContent = fileInput.getAttribute('data-original-label') || gettext('CSV File');
             }
         });
     }
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasText = textInput && textInput.value.trim() !== '';
 
             if (!hasFile && !hasText) {
-                alert('Please select a CSV file or paste CSV text before processing.');
+                alert(gettext('Please select a CSV file or paste CSV text before processing.'));
                 e.preventDefault();
                 return;
             }
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
             processIcon.className = 'fas fa-spinner fa-spin mr-2';
 
             // Update text
-            processText.textContent = 'Processing...';
+            processText.textContent = gettext('Processing...');
         });
     }
 });

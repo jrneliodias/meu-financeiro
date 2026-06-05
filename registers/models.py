@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
@@ -7,15 +8,16 @@ from django.contrib.auth.models import User
 class Category(models.Model):
     name = models.CharField(max_length=100)
     CATEGORY_TYPES = [
-        ('income', 'Income'),
-        ('expense', 'Expense'),
+        ('income', _('Income')),
+        ('expense', _('Expense')),
     ]
     type = models.CharField(max_length=10, choices=CATEGORY_TYPES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name_plural = 'Categories'
+        verbose_name = _('Category')
+        verbose_name_plural = _('Categories')
 
     def __str__(self):
         return self.name
@@ -24,7 +26,7 @@ class Category(models.Model):
 class PaymentMethod(models.Model):
     name = models.CharField(max_length=100)
     start_billing_day = models.IntegerField(
-        help_text="Day of the month when billing starts")
+        help_text=_("Day of the month when billing starts"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -123,8 +125,8 @@ class QuickFillPreset(models.Model):
 
     class Meta:
         ordering = ['display_order', 'name']
-        verbose_name = 'Quick Fill Preset'
-        verbose_name_plural = 'Quick Fill Presets'
+        verbose_name = _('Quick Fill Preset')
+        verbose_name_plural = _('Quick Fill Presets')
 
     def __str__(self):
         return self.name

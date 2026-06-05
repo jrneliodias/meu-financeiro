@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Tuple
 from decimal import Decimal
 from django.contrib.auth.models import User
+from django.utils.translation import gettext as _
 import logging
 
 from ..models import Expense, Income, Category, PaymentMethod
@@ -93,7 +94,10 @@ class RecordCreationStrategy(ABC):
                 category = Category.objects.get(name=category_name, type=category_type)
                 return category, None
             except Category.DoesNotExist:
-                return None, f"Category '{category_name}' of type '{category_type}' not found"
+                return None, _("Category '%(category)s' of type '%(type)s' not found") % {
+                    'category': category_name,
+                    'type': category_type,
+                }
 
     def _get_or_create_payment_method(self, payment_method_name: str,
                                      auto_create: bool) -> Tuple[Optional[PaymentMethod], Optional[str]]:
@@ -120,7 +124,9 @@ class RecordCreationStrategy(ABC):
                 payment_method = PaymentMethod.objects.get(name=payment_method_name)
                 return payment_method, None
             except PaymentMethod.DoesNotExist:
-                return None, f"Payment method '{payment_method_name}' not found"
+                return None, _("Payment method '%(payment_method)s' not found") % {
+                    'payment_method': payment_method_name
+                }
 
 
 class NegativeAmountExpenseStrategy(RecordCreationStrategy):
@@ -183,7 +189,7 @@ class NegativeAmountExpenseStrategy(RecordCreationStrategy):
             return expense, None
 
         except Exception as e:
-            error_msg = f"Error creating expense: {str(e)}"
+            error_msg = _("Error creating expense: %(error)s") % {'error': str(e)}
             logger.error(error_msg)
             return None, error_msg
 
@@ -238,7 +244,7 @@ class PositiveAmountIncomeStrategy(RecordCreationStrategy):
             return income, None
 
         except Exception as e:
-            error_msg = f"Error creating income: {str(e)}"
+            error_msg = _("Error creating income: %(error)s") % {'error': str(e)}
             logger.error(error_msg)
             return None, error_msg
 
@@ -271,7 +277,7 @@ class ExplicitTypeStrategy(RecordCreationStrategy):
         elif record_type == 'income':
             return self._create_income(user, row_data, auto_create_categories)
         else:
-            return None, f"Invalid type: {record_type}"
+            return None, _("Invalid type: %(record_type)s") % {'record_type': record_type}
 
     def _create_expense(self, user: User, row_data: Dict[str, Any],
                        auto_create_categories: bool,
@@ -309,7 +315,7 @@ class ExplicitTypeStrategy(RecordCreationStrategy):
             return expense, None
 
         except Exception as e:
-            error_msg = f"Error creating expense: {str(e)}"
+            error_msg = _("Error creating expense: %(error)s") % {'error': str(e)}
             logger.error(error_msg)
             return None, error_msg
 
@@ -340,7 +346,7 @@ class ExplicitTypeStrategy(RecordCreationStrategy):
             return income, None
 
         except Exception as e:
-            error_msg = f"Error creating income: {str(e)}"
+            error_msg = _("Error creating income: %(error)s") % {'error': str(e)}
             logger.error(error_msg)
             return None, error_msg
 

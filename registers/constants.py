@@ -4,6 +4,7 @@ Constantes semânticas para o módulo registers.
 Segue o princípio de eliminar magic numbers e strings,
 fornecendo uma única fonte de verdade para valores de configuração.
 """
+from django.utils.translation import gettext_noop
 
 
 class ExpenseConstants:
@@ -30,10 +31,10 @@ class ApiStatus:
 class ApiMessages:
     """Mensagens padrão para respostas da API."""
 
-    EXPENSE_NOT_FOUND = "Despesa não encontrada"
-    UNAUTHORIZED_ACCESS = "Acesso não autorizado"
-    DELETE_SUCCESS = "Despesa '{description}' excluída com sucesso"
-    AUTOFILL_SUCCESS = "Dados da despesa recuperados para autofill"
-    DETAILS_SUCCESS = "Detalhes da despesa recuperados"
-    RECENT_EXPENSES_SUCCESS = "Despesas recentes recuperadas"
-    INVALID_REQUEST = "Requisição inválida"
+    EXPENSE_NOT_FOUND = gettext_noop("Expense not found")
+    UNAUTHORIZED_ACCESS = gettext_noop("Unauthorized access")
+    DELETE_SUCCESS = gettext_noop("Expense '%(description)s' deleted successfully")
+    AUTOFILL_SUCCESS = gettext_noop("Expense data retrieved for autofill")
+    DETAILS_SUCCESS = gettext_noop("Expense details retrieved")
+    RECENT_EXPENSES_SUCCESS = gettext_noop("Recent expenses retrieved")
+    INVALID_REQUEST = gettext_noop("Invalid request")

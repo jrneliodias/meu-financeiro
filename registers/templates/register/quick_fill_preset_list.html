@@ -1,13 +1,13 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load i18n static %}
 
 {% block content %}
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
     <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">Quick Fill Presets</h2>
+        <h2 class="text-2xl font-bold">{% trans "Quick Fill Presets" %}</h2>
         <a href="{% url 'quick_fill_preset_create' %}"
            class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-            <i class="fas fa-plus mr-2"></i>Add New
+            <i class="fas fa-plus mr-2"></i>{% trans "Add New" %}
         </a>
     </div>
 
@@ -16,15 +16,15 @@
         <table class="w-full p-2">
             <thead class="border-b border-zinc-700">
                 <tr>
-                    <th class="text-start p-2">Order</th>
-                    <th class="text-start p-2">Icon</th>
-                    <th class="text-start p-2">Name</th>
-                    <th class="text-start p-2">Description</th>
-                    <th class="text-start p-2">Amount</th>
-                    <th class="text-start p-2">Category</th>
-                    <th class="text-start p-2">Payment Method</th>
-                    <th class="text-center p-2">Active</th>
-                    <th class="text-end p-2">Actions</th>
+                    <th class="text-start p-2">{% trans "Order" %}</th>
+                    <th class="text-start p-2">{% trans "Icon" %}</th>
+                    <th class="text-start p-2">{% trans "Name" %}</th>
+                    <th class="text-start p-2">{% trans "Description" %}</th>
+                    <th class="text-start p-2">{% trans "Amount" %}</th>
+                    <th class="text-start p-2">{% trans "Category" %}</th>
+                    <th class="text-start p-2">{% trans "Payment Method" %}</th>
+                    <th class="text-center p-2">{% trans "Active" %}</th>
+                    <th class="text-end p-2">{% trans "Actions" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,10 +56,10 @@
                 {% empty %}
                 <tr>
                     <td colspan="9" class="text-center p-4">
-                        No presets found.
+                        {% trans "No presets found." %}
                         <a href="{% url 'quick_fill_preset_create' %}"
                            class="text-blue-400 hover:text-blue-300 ml-2">
-                            Create your first preset
+                            {% trans "Create your first preset" %}
                         </a>
                     </td>
                 </tr>
@@ -97,10 +97,10 @@
         </div>
         {% empty %}
         <div class="text-center p-6 bg-zinc-700/30 rounded-lg">
-            No presets found.
+            {% trans "No presets found." %}
             <a href="{% url 'quick_fill_preset_create' %}"
                class="text-blue-400 hover:text-blue-300">
-                Create your first preset
+                {% trans "Create your first preset" %}
             </a>
         </div>
         {% endfor %}
@@ -138,7 +138,7 @@ document.querySelectorAll('.delete-preset-btn').forEach(function(btn) {
         const presetId = this.dataset.id;
         const presetName = this.dataset.name;
 
-        if (!confirm('Delete preset "' + presetName + '"?')) return;
+        if (!confirm(gettext('Delete preset "%(name)s"?').replace('%(name)s', presetName))) return;
 
         fetch('/register/quick-fill-presets/' + presetId + '/delete/', {
             method: 'POST',
@@ -152,11 +152,11 @@ document.querySelectorAll('.delete-preset-btn').forEach(function(btn) {
             if (data.success) {
                 location.reload();
             } else {
-                alert(data.error || 'Error deleting preset.');
+                alert(data.error || gettext('Error deleting preset.'));
             }
         })
         .catch(function() {
-            alert('Error deleting preset.');
+            alert(gettext('Error deleting preset.'));
         });
     });
 });

@@ -1,0 +1,1688 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-05 14:08-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: finance/settings.py:130 registers/templates/auth/login.html:85
+#: registers/templates/core/base.html:71
+msgid "Portuguese"
+msgstr ""
+
+#: finance/settings.py:131 registers/templates/auth/login.html:86
+#: registers/templates/core/base.html:72
+msgid "English"
+msgstr ""
+
+#: registers/components/expense_form/expense_form_component.py:26
+#: registers/templates/register/components/expense_details_modal.html:61
+#: registers/templates/register/csv_processor_preview.html:58
+#: registers/templates/register/expense_form.html:42
+#: registers/templates/register/income_form.html:9
+#: registers/templates/register/quick_fill_preset_form.html:29
+#: registers/templates/register/quick_fill_preset_list.html:22
+#: registers/templates/register/recurring_expense_form.html:21
+#: reports/templates/reports/components/expense_category_table.html:114
+#: reports/templates/reports/components/expense_details_table.html:10
+#: reports/templates/reports/components/recurring_expense_modal.html:61
+#: reports/templates/reports/expense_update.html:15
+#: reports/templates/reports/recurring_expense_list.html:61
+#: reports/templates/reports/recurring_expense_update.html:21
+msgid "Description"
+msgstr ""
+
+#: registers/components/expense_form/expense_form_component.py:27
+#: registers/templates/register/components/expense_details_modal.html:63
+#: registers/templates/register/csv_processor_preview.html:56
+#: registers/templates/register/expense_form.html:49
+#: registers/templates/register/income_form.html:13
+#: registers/templates/register/quick_fill_preset_list.html:23
+#: registers/templates/register/recurring_expense_form.html:29
+#: reports/templates/reports/components/expense_category_table.html:116
+#: reports/templates/reports/components/expense_details_table.html:11
+#: reports/templates/reports/components/recurring_expense_modal.html:64
+#: reports/templates/reports/expense_update.html:19
+#: reports/templates/reports/recurring_expense_list.html:62
+#: reports/templates/reports/recurring_expense_update.html:29
+msgid "Amount"
+msgstr ""
+
+#: registers/components/expense_form/expense_form_component.py:28
+#: registers/templates/register/expense_form.html:53
+msgid "Installments"
+msgstr ""
+
+#: registers/components/expense_form/expense_form_component.py:29
+#: registers/templates/register/components/expense_details_modal.html:60
+#: registers/templates/register/csv_processor_preview.html:55
+#: registers/templates/register/expense_form.html:60
+#: registers/templates/register/income_form.html:17
+#: reports/templates/reports/components/expense_category_table.html:113
+#: reports/templates/reports/components/expense_details_table.html:12
+#: reports/templates/reports/components/recurring_expense_modal.html:60
+#: reports/templates/reports/expense_update.html:23
+msgid "Date"
+msgstr ""
+
+#: registers/components/expense_form/expense_form_component.py:31
+#: registers/models.py:19
+#: registers/templates/register/budget_estimate_list.html:57
+#: registers/templates/register/budget_estimate_list.html:94
+#: registers/templates/register/budget_estimate_update.html:18
+#: registers/templates/register/expense_form.html:67
+#: registers/templates/register/income_form.html:21
+#: registers/templates/register/quick_fill_preset_form.html:48
+#: registers/templates/register/quick_fill_preset_list.html:24
+#: registers/templates/register/recurring_expense_form.html:41
+#: reports/templates/reports/components/budget_estimate_card.html:24
+#: reports/templates/reports/components/expense_category_table.html:7
+#: reports/templates/reports/components/expense_category_table.html:44
+#: reports/templates/reports/components/expense_details_table.html:13
+#: reports/templates/reports/components/recurring_expense_modal.html:62
+#: reports/templates/reports/expense_update.html:27
+#: reports/templates/reports/recurring_expense_list.html:64
+#: reports/templates/reports/recurring_expense_update.html:41
+msgid "Category"
+msgstr ""
+
+#: registers/components/expense_form/expense_form_component.py:35
+#: registers/templates/register/components/expense_details_modal.html:62
+#: registers/templates/register/csv_processor_preview.html:57
+#: registers/templates/register/expense_form.html:71
+#: registers/templates/register/quick_fill_preset_form.html:52
+#: registers/templates/register/quick_fill_preset_list.html:25
+#: registers/templates/register/recurring_expense_form.html:45
+#: reports/templates/reports/components/expense_category_table.html:115
+#: reports/templates/reports/components/expense_details_table.html:14
+#: reports/templates/reports/components/recurring_expense_modal.html:63
+#: reports/templates/reports/expense_update.html:31
+#: reports/templates/reports/recurring_expense_list.html:65
+#: reports/templates/reports/recurring_expense_update.html:45
+msgid "Payment Method"
+msgstr ""
+
+#: registers/constants.py:34 registers/views.py:400
+msgid "Expense not found"
+msgstr ""
+
+#: registers/constants.py:35
+msgid "Unauthorized access"
+msgstr ""
+
+#: registers/constants.py:36
+#, python-format
+msgid "Expense '%(description)s' deleted successfully"
+msgstr ""
+
+#: registers/constants.py:37
+msgid "Expense data retrieved for autofill"
+msgstr ""
+
+#: registers/constants.py:38
+msgid "Expense details retrieved"
+msgstr ""
+
+#: registers/constants.py:39
+msgid "Recent expenses retrieved"
+msgstr ""
+
+#: registers/constants.py:40 reports/views.py:426 reports/views.py:487
+#: reports/views.py:924 reports/views.py:974
+msgid "Invalid request"
+msgstr ""
+
+#: registers/forms.py:82 registers/forms.py:208
+msgid "CSV File"
+msgstr ""
+
+#: registers/forms.py:84
+msgid "Select a CSV file to import. Supported formats: .csv"
+msgstr ""
+
+#: registers/forms.py:92 registers/forms.py:218
+msgid "CSV Text"
+msgstr ""
+
+#: registers/forms.py:94 registers/forms.py:220
+msgid ""
+"Paste your CSV data directly here. Use this as an alternative to file upload."
+msgstr ""
+
+#: registers/forms.py:103 registers/forms.py:229
+msgid "CSV Separator"
+msgstr ""
+
+#: registers/forms.py:105 registers/forms.py:231
+msgid "Comma (,)"
+msgstr ""
+
+#: registers/forms.py:106 registers/forms.py:232
+msgid "Semicolon (;)"
+msgstr ""
+
+#: registers/forms.py:107 registers/forms.py:233
+msgid "Tab"
+msgstr ""
+
+#: registers/forms.py:108 registers/forms.py:234
+msgid "Pipe (|)"
+msgstr ""
+
+#: registers/forms.py:111 registers/forms.py:237
+msgid "Select the character used to separate columns in your CSV file"
+msgstr ""
+
+#: registers/forms.py:118
+msgid "Skip Header Row"
+msgstr ""
+
+#: registers/forms.py:121
+msgid "Check if your CSV file has a header row that should be skipped"
+msgstr ""
+
+#: registers/forms.py:128
+msgid "Auto-create Categories"
+msgstr ""
+
+#: registers/forms.py:131
+msgid "Automatically create new categories if they don't exist"
+msgstr ""
+
+#: registers/forms.py:138
+msgid "Auto-create Payment Methods"
+msgstr ""
+
+#: registers/forms.py:141
+msgid "Automatically create new payment methods if they don't exist"
+msgstr ""
+
+#: registers/forms.py:148
+msgid "Preview Mode"
+msgstr ""
+
+#: registers/forms.py:151
+msgid "Show a preview of the data before importing"
+msgstr ""
+
+#: registers/forms.py:164 registers/forms.py:292
+msgid "Please upload a valid CSV file."
+msgstr ""
+
+#: registers/forms.py:168 registers/forms.py:296
+msgid "File size must be less than 10MB."
+msgstr ""
+
+#: registers/forms.py:180 registers/forms.py:308
+msgid "CSV text must contain at least 2 lines (header and data)."
+msgstr ""
+
+#: registers/forms.py:185 registers/forms.py:313
+msgid "CSV text does not appear to contain valid separators."
+msgstr ""
+
+#: registers/forms.py:196 registers/forms.py:329
+msgid "Please provide either a CSV file or CSV text."
+msgstr ""
+
+#: registers/forms.py:199 registers/forms.py:332
+msgid "Please provide either a CSV file OR CSV text, not both."
+msgstr ""
+
+#: registers/forms.py:210
+msgid "Select a CSV file to process. Supported formats: .csv"
+msgstr ""
+
+#: registers/forms.py:244
+msgid "Auto-detect Nubank Format"
+msgstr ""
+
+#: registers/forms.py:247
+msgid "Automatically detect Nubank CSV columns (Data, Valor, Description)"
+msgstr ""
+
+#: registers/forms.py:256
+msgid "Date Column Name"
+msgstr ""
+
+#: registers/forms.py:258
+msgid "Name of the column containing dates (e.g., \"Data\")"
+msgstr ""
+
+#: registers/forms.py:266
+msgid "Amount Column Name"
+msgstr ""
+
+#: registers/forms.py:268
+msgid "Name of the column containing amounts (e.g., \"Valor\")"
+msgstr ""
+
+#: registers/forms.py:276
+msgid "Description Column Name"
+msgstr ""
+
+#: registers/forms.py:278
+msgid "Name of the column containing descriptions (e.g., \"Description\")"
+msgstr ""
+
+#: registers/forms.py:338
+msgid "Date Column"
+msgstr ""
+
+#: registers/forms.py:340
+msgid "Amount Column"
+msgstr ""
+
+#: registers/forms.py:342
+msgid "Description Column"
+msgstr ""
+
+#: registers/forms.py:346
+#, python-format
+msgid "When auto-detect is disabled, you must specify: %(fields)s"
+msgstr ""
+
+#: registers/models.py:11
+msgid "Income"
+msgstr ""
+
+#: registers/models.py:12
+msgid "Expense"
+msgstr ""
+
+#: registers/models.py:20
+msgid "Categories"
+msgstr ""
+
+#: registers/models.py:29
+msgid "Day of the month when billing starts"
+msgstr ""
+
+#: registers/models.py:128
+msgid "Quick Fill Preset"
+msgstr ""
+
+#: registers/models.py:129 registers/templates/core/base.html:41
+#: registers/templates/register/quick_fill_preset_list.html:7
+msgid "Quick Fill Presets"
+msgstr ""
+
+#: registers/services/csv_import_service.py:53
+#, python-format
+msgid "Missing required columns: %(columns)s"
+msgstr ""
+
+#: registers/services/csv_import_service.py:59
+msgid "CSV file is empty"
+msgstr ""
+
+#: registers/services/csv_import_service.py:89
+#: registers/services/csv_processor_service.py:401
+#, python-format
+msgid "Error reading CSV file: %(error)s"
+msgstr ""
+
+#: registers/services/csv_import_service.py:119
+#, python-format
+msgid "Error reading CSV string: %(error)s"
+msgstr ""
+
+#: registers/services/csv_import_service.py:137
+#, python-format
+msgid "Invalid date found in %(count)s row"
+msgid_plural "Invalid dates found in %(count)s rows"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_import_service.py:142
+#, python-format
+msgid "Error parsing dates: %(error)s"
+msgstr ""
+
+#: registers/services/csv_import_service.py:151
+#, python-format
+msgid "Invalid amount found in %(count)s row"
+msgid_plural "Invalid amounts found in %(count)s rows"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_import_service.py:156
+#, python-format
+msgid "Error parsing amounts: %(error)s"
+msgstr ""
+
+#: registers/services/csv_import_service.py:218
+msgid "Missing required fields"
+msgstr ""
+
+#: registers/services/csv_import_service.py:228
+msgid "No strategy found to handle this row (amount is zero or invalid)"
+msgstr ""
+
+#: registers/services/csv_import_service.py:251
+#, python-format
+msgid "Error importing row: %(error)s"
+msgstr ""
+
+#: registers/services/csv_import_service.py:263
+#: registers/services/csv_import_service.py:271
+#, python-format
+msgid "Row %(row)s: %(message)s"
+msgstr ""
+
+#: registers/services/csv_processor_service.py:197
+#, python-format
+msgid "... and %(count)s more"
+msgid_plural "... and %(count)s more"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_processor_service.py:202
+#, python-format
+msgid "Could not convert dates in %(count)s row: %(rows)s"
+msgid_plural "Could not convert dates in %(count)s rows: %(rows)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_processor_service.py:291 registers/views.py:437
+#, python-format
+msgid "Could not auto-detect Nubank format. Available columns: %(columns)s"
+msgstr ""
+
+#: registers/services/csv_processor_service.py:299
+#, python-format
+msgid "Column '%(column)s' not found in CSV. Available: %(available)s"
+msgstr ""
+
+#: registers/services/csv_processor_service.py:325
+#, python-format
+msgid "Successfully processed %(count)s row"
+msgid_plural "Successfully processed %(count)s rows"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_processor_service.py:330
+#, python-format
+msgid "Converted %(count)s date to ISO format"
+msgid_plural "Converted %(count)s dates to ISO format"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_processor_service.py:335
+#, python-format
+msgid "Parsed %(count)s description into payment method and description"
+msgid_plural ""
+"Parsed %(count)s descriptions into payment method and description"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/services/csv_processor_service.py:346
+#, python-format
+msgid "Error processing CSV: %(error)s"
+msgstr ""
+
+#: registers/services/csv_processor_service.py:420
+#, python-format
+msgid "Error reading CSV text: %(error)s"
+msgstr ""
+
+#: registers/services/csv_record_strategies.py:97
+#, python-format
+msgid "Category '%(category)s' of type '%(type)s' not found"
+msgstr ""
+
+#: registers/services/csv_record_strategies.py:127
+#, python-format
+msgid "Payment method '%(payment_method)s' not found"
+msgstr ""
+
+#: registers/services/csv_record_strategies.py:192
+#: registers/services/csv_record_strategies.py:318 registers/views.py:90
+#, python-format
+msgid "Error creating expense: %(error)s"
+msgstr ""
+
+#: registers/services/csv_record_strategies.py:247
+#: registers/services/csv_record_strategies.py:349
+#, python-format
+msgid "Error creating income: %(error)s"
+msgstr ""
+
+#: registers/services/csv_record_strategies.py:280
+#, python-format
+msgid "Invalid type: %(record_type)s"
+msgstr ""
+
+#: registers/templates/auth/login.html:19
+msgid "Login"
+msgstr ""
+
+#: registers/templates/auth/login.html:27
+msgid "Sign in to continue"
+msgstr ""
+
+#: registers/templates/auth/login.html:32
+msgid "Invalid username or password."
+msgstr ""
+
+#: registers/templates/auth/login.html:41
+msgid "Username"
+msgstr ""
+
+#: registers/templates/auth/login.html:50
+msgid "Enter your username"
+msgstr ""
+
+#: registers/templates/auth/login.html:56
+msgid "Password"
+msgstr ""
+
+#: registers/templates/auth/login.html:64
+msgid "Enter your password"
+msgstr ""
+
+#: registers/templates/auth/login.html:73
+msgid "Sign in"
+msgstr ""
+
+#: registers/templates/auth/login.html:80 registers/templates/core/base.html:66
+msgid "Language"
+msgstr ""
+
+#: registers/templates/core/base.html:8
+msgid "Finance dashboard"
+msgstr ""
+
+#: registers/templates/core/base.html:9
+msgid "Personal finance dashboard"
+msgstr ""
+
+#: registers/templates/core/base.html:18 registers/templates/core/base.html:26
+#: reports/templates/reports/components/filter_form.html:3
+msgid "Dashboard"
+msgstr ""
+
+#: registers/templates/core/base.html:31
+#: registers/templates/register/expense_form.html:6
+msgid "Register Expense"
+msgstr ""
+
+#: registers/templates/core/base.html:36
+#: registers/templates/register/income_form.html:5
+msgid "Register Income"
+msgstr ""
+
+#: registers/templates/core/base.html:46
+#: reports/templates/reports/recurring_expense_list.html:7
+msgid "Recurring Expenses"
+msgstr ""
+
+#: registers/templates/core/base.html:51
+#: registers/templates/register/budget_estimate_list.html:9
+msgid "Budget Estimates"
+msgstr ""
+
+#: registers/templates/core/base.html:56
+#: registers/templates/register/csv_import.html:8
+msgid "CSV Import"
+msgstr ""
+
+#: registers/templates/core/base.html:60
+msgid "Admin"
+msgstr ""
+
+#: registers/templates/core/base.html:81
+msgid "Logout"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:11
+msgid "Back to Dashboard"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:18
+#: registers/templates/register/budget_estimate_list.html:65
+#: registers/templates/register/budget_estimate_update.html:27
+#: reports/templates/reports/components/expense_category_table.html:45
+#: reports/templates/reports/components/process_recurring_modal.html:26
+msgid "Month"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:22
+#: reports/templatetags/currency_filters.py:36
+msgid "January"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:23
+#: reports/templatetags/currency_filters.py:37
+msgid "February"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:24
+#: reports/templatetags/currency_filters.py:38
+msgid "March"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:25
+#: reports/templatetags/currency_filters.py:39
+msgid "April"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:26
+#: reports/templatetags/currency_filters.py:40
+msgid "May"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:27
+#: reports/templatetags/currency_filters.py:41
+msgid "June"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:28
+#: reports/templatetags/currency_filters.py:42
+msgid "July"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:29
+#: reports/templatetags/currency_filters.py:43
+msgid "August"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:30
+#: reports/templatetags/currency_filters.py:44
+msgid "September"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:31
+#: reports/templatetags/currency_filters.py:45
+msgid "October"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:32
+#: reports/templatetags/currency_filters.py:46
+msgid "November"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:33
+#: reports/templatetags/currency_filters.py:47
+msgid "December"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:37
+#: registers/templates/register/budget_estimate_list.html:69
+#: registers/templates/register/budget_estimate_update.html:31
+#: reports/templates/reports/components/process_recurring_modal.html:36
+msgid "Year"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:53
+msgid "New Estimate"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:61
+#: registers/templates/register/budget_estimate_update.html:22
+msgid "Estimated Amount (R$)"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:74
+#: registers/templates/register/recurring_expense_form.html:59
+msgid "Save"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:95
+msgid "Estimated Amount"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:96
+#: registers/templates/register/components/expense_details_modal.html:64
+#: registers/templates/register/quick_fill_preset_list.html:27
+#: reports/templates/reports/components/expense_category_table.html:117
+#: reports/templates/reports/components/expense_details_table.html:18
+#: reports/templates/reports/recurring_expense_list.html:68
+msgid "Actions"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:108
+msgid "Edit"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:111
+#, python-format
+msgid "Remove estimate for %(category)s?"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:115
+msgid "Delete"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_list.html:127
+#, python-format
+msgid "No estimates for %(selected_month)s/%(selected_year)s."
+msgstr ""
+
+#: registers/templates/register/budget_estimate_update.html:8
+msgid "Edit Estimate"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_update.html:11
+#: registers/templates/register/quick_fill_preset_form.html:12
+#: reports/templates/reports/recurring_expense_update.html:10
+msgid "Back"
+msgstr ""
+
+#: registers/templates/register/budget_estimate_update.html:46
+msgid "Save Changes"
+msgstr ""
+
+#: registers/templates/register/components/category_autocomplete.html:5
+msgid "Search or create category..."
+msgstr ""
+
+#: registers/templates/register/components/expense_details_modal.html:12
+msgid "Expenses"
+msgstr ""
+
+#: registers/templates/register/components/expense_details_modal.html:28
+#: registers/templates/register/components/recent_expenses_table.html:21
+msgid "Loading expenses..."
+msgstr ""
+
+#: registers/templates/register/components/expense_details_modal.html:35
+msgid "Failed to load expenses."
+msgstr ""
+
+#: registers/templates/register/components/expense_details_modal.html:44
+#: reports/templates/reports/components/expense_category_table.html:97
+msgid "Total Amount"
+msgstr ""
+
+#: registers/templates/register/components/expense_details_modal.html:48
+#: reports/templates/reports/components/expense_category_table.html:101
+msgid "Number of Expenses"
+msgstr ""
+
+#: registers/templates/register/components/expense_details_modal.html:88
+#: reports/templates/reports/components/expense_category_table.html:138
+#: reports/templates/reports/components/recurring_expense_modal.html:81
+msgid "Close"
+msgstr ""
+
+#: registers/templates/register/components/recent_expenses_table.html:6
+msgid "Recent Expenses"
+msgstr ""
+
+#: registers/templates/register/components/recent_expenses_table.html:12
+msgid "Refresh list"
+msgstr ""
+
+#: registers/templates/register/components/recent_expenses_table.html:40
+msgid "No recent expenses found"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:9
+msgid ""
+"Import your financial data from CSV files with validation and preview "
+"options."
+msgstr ""
+
+#: registers/templates/register/csv_import.html:21
+#: registers/templates/register/csv_processor.html:21
+msgid "Upload File"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:24
+#: registers/templates/register/csv_processor.html:24
+msgid "Paste Text"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:73
+#: registers/templates/register/csv_processor.html:73
+msgid "CSV Settings"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:98
+msgid "Import Options"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:136
+msgid "Import CSV"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:144
+msgid "CSV Format Guide"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:147
+msgid "Required Columns"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:149
+msgid "Date in YYYY-MM-DD format"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:150
+msgid "Transaction description"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:151
+msgid "Transaction amount (numeric)"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:155
+msgid "Optional Columns"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:157
+msgid "Expense category"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:158
+msgid "Transaction type (default: expense)"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:159
+msgid "Payment method"
+msgstr ""
+
+#: registers/templates/register/csv_import.html:165
+msgid "Example CSV Format:"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:8
+msgid "CSV Import Preview"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:9
+#, python-format
+msgid "Review your data before importing. %(count)s record found."
+msgid_plural "Review your data before importing. %(count)s records found."
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/templates/register/csv_import_preview.html:14
+msgid "Import Summary"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:18
+#: registers/templates/register/csv_processor_preview.html:18
+msgid "Total Records"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:22
+msgid "Columns Found"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:26
+msgid "Preview Records"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:33
+#, python-format
+msgid "Data Preview (First %(count)s record)"
+msgid_plural "Data Preview (First %(count)s records)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/templates/register/csv_import_preview.html:77
+#: registers/templates/register/csv_processor_preview.html:94
+msgid "Back to Upload"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:85
+msgid "Confirm Import"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:93
+msgid "Import Settings"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:96
+msgid "Auto-create Categories:"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:97
+#: registers/templates/register/csv_import_preview.html:101
+msgid "Yes"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:97
+#: registers/templates/register/csv_import_preview.html:101
+msgid "No"
+msgstr ""
+
+#: registers/templates/register/csv_import_preview.html:100
+msgid "Auto-create Payment Methods:"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:8
+msgid "CSV Processor"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:9
+msgid ""
+"Transform Nubank CSV exports to standardized format. Converts dates, parses "
+"descriptions, and reorganizes columns."
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:98
+msgid "Manual Column Mapping"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:99
+msgid "Specify column names when auto-detect is disabled"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:137
+msgid "Process CSV"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:145
+msgid "Nubank CSV Format Guide"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:149
+msgid "Auto-Detected Format"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:150
+msgid ""
+"The processor automatically detects Nubank CSV exports with these columns:"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:152
+msgid "Date in DD/MM/YYYY format"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:153
+msgid "Amount (numeric)"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:154
+msgid "Full description"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:159
+msgid "Transformations Applied"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:161
+msgid "Dates converted: DD/MM/YYYY to YYYY-MM-DD"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:162
+msgid ""
+"Descriptions parsed: \"Uber - Trip\" to payment_method=\"Uber\", "
+"description=\"Trip\""
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:163
+msgid "Columns reorganized to: date, amount, payment_method, description"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:168
+msgid "Example Nubank CSV Input:"
+msgstr ""
+
+#: registers/templates/register/csv_processor.html:176
+msgid "Processed Output:"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:8
+msgid "CSV Processing Complete"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:9
+#, python-format
+msgid "Review and edit your processed data. %(count)s record transformed."
+msgid_plural ""
+"Review and edit your processed data. %(count)s records transformed."
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/templates/register/csv_processor_preview.html:14
+msgid "Processing Summary"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:22
+msgid "Standard Columns"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:26
+msgid "Edits Made"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:32
+msgid "Warnings"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:45
+msgid "Processed Data (Editable)"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:47
+msgid "Click any cell to edit"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:85
+#, python-format
+msgid "Showing first 100 rows. Download CSV to get all %(count)s record."
+msgid_plural ""
+"Showing first 100 rows. Download CSV to get all %(count)s records."
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/templates/register/csv_processor_preview.html:100
+msgid "Copy to Clipboard"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:105
+msgid "Download CSV"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:112
+msgid "How to Use"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:115
+msgid "Edit Data"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:116
+msgid ""
+"Click any cell in the table to edit its content. Changes are saved "
+"automatically."
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:119
+msgid "Copy"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:120
+msgid ""
+"Click \"Copy to Clipboard\" to copy all processed data (including edits) to "
+"your clipboard."
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:123
+msgid "Download"
+msgstr ""
+
+#: registers/templates/register/csv_processor_preview.html:124
+msgid ""
+"Click \"Download CSV\" to download a CSV file with all your processed data "
+"and edits."
+msgstr ""
+
+#: registers/templates/register/expense_form.html:21
+msgid "Manage presets"
+msgstr ""
+
+#: registers/templates/register/expense_form.html:29
+msgid "Add Quick Fill"
+msgstr ""
+
+#: registers/templates/register/expense_form.html:78
+#: registers/templates/register/income_form.html:25
+#: reports/templates/reports/expense_update.html:35
+msgid "Submit"
+msgstr ""
+
+#: registers/templates/register/expense_success.html:5
+msgid "Expense registered successfully!"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:8
+msgid "Edit Quick Fill Preset"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:8
+msgid "Create Quick Fill Preset"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:22
+msgid "Name (Button Label)"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:36
+msgid "Default Amount"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:40
+msgid "Icon (FontAwesome)"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:42
+msgid "e.g. fa-car-side, fa-utensils, fa-shopping-cart"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:59
+msgid "Display Order"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:64
+#: registers/templates/register/quick_fill_preset_list.html:26
+#: reports/templates/reports/recurring_expense_list.html:66
+msgid "Active"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:71
+#: reports/templates/reports/recurring_expense_update.html:59
+msgid "Update"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_form.html:71
+msgid "Create"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_list.html:10
+#: reports/templates/reports/recurring_expense_list.html:15
+msgid "Add New"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_list.html:19
+msgid "Order"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_list.html:20
+msgid "Icon"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_list.html:21
+msgid "Name"
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_list.html:59
+#: registers/templates/register/quick_fill_preset_list.html:100
+msgid "No presets found."
+msgstr ""
+
+#: registers/templates/register/quick_fill_preset_list.html:62
+#: registers/templates/register/quick_fill_preset_list.html:103
+msgid "Create your first preset"
+msgstr ""
+
+#: registers/templates/register/recurring_expense_form.html:7
+msgid "Register Recurring Expense"
+msgstr ""
+
+#: registers/templates/register/recurring_expense_form.html:10
+msgid "View List"
+msgstr ""
+
+#: registers/templates/register/recurring_expense_form.html:33
+#: reports/templates/reports/recurring_expense_list.html:63
+#: reports/templates/reports/recurring_expense_update.html:33
+msgid "Start Date"
+msgstr ""
+
+#: registers/templates/register/recurring_expense_form.html:54
+#: reports/templates/reports/recurring_expense_update.html:54
+msgid "Generate Monthly Debit"
+msgstr ""
+
+#: registers/views.py:51 registers/views.py:223 registers/views.py:349
+#: registers/views.py:494 registers/views.py:724 registers/views.py:776
+#, python-format
+msgid "%(field)s: %(error)s"
+msgstr ""
+
+#: registers/views.py:71
+#, python-format
+msgid "%(count)s installment has been registered."
+msgid_plural "%(count)s installments have been registered."
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/views.py:82
+#, python-format
+msgid "Expense %(expense)s has been registered."
+msgstr ""
+
+#: registers/views.py:205 registers/views.py:266
+#, python-format
+msgid "Import completed! %(count)s record imported successfully."
+msgid_plural "Import completed! %(count)s records imported successfully."
+msgstr[0] ""
+msgstr[1] ""
+
+#: registers/views.py:240
+msgid "No import data found. Please upload a file again."
+msgstr ""
+
+#: registers/views.py:283
+#, python-format
+msgid "Error during import: %(error)s"
+msgstr ""
+
+#: registers/views.py:302
+msgid "Preview functionality would be implemented here"
+msgstr ""
+
+#: registers/views.py:308
+msgid "Import functionality would be implemented here"
+msgstr ""
+
+#: registers/views.py:313
+msgid "Invalid action"
+msgstr ""
+
+#: registers/views.py:318 registers/views.py:563
+msgid "Invalid JSON data"
+msgstr ""
+
+#: registers/views.py:365
+#, python-format
+msgid "Recurring expense '%(description)s' registered successfully."
+msgstr ""
+
+#: registers/views.py:371
+#, python-format
+msgid "Error creating recurring expense: %(error)s"
+msgstr ""
+
+#: registers/views.py:388 reports/views.py:873 reports/views.py:900
+#: reports/views.py:936
+msgid "Unauthorized"
+msgstr ""
+
+#: registers/views.py:395
+#, python-format
+msgid "Expense '%(description)s' deleted successfully."
+msgstr ""
+
+#: registers/views.py:454
+msgid "Processing failed. No data to display."
+msgstr ""
+
+#: registers/views.py:511
+msgid "No processed data found. Please upload and process a file first."
+msgstr ""
+
+#: registers/views.py:535
+msgid "No row data provided"
+msgstr ""
+
+#: registers/views.py:556
+msgid "Data updated successfully"
+msgstr ""
+
+#: registers/views.py:655
+msgid "Category ID is required for category filter"
+msgstr ""
+
+#: registers/views.py:668
+msgid "Category not found"
+msgstr ""
+
+#: registers/views.py:672
+msgid "Recent"
+msgstr ""
+
+#: registers/views.py:677
+#, python-format
+msgid "Invalid filter type: %(filter_type)s"
+msgstr ""
+
+#: registers/views.py:693
+#, python-format
+msgid "Expenses - %(filter_title)s"
+msgstr ""
+
+#: registers/views.py:740
+#, python-format
+msgid "Preset '%(name)s' created successfully."
+msgstr ""
+
+#: registers/views.py:744
+#, python-format
+msgid "Error creating preset: %(error)s"
+msgstr ""
+
+#: registers/views.py:765
+msgid "Preset not found."
+msgstr ""
+
+#: registers/views.py:789
+#, python-format
+msgid "Preset '%(name)s' updated successfully."
+msgstr ""
+
+#: registers/views.py:793
+#, python-format
+msgid "Error updating preset: %(error)s"
+msgstr ""
+
+#: registers/views.py:815
+msgid "Preset not found"
+msgstr ""
+
+#: registers/views.py:819
+msgid "Preset deleted successfully."
+msgstr ""
+
+#: registers/views.py:853
+msgid "Category name is required."
+msgstr ""
+
+#: registers/views.py:873
+msgid "Invalid JSON."
+msgstr ""
+
+#: registers/views.py:890
+msgid "Estimate created successfully."
+msgstr ""
+
+#: registers/views.py:892
+msgid "An estimate already exists for this category this month."
+msgstr ""
+
+#: registers/views.py:918
+msgid "Estimate updated."
+msgstr ""
+
+#: registers/views.py:937
+msgid "Estimate removed."
+msgstr ""
+
+#: reports/services/expense_service.py:359
+msgid "No Category"
+msgstr ""
+
+#: reports/services/expense_service.py:431
+msgid "No Payment Method"
+msgstr ""
+
+#: reports/services/recurring_expense_service.py:191
+msgid "Month must be between 1 and 12"
+msgstr ""
+
+#: reports/services/recurring_expense_service.py:200
+msgid "Invalid year"
+msgstr ""
+
+#: reports/services/recurring_expense_service.py:225
+#, python-format
+msgid "%(description)s: invalid date - %(error)s"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:11
+msgid "Monthly Estimate"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:15
+msgid "Manage estimates"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:25
+msgid "Estimated"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:26
+msgid "Actual"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:27
+msgid "Progress"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:60
+msgid "Estimates"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:64
+msgid "Fixed Expenses"
+msgstr ""
+
+#: reports/templates/reports/components/budget_estimate_card.html:68
+msgid "Expected Total"
+msgstr ""
+
+#: reports/templates/reports/components/daily_total_card.html:6
+msgid "Spent Today:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_category_table.html:3
+msgid "Expenses by Category"
+msgstr ""
+
+#: reports/templates/reports/components/expense_category_table.html:13
+#: reports/templates/reports/components/expense_category_table.html:50
+msgid "Total"
+msgstr ""
+
+#: reports/templates/reports/components/expense_category_table.html:67
+msgid "Expense Details"
+msgstr ""
+
+#: reports/templates/reports/components/expense_category_table.html:80
+msgid "Loading expense details..."
+msgstr ""
+
+#: reports/templates/reports/components/expense_category_table.html:88
+msgid "Failed to load expense details."
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:3
+msgid "Monthly Expenses Details Table"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:15
+msgid "Created At"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:16
+msgid "Updated At"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:17
+msgid "Recurrence"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:47
+#: reports/templates/reports/components/expense_details_table.html:114
+msgid "No expenses found for the selected month."
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:71
+#: reports/templates/reports/recurring_expense_list.html:156
+msgid "Date:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:75
+#: reports/templates/reports/recurring_expense_list.html:160
+msgid "Category:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:79
+#: reports/templates/reports/recurring_expense_list.html:164
+msgid "Payment:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:84
+msgid "Recurrence:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:93
+msgid "More details"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:97
+msgid "Created:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_details_table.html:101
+msgid "Updated:"
+msgstr ""
+
+#: reports/templates/reports/components/expense_income_chart.html:3
+msgid "Expense and Income by Month"
+msgstr ""
+
+#: reports/templates/reports/components/filter_form.html:6
+msgid "Balance:"
+msgstr ""
+
+#: reports/templates/reports/components/fixed_expenses_card.html:4
+msgid "Fixed Expenses:"
+msgstr ""
+
+#: reports/templates/reports/components/installment_progress_card.html:11
+msgid "Open Installments"
+msgstr ""
+
+#: reports/templates/reports/components/installment_progress_card.html:15
+#, python-format
+msgid "%(count)s installment plan"
+msgid_plural "%(count)s installment plans"
+msgstr[0] ""
+msgstr[1] ""
+
+#: reports/templates/reports/components/installment_progress_card.html:41
+#, python-format
+msgid "%(paid)s/%(total)s paid"
+msgstr ""
+
+#: reports/templates/reports/components/installment_progress_card.html:69
+msgid "Paid:"
+msgstr ""
+
+#: reports/templates/reports/components/installment_progress_card.html:73
+msgid "Remaining:"
+msgstr ""
+
+#: reports/templates/reports/components/installment_progress_card.html:78
+#, python-format
+msgid "Total: %(total)s"
+msgstr ""
+
+#: reports/templates/reports/components/monthly_budget_card.html:4
+msgid "Expected Total:"
+msgstr ""
+
+#: reports/templates/reports/components/monthly_budget_card.html:9
+#, python-format
+msgid "Fixed %(fixed)s + Est. %(estimated)s"
+msgstr ""
+
+#: reports/templates/reports/components/payment_method_chart.html:3
+msgid "Monthly Expenses by Payment Method"
+msgstr ""
+
+#: reports/templates/reports/components/process_recurring_modal.html:8
+msgid "Process Recurring Expenses"
+msgstr ""
+
+#: reports/templates/reports/components/process_recurring_modal.html:18
+msgid "Select the month and year to generate active recurring expenses."
+msgstr ""
+
+#: reports/templates/reports/components/process_recurring_modal.html:51
+msgid "Cancel"
+msgstr ""
+
+#: reports/templates/reports/components/process_recurring_modal.html:56
+msgid "Process"
+msgstr ""
+
+#: reports/templates/reports/components/recurring_expense_modal.html:10
+msgid "Recurring Expense Details"
+msgstr ""
+
+#: reports/templates/reports/components/recurring_expense_modal.html:23
+msgid "Loading details..."
+msgstr ""
+
+#: reports/templates/reports/components/recurring_expense_modal.html:31
+msgid "Failed to load details."
+msgstr ""
+
+#: reports/templates/reports/components/recurring_expense_modal.html:40
+msgid "Monthly Amount"
+msgstr ""
+
+#: reports/templates/reports/components/recurring_expense_modal.html:44
+#: reports/templates/reports/components/recurring_expense_modal.html:55
+msgid "Generated Expenses"
+msgstr ""
+
+#: reports/templates/reports/components/recurring_expense_modal.html:48
+msgid "Total Generated"
+msgstr ""
+
+#: reports/templates/reports/expense_update.html:5
+msgid "Edit Expense"
+msgstr ""
+
+#: reports/templates/reports/expense_update.html:10
+msgid "Please correct the errors below:"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:11
+msgid "Process Expenses"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:26
+msgid "Active Expenses"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:37
+msgid "Inactive Expenses"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:48
+msgid "Grand Total"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:67
+msgid "Generated"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:78
+#: reports/templates/reports/recurring_expense_list.html:140
+msgid "Active Recurring Expenses"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:78
+#: reports/templates/reports/recurring_expense_list.html:140
+msgid "Inactive Recurring Expenses"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:102
+#: reports/templates/reports/recurring_expense_list.html:183
+#, python-format
+msgid "%(count)s expense"
+msgid_plural "%(count)s expenses"
+msgstr[0] ""
+msgstr[1] ""
+
+#: reports/templates/reports/recurring_expense_list.html:123
+#: reports/templates/reports/recurring_expense_list.html:202
+msgid "No recurring expenses found."
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_list.html:168
+msgid "Active:"
+msgstr ""
+
+#: reports/templates/reports/recurring_expense_update.html:7
+msgid "Edit Recurring Expense"
+msgstr ""
+
+#: reports/views.py:171
+msgid "Expense updated successfully."
+msgstr ""
+
+#: reports/views.py:434
+msgid "Invalid days parameter"
+msgstr ""
+
+#: reports/views.py:443
+msgid "Invalid category"
+msgstr ""
+
+#: reports/views.py:468
+msgid "Failed to load daily spending data"
+msgstr ""
+
+#: reports/views.py:491
+msgid "Date parameter is required"
+msgstr ""
+
+#: reports/views.py:498
+msgid "Invalid date format. Expected YYYY-MM-DD"
+msgstr ""
+
+#: reports/views.py:519 reports/views.py:529 reports/views.py:675
+msgid "Uncategorized"
+msgstr ""
+
+#: reports/views.py:520
+msgid "No payment method"
+msgstr ""
+
+#: reports/views.py:546
+#, python-format
+msgid "Server error: %(error)s"
+msgstr ""
+
+#: reports/views.py:600
+msgid "Invalid request - AJAX required"
+msgstr ""
+
+#: reports/views.py:618
+msgid "year"
+msgstr ""
+
+#: reports/views.py:620
+msgid "month"
+msgstr ""
+
+#: reports/views.py:622
+msgid "category"
+msgstr ""
+
+#: reports/views.py:625
+#, python-format
+msgid "Missing required parameters: %(params)s"
+msgstr ""
+
+#: reports/views.py:644
+#, python-format
+msgid ""
+"Invalid month name: %(month)s. Expected English month name (e.g., "
+"\"January\")"
+msgstr ""
+
+#: reports/views.py:676 reports/views.py:946 reports/views.py:947
+msgid "N/A"
+msgstr ""
+
+#: reports/views.py:805
+#, python-format
+msgid "Invalid data format: %(error)s"
+msgstr ""
+
+#: reports/views.py:816
+msgid "An unexpected error occurred while fetching expense details"
+msgstr ""
+
+#: reports/views.py:859
+msgid "Recurring expense updated successfully."
+msgstr ""
+
+#: reports/views.py:880
+#, python-format
+msgid "Recurring expense '%(description)s' deleted successfully."
+msgstr ""
+
+#: reports/views.py:885 reports/views.py:915 reports/views.py:962
+msgid "Recurring expense not found"
+msgstr ""
+
+#: reports/views.py:909
+msgid "Recurring expense activated."
+msgstr ""
+
+#: reports/views.py:911
+msgid "Recurring expense deactivated."
+msgstr ""
+
+#: reports/views.py:928
+msgid "ID parameter required"
+msgstr ""
+
+#: reports/views.py:982
+msgid "Invalid month and year"
+msgstr ""

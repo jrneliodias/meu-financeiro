@@ -16,6 +16,7 @@ import csv
 from datetime import datetime
 from typing import Dict, List, Tuple, Optional, Any
 import logging
+from django.utils.translation import gettext as _, ngettext
 
 logger = logging.getLogger(__name__)
 
@@ -192,8 +193,19 @@ class CSVProcessorService:
             # Show only first 10 failed rows to avoid cluttering
             failed_preview = ', '.join(map(str, failed_rows[:10]))
             if len(failed_rows) > 10:
-                failed_preview += f" ... and {len(failed_rows) - 10} more"
-            errors.append(f"Could not convert dates in {len(failed_rows)} rows: {failed_preview}")
+                failed_preview += " " + ngettext(
+                    "... and %(count)s more",
+                    "... and %(count)s more",
+                    len(failed_rows) - 10,
+                ) % {'count': len(failed_rows) - 10}
+            errors.append(ngettext(
+                "Could not convert dates in %(count)s row: %(rows)s",
+                "Could not convert dates in %(count)s rows: %(rows)s",
+                len(failed_rows),
+            ) % {
+                'count': len(failed_rows),
+                'rows': failed_preview,
+            })
 
         logger.info(f"Converted {conversion_count} dates from PT-BR to ISO format")
         return df, conversion_count, errors
@@ -276,13 +288,18 @@ class CSVProcessorService:
                 column_mapping = self.detect_format(df)
                 if column_mapping is None:
                     available_cols = ', '.join(df.columns.tolist())
-                    errors.append(f"Could not auto-detect Nubank format. Available columns: {available_cols}")
+                    errors.append(_("Could not auto-detect Nubank format. Available columns: %(columns)s") % {
+                        'columns': available_cols
+                    })
                     return df, errors
 
             # Validate that mapped columns exist
             for target, source in column_mapping.items():
                 if source not in df.columns:
-                    errors.append(f"Column '{source}' not found in CSV. Available: {', '.join(df.columns.tolist())}")
+                    errors.append(_("Column '%(column)s' not found in CSV. Available: %(available)s") % {
+                        'column': source,
+                        'available': ', '.join(df.columns.tolist()),
+                    })
                     return df, errors
 
             # Step 2: Convert dates
@@ -304,9 +321,21 @@ class CSVProcessorService:
 
             # Add success stats as info messages
             stats = [
-                f"Successfully processed {len(result_df)} rows",
-                f"Converted {conversion_count} dates to ISO format",
-                f"Parsed {split_count} descriptions into payment_method and description"
+                ngettext(
+                    "Successfully processed %(count)s row",
+                    "Successfully processed %(count)s rows",
+                    len(result_df),
+                ) % {'count': len(result_df)},
+                ngettext(
+                    "Converted %(count)s date to ISO format",
+                    "Converted %(count)s dates to ISO format",
+                    conversion_count,
+                ) % {'count': conversion_count},
+                ngettext(
+                    "Parsed %(count)s description into payment method and description",
+                    "Parsed %(count)s descriptions into payment method and description",
+                    split_count,
+                ) % {'count': split_count}
             ]
 
             logger.info(' | '.join(stats))
@@ -314,7 +343,7 @@ class CSVProcessorService:
             return result_df, warnings
 
         except Exception as e:
-            error_msg = f"Error processing CSV: {str(e)}"
+            error_msg = _("Error processing CSV: %(error)s") % {'error': str(e)}
             logger.error(error_msg, exc_info=True)
             errors.append(error_msg)
             return df, errors
@@ -369,7 +398,7 @@ class CSVProcessorService:
             df = pd.read_csv(uploaded_file, sep=separator)
             return df, []
         except Exception as e:
-            error_msg = f"Error reading CSV file: {str(e)}"
+            error_msg = _("Error reading CSV file: %(error)s") % {'error': str(e)}
             logger.error(error_msg, exc_info=True)
             return None, [error_msg]
 
@@ -388,6 +417,6 @@ class CSVProcessorService:
             df = pd.read_csv(io.StringIO(csv_string), sep=separator)
             return df, []
         except Exception as e:
-            error_msg = f"Error reading CSV text: {str(e)}"
+            error_msg = _("Error reading CSV text: %(error)s") % {'error': str(e)}
             logger.error(error_msg, exc_info=True)
             return None, [error_msg]

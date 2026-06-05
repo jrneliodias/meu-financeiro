@@ -1,15 +1,16 @@
+{% load i18n currency_filters %}
 <div class="my-3 space-y-4 bg-zinc-800/50 rounded-lg p-3 ">
-  <h2 class="text-2xl font-bold">Expenses by Category</h2>
+  <h2 class="text-2xl font-bold">{% trans "Expenses by Category" %}</h2>
   <table class="hidden md:table w-full p-2" border="1">
     <thead>
       <tr class="*:p-2 border-b border-zinc-700 ">
-        <th class="text-left">Category</th>
-        {% for month in all_months %}<th class="text-left">{{ month }}</th>{% endfor %}
+        <th class="text-left">{% trans "Category" %}</th>
+        {% for month in all_months %}<th class="text-left">{{ month|translate_month }}</th>{% endfor %}
       </tr>
     </thead>
     <tbody>
       <tr class="*:p-2 border-b border-zinc-700 bg-zinc-800/50">
-        <td class="font-bold">Total</td>
+        <td class="font-bold">{% trans "Total" %}</td>
         {% for value in formatted_totals %}
           <td class="text-left font-bold heatmap-cell"
               data-value="{{ value|stringformat:'f' }}">{{ value }}</td>
@@ -33,20 +34,20 @@
               class="w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900"
               data-selected-month="{{ selected_month|default:'' }}"
               data-selected-year="{{ selected_year|default:'' }}">
-        {% for month in all_months %}<option value="{{ forloop.counter0 }}">{{ month }}</option>{% endfor %}
+        {% for month in all_months %}<option value="{{ forloop.counter0 }}">{{ month|translate_month }}</option>{% endfor %}
       </select>
     </div>
     <!-- Mobile table with just category and selected month -->
     <table class="p-2 w-full" border="1">
       <thead>
         <tr class="*:p-2 border-b border-zinc-700">
-          <th class="text-left">Category</th>
-          <th class="text-left" id="selectedMonthHeader">Month</th>
+          <th class="text-left">{% trans "Category" %}</th>
+          <th class="text-left" id="selectedMonthHeader">{% trans "Month" %}</th>
         </tr>
       </thead>
       <tbody id="mobileCategoryTableBody">
         <tr class="*:p-2 border-b border-zinc-700 bg-zinc-800/50">
-          <td class="font-bold">Total</td>
+          <td class="font-bold">{% trans "Total" %}</td>
           <td class="text-left font-bold heatmap-cell" id="selectedMonthTotal"></td>
         </tr>
         <!-- Category rows will be dynamically populated -->
@@ -63,7 +64,7 @@
     <div class="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-700 flex-shrink-0">
       <h2 class="text-xl font-semibold text-white flex items-center">
         <i class="fas fa-receipt mr-3 text-blue-400"></i>
-        <span id="categoryModalTitle">Expense Details</span>
+        <span id="categoryModalTitle">{% trans "Expense Details" %}</span>
       </h2>
       <button id="categoryModalCloseBtn"
               class="text-gray-400 hover:text-white transition-colors duration-200">
@@ -76,7 +77,7 @@
       <!-- Loading state -->
       <div id="categoryModalLoading" class="text-center py-8">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
-        <p class="text-gray-300">Loading expense details...</p>
+        <p class="text-gray-300">{% trans "Loading expense details..." %}</p>
       </div>
 
       <!-- Error state -->
@@ -84,7 +85,7 @@
            class="hidden bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
         <div class="flex items-center">
           <i class="fas fa-exclamation-triangle mr-2"></i>
-          <span id="categoryModalErrorMessage">Failed to load expense details.</span>
+          <span id="categoryModalErrorMessage">{% trans "Failed to load expense details." %}</span>
         </div>
       </div>
 
@@ -93,11 +94,11 @@
         <!-- Summary section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Total Amount</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "Total Amount" %}</h3>
             <p class="text-2xl font-bold text-blue-400" id="categoryModalTotalAmount">R$ 0,00</p>
           </div>
           <div class="bg-zinc-700 rounded-lg p-4 text-center">
-            <h3 class="text-sm font-medium text-gray-400 mb-2">Number of Expenses</h3>
+            <h3 class="text-sm font-medium text-gray-400 mb-2">{% trans "Number of Expenses" %}</h3>
             <p class="text-2xl font-bold text-green-400" id="categoryModalExpenseCount">0</p>
           </div>
         </div>
@@ -109,11 +110,11 @@
             <table class="w-full">
               <thead class="bg-zinc-600">
                 <tr class="text-left">
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Date</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Description</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300">Payment Method</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">Amount</th>
-                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-center">Actions</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Date" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Description" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300">{% trans "Payment Method" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-right">{% trans "Amount" %}</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-300 text-center">{% trans "Actions" %}</th>
                 </tr>
               </thead>
               <tbody id="categoryExpensesList" class="divide-y divide-zinc-600">
@@ -134,7 +135,7 @@
       <button id="categoryModalCloseFooterBtn"
               class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
         <i class="fas fa-times mr-2"></i>
-        Close
+        {% trans "Close" %}
       </button>
     </div>
   </div>

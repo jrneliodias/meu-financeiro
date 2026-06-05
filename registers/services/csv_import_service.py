@@ -4,6 +4,7 @@ from django.core.files.uploadedfile import UploadedFile
 from typing import Dict, List, Tuple, Optional
 import logging
 import io
+from django.utils.translation import gettext as _, ngettext
 
 from ..models import Expense, Income, Category, PaymentMethod
 from .csv_record_strategies import RecordStrategyFactory
@@ -49,11 +50,13 @@ class CSVImportService:
         # Check for required columns
         missing_columns = [col for col in self.REQUIRED_COLUMNS if col not in df.columns]
         if missing_columns:
-            errors.append(f"Missing required columns: {', '.join(missing_columns)}")
+            errors.append(_("Missing required columns: %(columns)s") % {
+                'columns': ', '.join(missing_columns)
+            })
         
         # Check if dataframe is empty
         if df.empty:
-            errors.append("CSV file is empty")
+            errors.append(_("CSV file is empty"))
         
         return len(errors) == 0, errors
     
@@ -83,7 +86,7 @@ class CSVImportService:
             return df, errors
             
         except Exception as e:
-            errors.append(f"Error reading CSV file: {str(e)}")
+            errors.append(_("Error reading CSV file: %(error)s") % {'error': str(e)})
             logger.error(f"CSV parsing error: {e}")
             return None, errors
     
@@ -113,7 +116,7 @@ class CSVImportService:
             return df, errors
             
         except Exception as e:
-            errors.append(f"Error reading CSV string: {str(e)}")
+            errors.append(_("Error reading CSV string: %(error)s") % {'error': str(e)})
             logger.error(f"CSV parsing error: {e}")
             return None, errors
     
@@ -130,9 +133,13 @@ class CSVImportService:
                 df['date'] = pd.to_datetime(df['date'], errors='coerce')
                 invalid_dates = df[df['date'].isna()]
                 if not invalid_dates.empty:
-                    errors.append(f"Invalid dates found in {len(invalid_dates)} rows")
+                    errors.append(ngettext(
+                        "Invalid date found in %(count)s row",
+                        "Invalid dates found in %(count)s rows",
+                        len(invalid_dates),
+                    ) % {'count': len(invalid_dates)})
             except Exception as e:
-                errors.append(f"Error parsing dates: {str(e)}")
+                errors.append(_("Error parsing dates: %(error)s") % {'error': str(e)})
         
         # Validate amount column
         if 'amount' in df.columns:
@@ -140,9 +147,13 @@ class CSVImportService:
                 df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
                 invalid_amounts = df[df['amount'].isna()]
                 if not invalid_amounts.empty:
-                    errors.append(f"Invalid amounts found in {len(invalid_amounts)} rows")
+                    errors.append(ngettext(
+                        "Invalid amount found in %(count)s row",
+                        "Invalid amounts found in %(count)s rows",
+                        len(invalid_amounts),
+                    ) % {'count': len(invalid_amounts)})
             except Exception as e:
-                errors.append(f"Error parsing amounts: {str(e)}")
+                errors.append(_("Error parsing amounts: %(error)s") % {'error': str(e)})
         
         # Set default values for optional columns
         if 'type' not in df.columns:
@@ -204,7 +215,7 @@ class CSVImportService:
             try:
                 # Validate required fields
                 if pd.isna(row['date']) or pd.isna(row['description']) or pd.isna(row['amount']):
-                    self._log_error(index, "Missing required fields")
+                    self._log_error(index, _("Missing required fields"))
                     continue
 
                 # Convert row to dictionary for strategy pattern
@@ -214,7 +225,7 @@ class CSVImportService:
                 strategy = self.strategy_factory.get_strategy(row_data)
 
                 if strategy is None:
-                    self._log_error(index, "No strategy found to handle this row (amount is zero or invalid)")
+                    self._log_error(index, _("No strategy found to handle this row (amount is zero or invalid)"))
                     continue
 
                 # Create record using the selected strategy
@@ -237,7 +248,7 @@ class CSVImportService:
                     self.import_stats['imported_incomes'] += 1
 
             except Exception as e:
-                self._log_error(index, f"Error importing row: {str(e)}")
+                self._log_error(index, _("Error importing row: %(error)s") % {'error': str(e)})
                 logger.error(f"Import error at row {index}: {e}")
 
         return {
@@ -249,12 +260,18 @@ class CSVImportService:
     def _log_error(self, row_index: int, message: str):
         """Log an error for a specific row"""
         self.import_stats['errors'] += 1
-        self.error_log.append(f"Row {row_index + 1}: {message}")
+        self.error_log.append(_("Row %(row)s: %(message)s") % {
+            'row': row_index + 1,
+            'message': message,
+        })
     
     def _log_warning(self, row_index: int, message: str):
         """Log a warning for a specific row"""
         self.import_stats['warnings'] += 1
-        self.warning_log.append(f"Row {row_index + 1}: {message}")
+        self.warning_log.append(_("Row %(row)s: %(message)s") % {
+            'row': row_index + 1,
+            'message': message,
+        })
     
     def get_import_summary(self) -> Dict:
         """Get a summary of the import operation"""

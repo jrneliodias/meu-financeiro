@@ -1,21 +1,21 @@
-{% load currency_filters %}
+{% load currency_filters i18n %}
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
-  <h2 class="text-2xl font-bold">Monthly Expenses Details Table</h2>
+  <h2 class="text-2xl font-bold">{% trans "Monthly Expenses Details Table" %}</h2>
   
   <!-- Desktop table (hidden on mobile) -->
   <div class="hidden md:block ">
     <table border="1" class="w-full p-2">
       <thead class="border-b border-zinc-700">
         <tr>
-          <th class="text-start">Description</th>
-          <th class="text-start">Amount</th>
-          <th class="text-start">Date</th>
-          <th class="text-start">Category</th>
-          <th class="text-start">Payment Method</th>
-          <th class="text-start">Created At</th>
-          <th class="text-start">Updated At</th>
-          <th class="text-start">Recurrence</th>
-          <th class="px-4 py-2 text-end">Actions</th>
+          <th class="text-start">{% trans "Description" %}</th>
+          <th class="text-start">{% trans "Amount" %}</th>
+          <th class="text-start">{% trans "Date" %}</th>
+          <th class="text-start">{% trans "Category" %}</th>
+          <th class="text-start">{% trans "Payment Method" %}</th>
+          <th class="text-start">{% trans "Created At" %}</th>
+          <th class="text-start">{% trans "Updated At" %}</th>
+          <th class="text-start">{% trans "Recurrence" %}</th>
+          <th class="px-4 py-2 text-end">{% trans "Actions" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -44,7 +44,7 @@
         {% empty %}
         <tr>
           <td colspan="9" class="text-center p-4">
-            No expenses found for the selected month.
+            {% trans "No expenses found for the selected month." %}
           </td>
         </tr>
         {% endfor %}
@@ -68,20 +68,20 @@
           <!-- Primary details in 2x2 grid -->
           <div class="grid grid-cols-1 gap-x-4 gap-y-2 text-sm border-t border-zinc-600 pt-3">
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-              <span class="text-gray-400">Date:</span>
+              <span class="text-gray-400">{% trans "Date:" %}</span>
               <span>{{ expense.date }}</span>
             </div>
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-              <span class="text-gray-400">Category:</span>
+              <span class="text-gray-400">{% trans "Category:" %}</span>
               <span>{{ expense.category.name }}</span>
             </div>
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-              <span class="text-gray-400">Payment:</span>
+              <span class="text-gray-400">{% trans "Payment:" %}</span>
               <span>{{ expense.payment_method.name }}</span>
             </div>
             {% if expense.reccurring_expense %}
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-              <span class="text-gray-400">Recurrence:</span>
+              <span class="text-gray-400">{% trans "Recurrence:" %}</span>
               <span>{{ expense.reccurring_expense }}</span>
             </div>
             {% endif %}
@@ -90,15 +90,15 @@
           <!-- Expandable section for additional details -->
           <details class="mt-1">
             <summary class="text-sm text-gray-400 cursor-pointer hover:text-white py-1">
-              More details
+              {% trans "More details" %}
             </summary>
             <div class="grid grid-cols-1 gap-y-2 pt-2 pl-2 text-sm border-t border-zinc-600/50">
               <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-                <span class="text-gray-400">Created:</span>
+                <span class="text-gray-400">{% trans "Created:" %}</span>
                 <span>{{ expense.created_at }}</span>
               </div>
               <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-                <span class="text-gray-400">Updated:</span>
+                <span class="text-gray-400">{% trans "Updated:" %}</span>
                 <span>{{ expense.updated_at }}</span>
               </div>
             </div>
@@ -111,7 +111,7 @@
       {% endfor %}
     {% else %}
       <div class="text-center p-6 bg-zinc-700/30 rounded-lg">
-        No expenses found for the selected month.
+        {% trans "No expenses found for the selected month." %}
       </div>
     {% endif %}
   </div>

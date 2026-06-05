@@ -7,6 +7,7 @@ from registers.models import PaymentMethod
 import json
 import calendar
 from decimal import Decimal
+from django.utils.translation import gettext as _
 
 from reports.services.billing_period_calculator import BillingPeriodCalculator
 from reports.services.category_calculator import CategoryExpenseCalculator
@@ -355,7 +356,7 @@ class ExpenseService:
         # Process the single query result
         for item in expenses_by_month_category:
             month_name = item['month'].strftime('%B')
-            category_name = item['category__name'] or 'No Category'
+            category_name = item['category__name'] or _('No Category')
             amount = float(item['total_amount'])
 
             expenses_by_category_by_month[category_name][month_name] = amount
@@ -427,7 +428,7 @@ class ExpenseService:
         for item in payment_method_expenses:
             month_name = item['month'].strftime('%B')
             month_index = item['month'].month - 1  # 0-based index for arrays
-            payment_method = item['payment_method__name'] or 'No Payment Method'
+            payment_method = item['payment_method__name'] or _('No Payment Method')
             amount = float(item['total_amount'])
             
             monthly_data[month_name].append({

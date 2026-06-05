@@ -20,6 +20,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from typing import Optional
 expense_repository = ExpenseRepository()
 installment_calculator = InstallmentProgressCalculator()
@@ -167,7 +168,7 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         """Save and add success message."""
-        messages.success(self.request, "Expense updated successfully.")
+        messages.success(self.request, _("Expense updated successfully."))
         return super().form_valid(form)
 
 
@@ -422,7 +423,7 @@ def daily_spending_data_ajax(request):
     AJAX endpoint to get daily spending data for different periods.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({'error': _('Invalid request')}, status=400)
 
     try:
         # Get the number of days from the request
@@ -430,7 +431,7 @@ def daily_spending_data_ajax(request):
 
         # Validate days parameter
         if days not in [7, 30, 60, 90]:
-            return JsonResponse({'error': 'Invalid days parameter'}, status=400)
+            return JsonResponse({'error': _('Invalid days parameter')}, status=400)
 
         # Resolve optional category filter
         category = None
@@ -439,7 +440,7 @@ def daily_spending_data_ajax(request):
             try:
                 category = Category.objects.get(id=int(category_id), type='expense')
             except (Category.DoesNotExist, ValueError):
-                return JsonResponse({'error': 'Invalid category'}, status=400)
+                return JsonResponse({'error': _('Invalid category')}, status=400)
 
         # Create daily calculator and get data
         daily_calculator = DailyExpenseCalculator(expense_repository)
@@ -464,7 +465,7 @@ def daily_spending_data_ajax(request):
         print(f"ERROR traceback: {traceback.format_exc()}")
 
         return JsonResponse({
-            'error': 'Failed to load daily spending data',
+            'error': _('Failed to load daily spending data'),
             'message': str(e)
         }, status=500)
 
@@ -483,18 +484,18 @@ def expense_details_ajax(request):
     - Formatted data for modal display
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({'error': _('Invalid request')}, status=400)
 
     date_str = request.GET.get('date')
     if not date_str:
-        return JsonResponse({'error': 'Date parameter is required'}, status=400)
+        return JsonResponse({'error': _('Date parameter is required')}, status=400)
 
     try:
         # Parse date string (expected format: YYYY-MM-DD)
         from datetime import datetime
         target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        return JsonResponse({'error': 'Invalid date format. Expected YYYY-MM-DD'}, status=400)
+        return JsonResponse({'error': _('Invalid date format. Expected YYYY-MM-DD')}, status=400)
 
     try:
         from reports.repository.expense_repository import ExpenseRepository
@@ -515,8 +516,8 @@ def expense_details_ajax(request):
                 'id': expense['id'],
                 'description': expense['description'],
                 'amount': float(expense['amount']),  # Convert Decimal to float for JSON
-                'category': expense['category__name'] or 'Sem Categoria',
-                'payment_method': expense['payment_method__name'] or 'Sem Método',
+                'category': expense['category__name'] or _('Uncategorized'),
+                'payment_method': expense['payment_method__name'] or _('No payment method'),
                 'created_at': expense['created_at'].strftime('%H:%M') if expense['created_at'] else '',
                 'is_recurring': expense['reccurring_expense_id'] is not None,
                 'is_installment': expense['installment_plan_id'] is not None,
@@ -525,7 +526,7 @@ def expense_details_ajax(request):
             total_amount += expense['amount']
 
         categories = [
-            {'category': row['category__name'] or 'Sem Categoria', 'total': float(row['total'])}
+            {'category': row['category__name'] or _('Uncategorized'), 'total': float(row['total'])}
             for row in category_totals
         ]
 
@@ -541,7 +542,9 @@ def expense_details_ajax(request):
         })
 
     except Exception as e:
-        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+        return JsonResponse({
+            'error': _('Server error: %(error)s') % {'error': str(e)}
+        }, status=500)
 
 
 # ================================================================================
@@ -594,7 +597,7 @@ class CategoryExpenseRequestValidator:
             JsonResponse with error if invalid, None if valid
         """
         if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'error': 'Invalid request - AJAX required'}, status=400)
+            return JsonResponse({'error': _('Invalid request - AJAX required')}, status=400)
         return None
 
     @staticmethod
@@ -612,14 +615,16 @@ class CategoryExpenseRequestValidator:
         if not all([request_year, request_month_name, request_category]):
             missing_params = []
             if not request_year:
-                missing_params.append('year')
+                missing_params.append(_('year'))
             if not request_month_name:
-                missing_params.append('month')
+                missing_params.append(_('month'))
             if not request_category:
-                missing_params.append('category')
+                missing_params.append(_('category'))
 
             return JsonResponse({
-                'error': f'Missing required parameters: {", ".join(missing_params)}'
+                'error': _('Missing required parameters: %(params)s') % {
+                    'params': ', '.join(str(param) for param in missing_params)
+                }
             }, status=400)
         return None
 
@@ -636,7 +641,9 @@ class CategoryExpenseRequestValidator:
         month_number = MonthConverter.convert_name_to_number(month_name)
         if not month_number:
             return None, JsonResponse({
-                'error': f'Invalid month name: {month_name}. Expected English month name (e.g., "January")'
+                'error': _('Invalid month name: %(month)s. Expected English month name (e.g., "January")') % {
+                    'month': month_name
+                }
             }, status=400)
         return month_number, None
 
@@ -665,8 +672,8 @@ class CategoryExpenseDataFormatter:
             'date': expense_record['date'].isoformat(),
             'description': expense_record['description'],
             'amount': float(expense_record['amount']),
-            'category': expense_record['category__name'] or 'Uncategorized',
-            'payment_method': expense_record['payment_method__name'] or 'N/A',
+            'category': expense_record['category__name'] or _('Uncategorized'),
+            'payment_method': expense_record['payment_method__name'] or _('N/A'),
             'created_at': expense_record['created_at'].strftime('%H:%M')
         }
 
@@ -795,7 +802,9 @@ def category_expense_details_ajax(request):
 
     except ValueError as validation_error:
         return JsonResponse({
-            'error': f'Invalid data format: {str(validation_error)}'
+            'error': _('Invalid data format: %(error)s') % {
+                'error': str(validation_error)
+            }
         }, status=400)
     except Exception as unexpected_error:
         # Log the error for debugging (in production, use proper logging)
@@ -804,7 +813,7 @@ def category_expense_details_ajax(request):
         logger.error(f'Error fetching category expenses: {unexpected_error}', exc_info=True)
 
         return JsonResponse({
-            'error': 'An unexpected error occurred while fetching expense details'
+            'error': _('An unexpected error occurred while fetching expense details')
         }, status=500)
 
 
@@ -847,7 +856,7 @@ class RecurringExpenseUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         """Add success message"""
-        messages.success(self.request, "Recurring expense updated successfully.")
+        messages.success(self.request, _("Recurring expense updated successfully."))
         return super().form_valid(form)
 
 
@@ -861,17 +870,19 @@ def recurring_expense_delete(request, pk):
 
         # Verify if user owns the recurring expense
         if recurring_expense.user != request.user:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            return JsonResponse({'error': _('Unauthorized')}, status=403)
 
         description = recurring_expense.description
         recurring_expense_service.delete_recurring_expense(pk)
 
         return JsonResponse({
             'success': True,
-            'message': f"Recurring expense '{description}' deleted successfully."
+            'message': _("Recurring expense '%(description)s' deleted successfully.") % {
+                'description': description
+            }
         })
     except RecurringExpense.DoesNotExist:
-        return JsonResponse({'error': 'Recurring expense not found'}, status=404)
+        return JsonResponse({'error': _('Recurring expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -886,7 +897,7 @@ def recurring_expense_toggle(request, pk):
 
         # Verify ownership
         if recurring_expense.user != request.user:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            return JsonResponse({'error': _('Unauthorized')}, status=403)
 
         # Toggle the field
         updated_recurring_expense = recurring_expense_service.toggle_generate_debit(pk)
@@ -894,10 +905,14 @@ def recurring_expense_toggle(request, pk):
         return JsonResponse({
             'success': True,
             'generate_debit': updated_recurring_expense.generate_debit,
-            'message': f"Recurring expense {'activated' if updated_recurring_expense.generate_debit else 'deactivated'}."
+            'message': (
+                _('Recurring expense activated.')
+                if updated_recurring_expense.generate_debit
+                else _('Recurring expense deactivated.')
+            )
         })
     except RecurringExpense.DoesNotExist:
-        return JsonResponse({'error': 'Recurring expense not found'}, status=404)
+        return JsonResponse({'error': _('Recurring expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -906,11 +921,11 @@ def recurring_expense_toggle(request, pk):
 def recurring_expense_details_ajax(request):
     """AJAX endpoint to fetch expenses generated by recurring expense"""
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({'error': _('Invalid request')}, status=400)
 
     recurring_expense_id = request.GET.get('id')
     if not recurring_expense_id:
-        return JsonResponse({'error': 'ID parameter required'}, status=400)
+        return JsonResponse({'error': _('ID parameter required')}, status=400)
 
     try:
         recurring_expense_service = RecurringExpenseService()
@@ -918,7 +933,7 @@ def recurring_expense_details_ajax(request):
 
         # Verify ownership
         if data['recurring_expense'].user != request.user:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
+            return JsonResponse({'error': _('Unauthorized')}, status=403)
 
         # Format expenses for JSON response
         expenses_list = []
@@ -928,8 +943,8 @@ def recurring_expense_details_ajax(request):
                 'date': expense.date.isoformat(),
                 'description': expense.description,
                 'amount': float(expense.amount),
-                'category': expense.category.name if expense.category else 'N/A',
-                'payment_method': expense.payment_method.name if expense.payment_method else 'N/A',
+                'category': expense.category.name if expense.category else _('N/A'),
+                'payment_method': expense.payment_method.name if expense.payment_method else _('N/A'),
             })
 
         return JsonResponse({
@@ -944,7 +959,7 @@ def recurring_expense_details_ajax(request):
             'total_generated': float(data['total_generated']),
         })
     except RecurringExpense.DoesNotExist:
-        return JsonResponse({'error': 'Recurring expense not found'}, status=404)
+        return JsonResponse({'error': _('Recurring expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -956,7 +971,7 @@ def process_recurring_expenses_ajax(request):
     AJAX endpoint to process recurring expenses for a selected month/year.
     """
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+        return JsonResponse({'success': False, 'error': _('Invalid request')}, status=400)
 
     try:
         month = int(request.POST.get('month'))
@@ -964,7 +979,7 @@ def process_recurring_expenses_ajax(request):
     except (TypeError, ValueError):
         return JsonResponse({
             'success': False,
-            'error': 'Mês e ano inválidos'
+            'error': _('Invalid month and year')
         }, status=400)
 
     # Process expenses using service

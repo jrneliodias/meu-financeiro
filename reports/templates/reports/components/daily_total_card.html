@@ -1,9 +1,9 @@
-{% load currency_filters %}
+{% load currency_filters i18n %}
 <div data-date="{{ today_date }}"
      onclick="window.showExpenseDetailsForDate && window.showExpenseDetailsForDate(this.dataset.date)"
      class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg cursor-pointer hover:bg-zinc-700/40 transition-colors duration-150">
   <div class="flex flex-col items-start">
-    <p class="text-white text-xs md:text-sm">Gasto Hoje:</p>
+    <p class="text-white text-xs md:text-sm">{% trans "Spent Today:" %}</p>
     <span id="dailyTotalDisplay" class="text-blue-400 text-xl md:text-2xl font-bold">
       {{ today_total|format_brl }}
     </span>

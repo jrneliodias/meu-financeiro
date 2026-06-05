@@ -1,35 +1,35 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load i18n static %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">CSV Processing Complete</h1>
-        <p class="text-gray-400">Review and edit your processed data. {{ row_count }} records transformed.</p>
+        <h1 class="text-3xl font-bold text-white mb-2">{% trans "CSV Processing Complete" %}</h1>
+        <p class="text-gray-400">{% blocktrans count count=row_count %}Review and edit your processed data. {{ count }} record transformed.{% plural %}Review and edit your processed data. {{ count }} records transformed.{% endblocktrans %}</p>
     </div>
 
     <!-- Processing Summary -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-white mb-4">Processing Summary</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% trans "Processing Summary" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-zinc-700 p-4 rounded-lg">
                 <div class="text-2xl font-bold text-blue-400">{{ row_count }}</div>
-                <div class="text-sm text-gray-400">Total Records</div>
+                <div class="text-sm text-gray-400">{% trans "Total Records" %}</div>
             </div>
             <div class="bg-zinc-700 p-4 rounded-lg">
                 <div class="text-2xl font-bold text-green-400">4</div>
-                <div class="text-sm text-gray-400">Standard Columns</div>
+                <div class="text-sm text-gray-400">{% trans "Standard Columns" %}</div>
             </div>
             <div class="bg-zinc-700 p-4 rounded-lg">
                 <div class="text-2xl font-bold text-yellow-400" id="editCount">0</div>
-                <div class="text-sm text-gray-400">Edits Made</div>
+                <div class="text-sm text-gray-400">{% trans "Edits Made" %}</div>
             </div>
         </div>
 
         {% if stats.warnings %}
             <div class="mt-4 p-4 bg-yellow-900 bg-opacity-30 border border-yellow-600 rounded-lg">
-                <h4 class="font-medium text-yellow-400 mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>Warnings</h4>
+                <h4 class="font-medium text-yellow-400 mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>{% trans "Warnings" %}</h4>
                 <ul class="text-sm text-yellow-200 space-y-1">
                     {% for warning in stats.warnings %}
                         <li>{{ warning }}</li>
@@ -42,9 +42,9 @@
     <!-- Data Preview with Editable Table -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-white">Processed Data (Editable)</h3>
+            <h3 class="text-lg font-semibold text-white">{% trans "Processed Data (Editable)" %}</h3>
             <div class="text-sm text-gray-400">
-                <i class="fas fa-info-circle mr-1"></i>Click any cell to edit
+                <i class="fas fa-info-circle mr-1"></i>{% trans "Click any cell to edit" %}
             </div>
         </div>
 
@@ -52,10 +52,10 @@
             <table class="w-full text-sm text-left text-gray-300" id="processedDataTable">
                 <thead class="text-xs text-gray-400 uppercase bg-zinc-700">
                     <tr>
-                        <th scope="col" class="px-6 py-3">Date</th>
-                        <th scope="col" class="px-6 py-3">Amount</th>
-                        <th scope="col" class="px-6 py-3">Payment Method</th>
-                        <th scope="col" class="px-6 py-3">Description</th>
+                        <th scope="col" class="px-6 py-3">{% trans "Date" %}</th>
+                        <th scope="col" class="px-6 py-3">{% trans "Amount" %}</th>
+                        <th scope="col" class="px-6 py-3">{% trans "Payment Method" %}</th>
+                        <th scope="col" class="px-6 py-3">{% trans "Description" %}</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -82,7 +82,7 @@
         {% if row_count > 100 %}
             <div class="mt-4 p-3 bg-blue-900 bg-opacity-30 border border-blue-600 rounded-lg text-sm text-blue-200">
                 <i class="fas fa-info-circle mr-2"></i>
-                Showing first 100 rows. Download CSV to get all {{ row_count }} records.
+                {% blocktrans count count=row_count %}Showing first 100 rows. Download CSV to get all {{ count }} record.{% plural %}Showing first 100 rows. Download CSV to get all {{ count }} records.{% endblocktrans %}
             </div>
         {% endif %}
     </div>
@@ -91,37 +91,37 @@
     <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
         <a href="{% url 'csv_processor' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
-            Back to Upload
+            {% trans "Back to Upload" %}
         </a>
 
         <div class="flex flex-wrap gap-4">
             <button type="button" id="copyToClipboardBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
                 <i class="fas fa-clipboard mr-2" id="copyIcon"></i>
-                <span id="copyText">Copy to Clipboard</span>
+                <span id="copyText">{% trans "Copy to Clipboard" %}</span>
             </button>
 
             <a href="{% url 'csv_processor_download' %}" id="downloadBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
                 <i class="fas fa-download mr-2"></i>
-                Download CSV
+                {% trans "Download CSV" %}
             </a>
         </div>
     </div>
 
     <!-- Edit Instructions -->
     <div class="bg-zinc-800 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-white mb-4">How to Use</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% trans "How to Use" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-400">
             <div>
-                <h4 class="font-medium text-white mb-2"><i class="fas fa-edit text-blue-400 mr-2"></i>Edit Data</h4>
-                <p>Click any cell in the table to edit its content. Changes are saved automatically.</p>
+                <h4 class="font-medium text-white mb-2"><i class="fas fa-edit text-blue-400 mr-2"></i>{% trans "Edit Data" %}</h4>
+                <p>{% trans "Click any cell in the table to edit its content. Changes are saved automatically." %}</p>
             </div>
             <div>
-                <h4 class="font-medium text-white mb-2"><i class="fas fa-clipboard text-purple-400 mr-2"></i>Copy</h4>
-                <p>Click "Copy to Clipboard" to copy all processed data (including edits) to your clipboard.</p>
+                <h4 class="font-medium text-white mb-2"><i class="fas fa-clipboard text-purple-400 mr-2"></i>{% trans "Copy" %}</h4>
+                <p>{% trans 'Click "Copy to Clipboard" to copy all processed data (including edits) to your clipboard.' %}</p>
             </div>
             <div>
-                <h4 class="font-medium text-white mb-2"><i class="fas fa-download text-green-400 mr-2"></i>Download</h4>
-                <p>Click "Download CSV" to download a CSV file with all your processed data and edits.</p>
+                <h4 class="font-medium text-white mb-2"><i class="fas fa-download text-green-400 mr-2"></i>{% trans "Download" %}</h4>
+                <p>{% trans 'Click "Download CSV" to download a CSV file with all your processed data and edits.' %}</p>
             </div>
         </div>
     </div>
@@ -283,19 +283,19 @@ document.addEventListener('DOMContentLoaded', function() {
         copyButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
         copyButton.classList.add('bg-green-600');
         copyIcon.className = 'fas fa-check mr-2';
-        copyText.textContent = 'Copied!';
+        copyText.textContent = gettext('Copied!');
 
         // Reset after 2 seconds
         setTimeout(() => {
             copyButton.classList.remove('bg-green-600');
             copyButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
             copyIcon.className = 'fas fa-clipboard mr-2';
-            copyText.textContent = 'Copy to Clipboard';
+            copyText.textContent = gettext('Copy to Clipboard');
         }, 2000);
     }
 
     function showCopyError() {
-        alert('Failed to copy to clipboard. Please try manually selecting and copying the data.');
+        alert(gettext('Failed to copy to clipboard. Please try manually selecting and copying the data.'));
     }
 
     // Download with edits - sync before downloading
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Show loading state
         const originalHtml = this.innerHTML;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Preparing Download...';
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + gettext('Preparing Download...');
         this.classList.add('opacity-75', 'cursor-not-allowed');
 
         // Sync data first, then download

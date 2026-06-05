@@ -1,5 +1,6 @@
 from reports.repository.recurring_expense_repository import RecurringExpenseRepository
 from decimal import Decimal
+from django.utils.translation import gettext as _
 
 
 class RecurringExpenseService:
@@ -187,7 +188,7 @@ class RecurringExpenseService:
         if not (1 <= month <= 12):
             return {
                 'success': False,
-                'error': 'Mês deve estar entre 1 e 12',
+                'error': _('Month must be between 1 and 12'),
                 'created_count': 0,
                 'skipped_count': 0,
                 'errors': []
@@ -196,7 +197,7 @@ class RecurringExpenseService:
         if not (2000 <= year <= 2100):
             return {
                 'success': False,
-                'error': 'Ano inválido',
+                'error': _('Invalid year'),
                 'created_count': 0,
                 'skipped_count': 0,
                 'errors': []
@@ -221,7 +222,10 @@ class RecurringExpenseService:
                 )
             except ValueError as e:
                 # Invalid date (e.g., February 30)
-                errors.append(f"{recurring_expense.description}: Data inválida - {str(e)}")
+                errors.append(_("%(description)s: invalid date - %(error)s") % {
+                    'description': recurring_expense.description,
+                    'error': str(e),
+                })
                 continue
 
             # Check if expense already exists

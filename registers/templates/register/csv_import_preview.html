@@ -1,37 +1,36 @@
 {% extends 'core/base.html' %}
-{% load static %}
-{% load custom_filters %}
+{% load custom_filters i18n static %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">CSV Import Preview</h1>
-        <p class="text-gray-400">Review your data before importing. {{ preview_data.total_rows }} records found.</p>
+        <h1 class="text-3xl font-bold text-white mb-2">{% trans "CSV Import Preview" %}</h1>
+        <p class="text-gray-400">{% blocktrans count count=preview_data.total_rows %}Review your data before importing. {{ count }} record found.{% plural %}Review your data before importing. {{ count }} records found.{% endblocktrans %}</p>
     </div>
 
     <!-- Import Summary -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-white mb-4">Import Summary</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% trans "Import Summary" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-zinc-700 p-4 rounded-lg">
                 <div class="text-2xl font-bold text-blue-400">{{ preview_data.total_rows }}</div>
-                <div class="text-sm text-gray-400">Total Records</div>
+                <div class="text-sm text-gray-400">{% trans "Total Records" %}</div>
             </div>
             <div class="bg-zinc-700 p-4 rounded-lg">
                 <div class="text-2xl font-bold text-green-400">{{ preview_data.columns|length }}</div>
-                <div class="text-sm text-gray-400">Columns Found</div>
+                <div class="text-sm text-gray-400">{% trans "Columns Found" %}</div>
             </div>
             <div class="bg-zinc-700 p-4 rounded-lg">
                 <div class="text-2xl font-bold text-yellow-400">{{ preview_data.sample_data|length }}</div>
-                <div class="text-sm text-gray-400">Preview Records</div>
+                <div class="text-sm text-gray-400">{% trans "Preview Records" %}</div>
             </div>
         </div>
     </div>
 
     <!-- Data Preview -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-white mb-4">Data Preview (First {{ preview_data.sample_data|length }} records)</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% blocktrans count count=preview_data.sample_data|length %}Data Preview (First {{ count }} record){% plural %}Data Preview (First {{ count }} records){% endblocktrans %}</h3>
         
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-300">
@@ -75,7 +74,7 @@
     <div class="flex justify-between items-center">
         <a href="{% url 'csv_import' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
-            Back to Upload
+            {% trans "Back to Upload" %}
         </a>
         
         <div class="flex space-x-4">
@@ -83,7 +82,7 @@
                 {% csrf_token %}
                 <button type="submit" id="confirmImportBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
                     <i class="fas fa-check mr-2" id="confirmIcon"></i>
-                    <span id="confirmText">Confirm Import</span>
+                    <span id="confirmText">{% trans "Confirm Import" %}</span>
                 </button>
             </form>
         </div>
@@ -91,15 +90,15 @@
 
     <!-- Import Settings -->
     <div class="mt-6 bg-zinc-800 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-white mb-4">Import Settings</h3>
+        <h3 class="text-lg font-semibold text-white mb-4">{% trans "Import Settings" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-                <span class="text-gray-400">Auto-create Categories:</span>
-                <span class="text-white ml-2">{{ form.auto_create_categories.value|yesno:"Yes,No" }}</span>
+                <span class="text-gray-400">{% trans "Auto-create Categories:" %}</span>
+                <span class="text-white ml-2">{% if form.auto_create_categories.value %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</span>
             </div>
             <div>
-                <span class="text-gray-400">Auto-create Payment Methods:</span>
-                <span class="text-white ml-2">{{ form.auto_create_payment_methods.value|yesno:"Yes,No" }}</span>
+                <span class="text-gray-400">{% trans "Auto-create Payment Methods:" %}</span>
+                <span class="text-white ml-2">{% if form.auto_create_payment_methods.value %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</span>
             </div>
         </div>
     </div>
@@ -114,7 +113,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     form.addEventListener('submit', function(e) {
         // Show confirmation dialog
-        if (!confirm('Are you sure you want to import {{ preview_data.total_rows }} records? This action cannot be undone.')) {
+        if (!confirm(ngettext(
+            'Are you sure you want to import %(count)s record? This action cannot be undone.',
+            'Are you sure you want to import %(count)s records? This action cannot be undone.',
+            {{ preview_data.total_rows }}
+        ).replace('%(count)s', '{{ preview_data.total_rows }}'))) {
             e.preventDefault();
             return;
         }
@@ -128,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.className = 'fas fa-spinner fa-spin mr-2';
 
         // Update text
-        text.textContent = 'Importing...';
+        text.textContent = gettext('Importing...');
     });
 });
 </script>

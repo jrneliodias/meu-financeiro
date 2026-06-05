@@ -1,6 +1,7 @@
-{% load static %}
+{% load i18n static %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,7 +16,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
     />
-    <title>Login - Meu Financeiro</title>
+    <title>{% trans "Login" %} - Meu Financeiro</title>
   </head>
   <body class="bg-zinc-900 min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md p-8">
@@ -23,12 +24,12 @@
         <div class="text-center mb-8">
           <i class="fa-solid fa-wallet text-4xl text-blue-500 mb-4"></i>
           <h1 class="text-2xl font-bold text-white">Meu Financeiro</h1>
-          <p class="text-zinc-400 mt-2">Faça login para continuar</p>
+          <p class="text-zinc-400 mt-2">{% trans "Sign in to continue" %}</p>
         </div>
 
         {% if form.errors %}
         <div class="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-6">
-          <p class="text-sm">Usuário ou senha inválidos.</p>
+          <p class="text-sm">{% trans "Invalid username or password." %}</p>
         </div>
         {% endif %}
 
@@ -37,7 +38,7 @@
 
           <div>
             <label for="username" class="block text-sm font-medium text-zinc-300 mb-2">
-              Usuário
+              {% trans "Username" %}
             </label>
             <input
               type="text"
@@ -46,13 +47,13 @@
               required
               autofocus
               class="w-full px-4 py-3 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Digite seu usuário"
+              placeholder="{% trans 'Enter your username' %}"
             />
           </div>
 
           <div>
             <label for="password" class="block text-sm font-medium text-zinc-300 mb-2">
-              Senha
+              {% trans "Password" %}
             </label>
             <input
               type="password"
@@ -60,7 +61,7 @@
               id="password"
               required
               class="w-full px-4 py-3 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Digite sua senha"
+              placeholder="{% trans 'Enter your password' %}"
             />
           </div>
 
@@ -69,8 +70,21 @@
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
           >
             <i class="fa-solid fa-right-to-bracket"></i>
-            Entrar
+            {% trans "Sign in" %}
           </button>
+        </form>
+        <form action="{% url 'set_language' %}" method="post" class="mt-6 flex items-center justify-center gap-2 text-zinc-300">
+          {% csrf_token %}
+          <input name="next" type="hidden" value="{{ request.get_full_path }}">
+          <i class="fa-solid fa-language text-sm"></i>
+          <label for="login-language-select" class="sr-only">{% trans "Language" %}</label>
+          <select id="login-language-select"
+                  name="language"
+                  onchange="this.form.submit()"
+                  class="bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm text-white">
+            <option value="pt-br" {% if LANGUAGE_CODE == 'pt-br' %}selected{% endif %}>{% trans "Portuguese" %}</option>
+            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>{% trans "English" %}</option>
+          </select>
         </form>
       </div>
     </div>

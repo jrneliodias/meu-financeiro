@@ -1,5 +1,6 @@
 from datetime import date
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from .base_form_component import BaseFormComponent
 from .quick_fill_menu import QuickFillMenu
 from registers.models import Category, PaymentMethod
@@ -22,14 +23,16 @@ class ExpenseFormComponent(BaseFormComponent):
     def get_form_fields(self):
         """Get form fields configuration"""
         return {
-            'description': forms.CharField(max_length=200),
-            'amount': forms.DecimalField(max_digits=10, decimal_places=2),
-            'installments': forms.IntegerField(min_value=1, initial=1),
-            'date': forms.DateField(widget=forms.DateInput(attrs={'type': 'date'})),
+            'description': forms.CharField(label=_('Description'), max_length=200),
+            'amount': forms.DecimalField(label=_('Amount'), max_digits=10, decimal_places=2),
+            'installments': forms.IntegerField(label=_('Installments'), min_value=1, initial=1),
+            'date': forms.DateField(label=_('Date'), widget=forms.DateInput(attrs={'type': 'date'})),
             'category': forms.ModelChoiceField(
+                label=_('Category'),
                 queryset=Category.objects
             ),
             'payment_method': forms.ModelChoiceField(
+                label=_('Payment Method'),
                 queryset=PaymentMethod.objects
             ),
         }
