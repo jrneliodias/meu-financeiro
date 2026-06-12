@@ -6,7 +6,7 @@
       {{ budget_summary.total_expected|format_brl }}
     </span>
     <p class="text-zinc-500 text-xs mt-0.5">
-      {% blocktrans with fixed=budget_summary.total_fixed|format_brl estimated=budget_summary.total_estimated|format_brl %}Fixed {{ fixed }} + Est. {{ estimated }}{% endblocktrans %}
+      {% blocktrans with fixed=budget_summary.total_fixed|format_brl installments=budget_summary.total_installments|format_brl estimated=budget_summary.total_estimated|format_brl %}Fixed {{ fixed }} + Inst. {{ installments }} + Est. {{ estimated }}{% endblocktrans %}
     </p>
   </div>
 </div>

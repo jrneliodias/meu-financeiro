@@ -4,7 +4,7 @@
   },
   "djlint.profile": "django",
   "[django-html]": {
-    "editor.defaultFormatter": "monosans.djlint",
+    "editor.defaultFormatter": "junstyle.vscode-django-support",
     "editor.formatOnSave": true
   }
 }

@@ -9,7 +9,13 @@ class BudgetEstimateService:
         self._repo = BudgetEstimateRepository()
         self._recurring_repo = RecurringExpenseRepository()
 
-    def get_monthly_budget_summary(self, user, month: int, year: int) -> BudgetSummary:
+    def get_monthly_budget_summary(
+        self,
+        user,
+        month: int,
+        year: int,
+        monthly_installment_total: Decimal = Decimal('0'),
+    ) -> BudgetSummary:
         estimates = self._repo.get_estimates_with_actuals(user, month, year)
         total_fixed = self._recurring_repo.get_total_recurring_expenses_with_debit(user)
 
@@ -27,13 +33,14 @@ class BudgetEstimateService:
             total_estimated += est.amount
 
         total_actual = Decimal(str(sum(float(i.actual_amount) for i in items)))
-        total_expected = total_fixed + total_estimated
+        total_expected = total_fixed + monthly_installment_total + total_estimated
         overall_progress = float(total_actual / total_expected * 100) if total_expected else 0.0
 
         return BudgetSummary(
             estimates=items,
             total_estimated=total_estimated,
             total_fixed=total_fixed,
+            total_installments=monthly_installment_total,
             total_expected=total_expected,
             total_actual=total_actual,
             overall_progress=overall_progress,

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import List, Optional, Dict, Any
 from django.db.models import Count, Sum, Q
 from django.contrib.auth.models import User
@@ -172,3 +173,20 @@ class InstallmentRepository:
             queryset = queryset.filter(user=user)
 
         return queryset.count()
+
+    def get_monthly_installment_expenses_total(
+        self,
+        month: int,
+        year: int,
+        user: Optional[User] = None,
+    ) -> Decimal:
+        """Sum of Expense amounts linked to an installment plan for the given month/year."""
+        queryset = Expense.objects.filter(
+            date__month=month,
+            date__year=year,
+            installment_plan__isnull=False,
+        )
+        if user:
+            queryset = queryset.filter(user=user)
+        result = queryset.aggregate(total=Sum('amount'))
+        return result['total'] or Decimal('0')

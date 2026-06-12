@@ -62,14 +62,14 @@
     <form action="{% url 'set_language' %}" method="post" class="flex items-center justify-center lg:justify-start gap-2 p-2 lg:px-4 lg:py-2 text-zinc-300 lg:mt-auto">
       {% csrf_token %}
       <input name="next" type="hidden" value="{{ request.get_full_path }}">
-      <i class="fa-solid fa-language text-sm lg:text-xs"></i>
+      <i class="fa-solid fa-language text-sm hidden lg:block lg:text-xs"></i>
       <label for="language-select" class="sr-only">{% trans "Language" %}</label>
       <select id="language-select"
               name="language"
               onchange="this.form.submit()"
-              class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-white">
-        <option value="pt-br" {% if LANGUAGE_CODE == 'pt-br' %}selected{% endif %}>{% trans "Portuguese" %}</option>
-        <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>{% trans "English" %}</option>
+              class="order-last lg:order-none w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-white">
+        <option value="pt-br" {% if LANGUAGE_CODE == 'pt-br' %}selected{% endif %}>{% trans "PT" %}</option>
+        <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>{% trans "EN" %}</option>
       </select>
     </form>
     <div class="flex items-center justify-center lg:justify-start gap-2 p-4 lg:px-4 lg:py-2 text-zinc-400">

@@ -88,6 +88,7 @@ class BudgetSummary:
     estimates: List
     total_estimated: Decimal
     total_fixed: Decimal
+    total_installments: Decimal
     total_expected: Decimal
     total_actual: Decimal
     overall_progress: float

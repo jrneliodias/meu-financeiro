@@ -106,6 +106,19 @@ class InstallmentProgressCalculator:
             'installments': progress_list,
         }
 
+    def get_monthly_installment_summary(
+        self,
+        month: int,
+        year: int,
+        user: Optional[User] = None,
+    ) -> dict:
+        """Total installment spending for the selected month/year."""
+        total = self.repository.get_monthly_installment_expenses_total(month, year, user)
+        return {
+            'total_amount': total,
+            'formatted_total': self._format_currency(total),
+        }
+
     def _format_currency(self, value: Decimal) -> str:
         """
         Format value as Brazilian Real currency.

@@ -1646,6 +1646,10 @@ msgstr "Saldo:"
 msgid "Fixed Expenses:"
 msgstr "Despesas Fixas:"
 
+#: reports/templates/reports/components/installment_monthly_card.html:4
+msgid "Monthly Installments:"
+msgstr "Parcelas do Mês:"
+
 #: reports/templates/reports/components/installment_progress_card.html:11
 msgid "Open Installments"
 msgstr "Parcelas em Aberto"
@@ -1681,8 +1685,8 @@ msgstr "Total Esperado:"
 
 #: reports/templates/reports/components/monthly_budget_card.html:9
 #, python-format
-msgid "Fixed %(fixed)s + Est. %(estimated)s"
-msgstr "Fixo %(fixed)s + Est. %(estimated)s"
+msgid "Fixed %(fixed)s + Inst. %(installments)s + Est. %(estimated)s"
+msgstr "Fixo %(fixed)s + Parc. %(installments)s + Est. %(estimated)s"
 
 #: reports/templates/reports/components/payment_method_chart.html:3
 msgid "Monthly Expenses by Payment Method"

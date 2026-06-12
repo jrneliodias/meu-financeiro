@@ -106,6 +106,13 @@ def expense_report(request):
         reference_year=selected_year
     )
 
+    # 6b. Get monthly installment total for the summary card
+    installment_monthly_summary = installment_calculator.get_monthly_installment_summary(
+        month=selected_month,
+        year=selected_year,
+        user=request.user,
+    )
+
     # 7. Get today's total expenses for the daily card
     today = date_type.today()
     today_total = float(expense_repository.get_total_by_date(today))
@@ -113,7 +120,8 @@ def expense_report(request):
 
     # 8. Get budget estimates summary for selected month/year
     budget_summary = budget_estimate_service.get_monthly_budget_summary(
-        request.user, selected_month, selected_year
+        request.user, selected_month, selected_year,
+        monthly_installment_total=installment_monthly_summary['total_amount'],
     )
 
     # Prepare the context
@@ -138,6 +146,7 @@ def expense_report(request):
         'daily_spending_data': daily_spending_data,
         'fixed_expenses_summary': fixed_expenses_summary,
         'installments_progress': installments_progress,
+        'installment_monthly_summary': installment_monthly_summary,
         'today_total': today_total,
         'today_date': today_date,
         'budget_summary': budget_summary,
