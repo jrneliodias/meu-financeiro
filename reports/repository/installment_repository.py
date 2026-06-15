@@ -190,3 +190,34 @@ class InstallmentRepository:
             queryset = queryset.filter(user=user)
         result = queryset.aggregate(total=Sum('amount'))
         return result['total'] or Decimal('0')
+
+    def get_monthly_installment_expenses_detail(
+        self,
+        month: int,
+        year: int,
+        user=None,
+    ):
+        """
+        Retorna as expenses individuais de parcelas do mês/ano especificado.
+
+        Usado pelo endpoint AJAX do modal do installment_monthly_card.
+        Retorna valores via .values() para serialização direta em JSON.
+        """
+        queryset = Expense.objects.filter(
+            date__month=month,
+            date__year=year,
+            installment_plan__isnull=False,
+        ).select_related('category', 'payment_method', 'installment_plan')
+
+        if user:
+            queryset = queryset.filter(user=user)
+
+        return queryset.values(
+            'id',
+            'description',
+            'amount',
+            'date',
+            'category__name',
+            'payment_method__name',
+            'installment_plan__description',
+        ).order_by('-amount', 'description')
