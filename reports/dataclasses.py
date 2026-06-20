@@ -1,5 +1,5 @@
 from typing import Dict, List, NamedTuple, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
 
@@ -92,3 +92,5 @@ class BudgetSummary:
     total_expected: Decimal
     total_actual: Decimal
     overall_progress: float
+    total_regular: Decimal = field(default_factory=lambda: Decimal('0'))
+    adjusted_expected: Decimal = field(default_factory=lambda: Decimal('0'))

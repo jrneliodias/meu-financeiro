@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Meu Financeiro\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-05 18:40-0300\n"
+"POT-Creation-Date: 2026-06-14 15:48-0300\n"
 "PO-Revision-Date: 2026-06-05 14:03-0300\n"
 "Last-Translator: jrneliodias\n"
 "Language-Team: Portuguese (Brazil)\n"
@@ -16,12 +16,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: finance/settings.py:130 registers/templates/auth/login.html:85
-#: registers/templates/core/base.html:71
 msgid "Portuguese"
 msgstr "Português"
 
 #: finance/settings.py:131 registers/templates/auth/login.html:86
-#: registers/templates/core/base.html:72
 msgid "English"
 msgstr "Inglês"
 
@@ -63,6 +61,7 @@ msgstr "Valor"
 #: registers/components/expense_form/expense_form_component.py:28
 #: registers/templates/register/expense_form.html:53
 #: reports/templates/reports/components/daily_spending_chart.html:96
+#: reports/templates/reports/components/monthly_budget_card.html:38
 msgid "Installments"
 msgstr "Parcelas"
 
@@ -143,8 +142,8 @@ msgstr "Detalhes da despesa recuperados"
 msgid "Recent expenses retrieved"
 msgstr "Despesas recentes recuperadas"
 
-#: registers/constants.py:40 reports/views.py:426 reports/views.py:487
-#: reports/views.py:924 reports/views.py:974
+#: registers/constants.py:40 reports/views.py:447 reports/views.py:508
+#: reports/views.py:945 reports/views.py:995
 msgid "Invalid request"
 msgstr "Requisição inválida"
 
@@ -523,7 +522,7 @@ msgid "Personal finance dashboard"
 msgstr "Painel de finanças pessoais"
 
 #: registers/templates/core/base.html:18 registers/templates/core/base.html:26
-#: reports/templates/reports/components/filter_form.html:3
+#: reports/templates/reports/components/filter_form.html:4
 msgid "Dashboard"
 msgstr "Painel"
 
@@ -555,6 +554,14 @@ msgstr "Importar CSV"
 #: registers/templates/core/base.html:60
 msgid "Admin"
 msgstr "Admin"
+
+#: registers/templates/core/base.html:71
+msgid "PT"
+msgstr ""
+
+#: registers/templates/core/base.html:72
+msgid "EN"
+msgstr ""
 
 #: registers/templates/core/base.html:81
 msgid "Logout"
@@ -1276,8 +1283,8 @@ msgstr "Despesa recorrente '%(description)s' registrada com sucesso."
 msgid "Error creating recurring expense: %(error)s"
 msgstr "Erro ao criar despesa recorrente: %(error)s"
 
-#: registers/views.py:388 reports/views.py:873 reports/views.py:900
-#: reports/views.py:936
+#: registers/views.py:388 reports/views.py:894 reports/views.py:921
+#: reports/views.py:957
 msgid "Unauthorized"
 msgstr "Não autorizado"
 
@@ -1413,6 +1420,7 @@ msgid "Manage estimates"
 msgstr "Gerenciar estimativas"
 
 #: reports/templates/reports/components/budget_estimate_card.html:25
+#: reports/templates/reports/components/monthly_budget_card.html:42
 msgid "Estimated"
 msgstr "Estimado"
 
@@ -1506,6 +1514,7 @@ msgstr "Falha ao carregar detalhes da despesa."
 #: reports/templates/reports/components/daily_spending_chart.html:84
 #: reports/templates/reports/components/expense_category_table.html:13
 #: reports/templates/reports/components/expense_category_table.html:50
+#: reports/templates/reports/components/monthly_budget_card.html:46
 msgid "Total"
 msgstr "Total"
 
@@ -1638,7 +1647,7 @@ msgstr "Atualizado:"
 msgid "Expense and Income by Month"
 msgstr "Despesas e Receitas por Mês"
 
-#: reports/templates/reports/components/filter_form.html:6
+#: reports/templates/reports/components/filter_form.html:29
 msgid "Balance:"
 msgstr "Saldo:"
 
@@ -1679,14 +1688,21 @@ msgstr "Restante:"
 msgid "Total: %(total)s"
 msgstr "Total: %(total)s"
 
-#: reports/templates/reports/components/monthly_budget_card.html:4
+#: reports/templates/reports/components/monthly_budget_card.html:5
 msgid "Expected Total:"
 msgstr "Total Esperado:"
 
 #: reports/templates/reports/components/monthly_budget_card.html:9
-#, python-format
-msgid "Fixed %(fixed)s + Inst. %(installments)s + Est. %(estimated)s"
-msgstr "Fixo %(fixed)s + Parc. %(installments)s + Est. %(estimated)s"
+msgid "See breakdown"
+msgstr "Ver detalhamento"
+
+#: reports/templates/reports/components/monthly_budget_card.html:25
+msgid "Expected Total Breakdown"
+msgstr "Detalhamento do Total Esperado"
+
+#: reports/templates/reports/components/monthly_budget_card.html:34
+msgid "Fixed"
+msgstr ""
 
 #: reports/templates/reports/components/payment_method_chart.html:3
 msgid "Monthly Expenses by Payment Method"
@@ -1732,6 +1748,18 @@ msgstr "Despesas Geradas"
 #: reports/templates/reports/components/recurring_expense_modal.html:48
 msgid "Total Generated"
 msgstr "Total Gerado"
+
+#: reports/templates/reports/components/regular_expenses_card.html:4
+msgid "Daily Expenses:"
+msgstr "Gastos Avulsos:"
+
+#: reports/templates/reports/components/estimated_expenses_card.html:4
+msgid "Estimated:"
+msgstr "Estimado:"
+
+#: reports/templates/reports/components/monthly_budget_card.html:47
+msgid "Daily Expenses"
+msgstr "Gastos Avulsos"
 
 #: reports/templates/reports/expense_update.html:5
 msgid "Edit Expense"
@@ -1792,65 +1820,65 @@ msgstr "Ativo:"
 msgid "Edit Recurring Expense"
 msgstr "Editar Despesa Recorrente"
 
-#: reports/views.py:171
+#: reports/views.py:192
 msgid "Expense updated successfully."
 msgstr "Despesa atualizada com sucesso."
 
-#: reports/views.py:434
+#: reports/views.py:455
 msgid "Invalid days parameter"
 msgstr "Parâmetro de dias inválido"
 
-#: reports/views.py:443
+#: reports/views.py:464
 msgid "Invalid category"
 msgstr "Categoria inválida"
 
-#: reports/views.py:468
+#: reports/views.py:489
 msgid "Failed to load daily spending data"
 msgstr "Falha ao carregar dados de gastos diários"
 
-#: reports/views.py:491
+#: reports/views.py:512
 msgid "Date parameter is required"
 msgstr "O parâmetro de data é obrigatório"
 
-#: reports/views.py:498
+#: reports/views.py:519
 msgid "Invalid date format. Expected YYYY-MM-DD"
 msgstr "Formato de data inválido. Esperado AAAA-MM-DD"
 
-#: reports/views.py:519 reports/views.py:529 reports/views.py:675
+#: reports/views.py:540 reports/views.py:550 reports/views.py:696
 msgid "Uncategorized"
 msgstr "Sem categoria"
 
-#: reports/views.py:520
+#: reports/views.py:541
 msgid "No payment method"
 msgstr "Sem forma de pagamento"
 
-#: reports/views.py:546
+#: reports/views.py:567
 #, python-format
 msgid "Server error: %(error)s"
 msgstr "Erro no servidor: %(error)s"
 
-#: reports/views.py:600
+#: reports/views.py:621
 msgid "Invalid request - AJAX required"
 msgstr "Requisição inválida - AJAX necessário"
 
-#: reports/views.py:618
+#: reports/views.py:639
 msgid "year"
 msgstr "ano"
 
-#: reports/views.py:620
+#: reports/views.py:641
 msgid "month"
 msgstr "mês"
 
-#: reports/views.py:622
+#: reports/views.py:643
 msgid "category"
 msgstr "categoria"
 
-#: reports/views.py:625
+#: reports/views.py:646
 #, python-format
 msgid "Missing required parameters: %(params)s"
 msgstr "Parâmetros obrigatórios ausentes: %(params)s"
 
-#: reports/views.py:644
+#: reports/views.py:665
 #, python-format
 msgid ""
 "Invalid month name: %(month)s. Expected English month name (e.g., "
@@ -1858,45 +1886,45 @@ msgid ""
 msgstr ""
 "Nome de mês inválido: %(month)s. Esperado nome em inglês (ex.: \"January\")"
 
-#: reports/views.py:676 reports/views.py:946 reports/views.py:947
+#: reports/views.py:697 reports/views.py:967 reports/views.py:968
 msgid "N/A"
 msgstr "N/D"
 
-#: reports/views.py:805
+#: reports/views.py:826
 #, python-format
 msgid "Invalid data format: %(error)s"
 msgstr "Formato de dados inválido: %(error)s"
 
-#: reports/views.py:816
+#: reports/views.py:837
 msgid "An unexpected error occurred while fetching expense details"
 msgstr "Ocorreu um erro inesperado ao buscar detalhes da despesa"
 
-#: reports/views.py:859
+#: reports/views.py:880
 msgid "Recurring expense updated successfully."
 msgstr "Despesa recorrente atualizada com sucesso."
 
-#: reports/views.py:880
+#: reports/views.py:901
 #, python-format
 msgid "Recurring expense '%(description)s' deleted successfully."
 msgstr "Despesa recorrente '%(description)s' excluída com sucesso."
 
-#: reports/views.py:885 reports/views.py:915 reports/views.py:962
+#: reports/views.py:906 reports/views.py:936 reports/views.py:983
 msgid "Recurring expense not found"
 msgstr "Despesa recorrente não encontrada"
 
-#: reports/views.py:909
+#: reports/views.py:930
 msgid "Recurring expense activated."
 msgstr "Despesa recorrente ativada."
 
-#: reports/views.py:911
+#: reports/views.py:932
 msgid "Recurring expense deactivated."
 msgstr "Despesa recorrente desativada."
 
-#: reports/views.py:928
+#: reports/views.py:949
 msgid "ID parameter required"
 msgstr "Parâmetro ID é obrigatório"
 
-#: reports/views.py:982
+#: reports/views.py:1003
 msgid "Invalid month and year"
 msgstr "Mês e ano inválidos"
 
@@ -3435,3 +3463,16 @@ msgstr ""
 #: venv/lib/python3.10/site-packages/httplib2/__init__.py:1471
 msgid "Redirected but the response is missing a Location: header."
 msgstr ""
+
+msgid "Installment Expenses"
+msgstr "Despesas de Parcelas"
+
+msgid "No installment expenses found for this period."
+msgstr "Nenhuma despesa de parcela encontrada para este período."
+
+msgid "Installment Plan"
+msgstr "Plano de Parcelas"
+
+#, python-format
+#~ msgid "Fixed %(fixed)s + Inst. %(installments)s + Est. %(estimated)s"
+#~ msgstr "Fixo %(fixed)s + Parc. %(installments)s + Est. %(estimated)s"

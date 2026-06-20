@@ -1,19 +1,122 @@
-{% load currency_filters i18n %}
-<div class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
+{% load i18n %}
+<div
+  class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg"
+  data-month="{{ selected_month }}"
+  data-year="{{ selected_year }}"
+  id="installmentMonthlyCardRoot"
+>
   <div class="flex flex-col items-start">
-    <p class="text-white text-xs md:text-sm">{% trans "Monthly Installments:" %}</p>
+    <div class="flex items-center gap-1">
+      <p class="text-white text-xs md:text-sm">{% trans "Monthly Installments:" %}</p>
+      <button
+        type="button"
+        id="installmentExpensesBtn"
+        class="text-zinc-500 hover:text-zinc-300 transition-colors"
+        title="{% trans 'See installment expenses' %}"
+      >
+        <i class="fas fa-info-circle text-xs"></i>
+      </button>
+    </div>
     <span id="installmentMonthlyDisplay" class="text-purple-400 text-xl md:text-2xl font-bold">
       {{ installment_monthly_summary.formatted_total }}
     </span>
   </div>
 </div>
+
+<!-- Installment Expenses Modal -->
+<div
+  id="installmentExpensesModal"
+  class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+  onclick="if(event.target===this) this.classList.add('hidden')"
+>
+  <div class="bg-zinc-800 rounded-xl shadow-xl p-6 w-96 max-w-[90vw] max-h-[80vh] flex flex-col">
+    <div class="flex items-center justify-between mb-4 flex-shrink-0">
+      <h3 class="text-white font-semibold text-base">{% trans "Installment Expenses" %}</h3>
+      <button
+        type="button"
+        id="installmentExpensesModalClose"
+        class="text-zinc-400 hover:text-white transition-colors"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div id="installmentExpensesList" class="overflow-y-auto flex-1 space-y-2">
+      <!-- Preenchido via JS -->
+    </div>
+
+    <div id="installmentExpensesFooter" class="hidden border-t border-zinc-700 pt-3 mt-3 flex-shrink-0 flex justify-between items-center">
+      <span class="text-zinc-400 text-sm font-medium">{% trans "Total" %}</span>
+      <span id="installmentExpensesTotal" class="text-purple-400 font-bold text-base"></span>
+    </div>
+  </div>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const value = {{ installment_monthly_summary.total_amount|default:0 }};
-    const formatted = new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(value);
-    document.getElementById('installmentMonthlyDisplay').textContent = formatted;
+document.addEventListener('DOMContentLoaded', function () {
+  const formatBRL = (value) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+  const formatDate = (isoDate) => {
+    const [y, m, d] = isoDate.split('-');
+    return `${d}/${m}/${y}`;
+  };
+
+  const rawValue = {{ installment_monthly_summary.total_amount|default:0 }};
+  document.getElementById('installmentMonthlyDisplay').textContent = formatBRL(rawValue);
+
+  const modal = document.getElementById('installmentExpensesModal');
+  const list = document.getElementById('installmentExpensesList');
+  const footer = document.getElementById('installmentExpensesFooter');
+  const totalEl = document.getElementById('installmentExpensesTotal');
+  const root = document.getElementById('installmentMonthlyCardRoot');
+
+  document.getElementById('installmentExpensesModalClose').addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+
+  document.getElementById('installmentExpensesBtn').addEventListener('click', () => {
+    const month = root.dataset.month;
+    const year = root.dataset.year;
+
+    modal.classList.remove('hidden');
+    footer.classList.add('hidden');
+    list.innerHTML = '<div class="text-center text-zinc-400 py-4"><i class="fas fa-spinner fa-spin mr-2"></i>{% trans "Loading..." %}</div>';
+
+    fetch(`/installment-expenses-ajax/?month=${month}&year=${year}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Request failed');
+        return res.json();
+      })
+      .then((data) => {
+        if (data.count === 0) {
+          list.innerHTML = '<p class="text-zinc-400 text-sm text-center py-4">{% trans "No installment expenses found for this period." %}</p>';
+          return;
+        }
+
+        list.innerHTML = data.expenses.map((exp) => `
+          <div class="bg-zinc-700/50 rounded-lg p-3">
+            <div class="flex justify-between items-start gap-2">
+              <p class="text-white text-sm font-medium truncate flex-1">${exp.description}</p>
+              <span class="text-purple-400 font-semibold text-sm flex-shrink-0">${formatBRL(exp.amount)}</span>
+            </div>
+            <div class="flex flex-wrap gap-1 mt-1">
+              <span class="text-zinc-400 text-xs">${formatDate(exp.date)}</span>
+              ${exp.category ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-600 text-gray-300">${exp.category}</span>` : ''}
+              ${exp.payment_method ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/50 text-blue-300">${exp.payment_method}</span>` : ''}
+            </div>
+            ${exp.installment_plan ? `<p class="text-zinc-500 text-xs mt-1">{% trans "Installment Plan" %}: ${exp.installment_plan}</p>` : ''}
+          </div>
+        `).join('');
+
+        totalEl.textContent = formatBRL(data.total_amount);
+        footer.classList.remove('hidden');
+      })
+      .catch(() => {
+        list.innerHTML = '<p class="text-red-400 text-sm text-center py-4">{% trans "An unexpected error occurred" %}</p>';
+      });
+  });
 });
 </script>

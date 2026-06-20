@@ -1,12 +1,44 @@
 {% load currency_filters i18n %}
 <div class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
   <div class="flex flex-col items-start">
-    <p class="text-white text-xs md:text-sm">{% trans "Expected Total:" %}</p>
-    <span class="text-blue-400 text-xl md:text-2xl font-bold">
-      {{ budget_summary.total_expected|format_brl }}
-    </span>
-    <p class="text-zinc-500 text-xs mt-0.5">
-      {% blocktrans with fixed=budget_summary.total_fixed|format_brl installments=budget_summary.total_installments|format_brl estimated=budget_summary.total_estimated|format_brl %}Fixed {{ fixed }} + Inst. {{ installments }} + Est. {{ estimated }}{% endblocktrans %}
-    </p>
+    <div class="flex items-center gap-1">
+      <p class="text-white text-xs md:text-sm">
+        {% trans 'Expected Total:' %}
+      </p>
+      <button type="button" onclick="document.getElementById('budgetBreakdownModal').classList.remove('hidden')" class="text-zinc-500 hover:text-zinc-300 transition-colors" title="{% trans 'See breakdown' %}"><i class="fas fa-info-circle text-xs"></i></button>
+    </div>
+    <span class="text-blue-400 text-xl md:text-2xl font-bold">{{ budget_summary.adjusted_expected|format_brl }}</span>
+  </div>
+</div>
+
+<!-- Budget Breakdown Modal -->
+<div id="budgetBreakdownModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50" onclick="if(event.target===this) this.classList.add('hidden')">
+  <div class="bg-zinc-800 rounded-xl shadow-xl p-6 w-80 max-w-[90vw]">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-semibold text-base">{% trans 'Expected Total Breakdown' %}</h3>
+      <button type="button" onclick="document.getElementById('budgetBreakdownModal').classList.add('hidden')" class="text-zinc-400 hover:text-white transition-colors"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <span class="text-zinc-400 text-sm">{% trans 'Fixed' %}</span>
+        <span class="text-orange-400 font-semibold">{{ budget_summary.total_fixed|format_brl }}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-zinc-400 text-sm">{% trans 'Installments' %}</span>
+        <span class="text-purple-400 font-semibold">{{ budget_summary.total_installments|format_brl }}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-zinc-400 text-sm">{% trans 'Estimated' %}</span>
+        <span class="text-yellow-400 font-semibold">{{ budget_summary.total_estimated|format_brl }}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-zinc-400 text-sm">{% trans 'Daily Expenses' %}</span>
+        <span class="text-cyan-400 font-semibold">{{ budget_summary.total_regular|format_brl }}</span>
+      </div>
+      <div class="border-t border-zinc-700 pt-3 flex justify-between items-center">
+        <span class="text-white text-sm font-medium">{% trans 'Total' %}</span>
+        <span class="text-blue-400 font-bold text-lg">{{ budget_summary.adjusted_expected|format_brl }}</span>
+      </div>
+    </div>
   </div>
 </div>

@@ -249,6 +249,19 @@ class ExpenseRepository:
         )
         return result['total'] or 0
 
+    def get_monthly_regular_expenses_total(self, month: int, year: int, user=None) -> Decimal:
+        """Total de despesas avulsas no mês: exclui recorrentes e parcelas."""
+        qs = Expense.objects.filter(
+            date__month=month,
+            date__year=year,
+            installment_plan__isnull=True,
+            reccurring_expense__isnull=True,
+        )
+        if user:
+            qs = qs.filter(user=user)
+        result = qs.aggregate(total=Sum('amount'))
+        return result['total'] or Decimal('0.00')
+
     def get_category_totals_by_date(self, target_date):
         return (
             Expense.objects

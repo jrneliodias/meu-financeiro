@@ -20,4 +20,5 @@ urlpatterns = [
     path("daily-spending-data/", views.daily_spending_data_ajax, name="daily_spending_data_ajax"),
     path("expense-details/", views.expense_details_ajax, name="expense_details_ajax"),
     path("category-expense-details/", views.category_expense_details_ajax, name="category_expense_details_ajax"),
+    path("installment-expenses-ajax/", views.installment_expenses_ajax, name="installment_expenses_ajax"),
 ]

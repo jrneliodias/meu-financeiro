@@ -3,7 +3,8 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 
 from registers.models import Category, Expense, Installment, PaymentMethod
 from reports.repository.installment_repository import InstallmentRepository
@@ -233,3 +234,84 @@ class GetMonthlyInstallmentExpensesDetailTest(TestCase):
                       'category__name', 'payment_method__name',
                       'installment_plan__description'):
             self.assertIn(field, row)
+
+
+class InstallmentExpensesAjaxViewTest(TestCase):
+    """Testes para a view installment_expenses_ajax."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='viewuser', password='pass')
+        self.client = Client()
+        self.client.login(username='viewuser', password='pass')
+        self.url = reverse('installment_expenses_ajax')
+        self.ajax_header = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+
+        category = Category.objects.create(name='Tech', type='expense')
+        payment_method = PaymentMethod.objects.create(name='Visa', start_billing_day=5)
+        installment = Installment.objects.create(
+            user=self.user,
+            description='MacBook',
+            total_amount=Decimal('12000.00'),
+            total_installments=12,
+            start_date=date(2026, 1, 1),
+            category=category,
+            payment_method=payment_method,
+        )
+        self.expense = Expense.objects.create(
+            user=self.user,
+            description='MacBook 6/12',
+            amount=Decimal('1000.00'),
+            date=date(2026, 6, 10),
+            category=category,
+            payment_method=payment_method,
+            installment_plan=installment,
+        )
+
+    def test_requer_header_ajax(self):
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'})
+        self.assertEqual(response.status_code, 400)
+
+    def test_requer_login(self):
+        self.client.logout()
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'}, **self.ajax_header)
+        self.assertEqual(response.status_code, 302)
+
+    def test_retorna_400_sem_month(self):
+        response = self.client.get(self.url, {'year': '2026'}, **self.ajax_header)
+        self.assertEqual(response.status_code, 400)
+
+    def test_retorna_400_sem_year(self):
+        response = self.client.get(self.url, {'month': '6'}, **self.ajax_header)
+        self.assertEqual(response.status_code, 400)
+
+    def test_retorna_400_com_month_invalido(self):
+        response = self.client.get(self.url, {'month': 'abc', 'year': '2026'}, **self.ajax_header)
+        self.assertEqual(response.status_code, 400)
+
+    def test_retorna_200_com_params_validos(self):
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'}, **self.ajax_header)
+        self.assertEqual(response.status_code, 200)
+
+    def test_resposta_contem_campos_obrigatorios(self):
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'}, **self.ajax_header)
+        data = response.json()
+        self.assertIn('expenses', data)
+        self.assertIn('total_amount', data)
+        self.assertIn('count', data)
+
+    def test_lista_apenas_expenses_do_usuario(self):
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'}, **self.ajax_header)
+        data = response.json()
+        self.assertEqual(data['count'], 1)
+        self.assertEqual(data['expenses'][0]['description'], 'MacBook 6/12')
+
+    def test_total_amount_corresponde_a_soma(self):
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'}, **self.ajax_header)
+        data = response.json()
+        self.assertAlmostEqual(data['total_amount'], 1000.0)
+
+    def test_cada_expense_tem_campos_obrigatorios(self):
+        response = self.client.get(self.url, {'month': '6', 'year': '2026'}, **self.ajax_header)
+        expense = response.json()['expenses'][0]
+        for field in ('description', 'amount', 'date', 'category', 'payment_method', 'installment_plan'):
+            self.assertIn(field, expense)

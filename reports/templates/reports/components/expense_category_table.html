@@ -2,8 +2,8 @@
 <div class="my-3 space-y-4 bg-zinc-800/50 rounded-lg p-3 ">
   <h2 class="text-2xl font-bold">{% trans "Expenses by Category" %}</h2>
   <table class="hidden md:table w-full p-2" border="1">
-    <thead>
-      <tr class="*:p-2 border-b border-zinc-700 ">
+    <thead class="sticky top-16 lg:top-0 z-10">
+      <tr class="*:p-2 border-b border-zinc-700 bg-zinc-900">
         <th class="text-left">{% trans "Category" %}</th>
         {% for month in all_months %}<th class="text-left">{{ month|translate_month }}</th>{% endfor %}
       </tr>

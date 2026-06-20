@@ -113,7 +113,18 @@ def expense_report(request):
         user=request.user,
     )
 
-    # 7. Get today's total expenses for the daily card
+    # 7. Get regular (non-recurring, non-installment) expenses for the selected month
+    regular_total = expense_repository.get_monthly_regular_expenses_total(
+        month=selected_month,
+        year=selected_year,
+        user=request.user,
+    )
+    regular_expenses_summary = {
+        'total_amount': regular_total,
+        'formatted_total': format_brl(float(regular_total)),
+    }
+
+    # 8. Get today's total expenses for the daily card
     today = date_type.today()
     today_total = float(expense_repository.get_total_by_date(today))
     today_date = today.strftime('%Y-%m-%d')
@@ -123,6 +134,8 @@ def expense_report(request):
         request.user, selected_month, selected_year,
         monthly_installment_total=installment_monthly_summary['total_amount'],
     )
+    budget_summary.total_regular = regular_total
+    budget_summary.adjusted_expected = budget_summary.total_expected + regular_total
 
     # Prepare the context
     context = {
@@ -147,6 +160,7 @@ def expense_report(request):
         'fixed_expenses_summary': fixed_expenses_summary,
         'installments_progress': installments_progress,
         'installment_monthly_summary': installment_monthly_summary,
+        'regular_expenses_summary': regular_expenses_summary,
         'today_total': today_total,
         'today_date': today_date,
         'budget_summary': budget_summary,
@@ -998,3 +1012,72 @@ def process_recurring_expenses_ajax(request):
     )
 
     return JsonResponse(result)
+
+
+@login_required
+def installment_expenses_ajax(request):
+    """
+    AJAX endpoint para listar as expenses de parcelas do mês selecionado.
+
+    Retorna as expenses individuais que compõem o total exibido no
+    installment_monthly_card, permitindo ao usuário verificar o detalhamento.
+
+    Query Parameters:
+        month: int (1-12)
+        year: int (ex: 2026)
+
+    Returns:
+        JsonResponse com:
+        - expenses: lista de expenses de parcelas
+        - total_amount: soma dos valores
+        - count: quantidade de expenses
+    """
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'error': _('Invalid request')}, status=400)
+
+    month_str = request.GET.get('month', '').strip()
+    year_str = request.GET.get('year', '').strip()
+
+    if not month_str or not year_str:
+        return JsonResponse({'error': _('month and year are required')}, status=400)
+
+    try:
+        month = int(month_str)
+        year = int(year_str)
+    except ValueError:
+        return JsonResponse({'error': _('month and year must be integers')}, status=400)
+
+    try:
+        from reports.repository.installment_repository import InstallmentRepository
+        repo = InstallmentRepository()
+        expenses_qs = repo.get_monthly_installment_expenses_detail(
+            month=month, year=year, user=request.user
+        )
+
+        expenses_list = []
+        total_amount = Decimal('0.00')
+
+        for expense in expenses_qs:
+            total_amount += expense['amount']
+            expenses_list.append({
+                'description': expense['description'],
+                'amount': float(expense['amount']),
+                'date': expense['date'].isoformat(),
+                'category': expense['category__name'] or _('Uncategorized'),
+                'payment_method': expense['payment_method__name'] or _('N/A'),
+                'installment_plan': expense['installment_plan__description'] or '',
+            })
+
+        return JsonResponse({
+            'month': month,
+            'year': year,
+            'expenses': expenses_list,
+            'total_amount': float(total_amount),
+            'count': len(expenses_list),
+        })
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'Error fetching installment expenses: {e}', exc_info=True)
+        return JsonResponse({'error': _('An unexpected error occurred')}, status=500)

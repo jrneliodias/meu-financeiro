@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
+  <div class="flex flex-col items-start">
+    <p class="text-white text-xs md:text-sm">{% trans "Daily Expenses:" %}</p>
+    <span id="regularExpensesDisplay" class="text-cyan-400 text-xl md:text-2xl font-bold">
+      {{ regular_expenses_summary.formatted_total }}
+    </span>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const value = {{ regular_expenses_summary.total_amount|default:0 }};
+    const formatted = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+    document.getElementById('regularExpensesDisplay').textContent = formatted;
+});
+</script>
