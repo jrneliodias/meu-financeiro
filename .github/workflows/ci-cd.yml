@@ -1,0 +1,49 @@
+name: CI/CD — Deploy to VPS
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: "ci-secret-key-for-testing"
+      DEBUG: "true"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,testserver"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: python manage.py test
+
+  deploy:
+    name: Deploy
+    needs: test
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: PROD
+    steps:
+      - name: Write .env and deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22022
+          envs: ENV_FILE
+          script: |
+            printf '%s' "$ENV_FILE" > /deploy/meu-financeiro/.env
+            bash /deploy/meu-financeiro/scripts/deploy.sh
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
