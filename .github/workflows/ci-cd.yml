@@ -59,7 +59,7 @@ jobs:
           port: 22022
           envs: ENV_FILE
           script: |
-            printf '%s' "$ENV_FILE" > /deploy/meu-financeiro/.env
-            bash /deploy/meu-financeiro/scripts/deploy.sh
+            printf '%s' "$ENV_FILE" > /meu-financeiro/.env
+            bash /meu-financeiro/scripts/deploy.sh
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
