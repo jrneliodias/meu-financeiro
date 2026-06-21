@@ -87,9 +87,9 @@ class BillingPeriodCalculator:
             # July: Jun 24 to Jul 24
             7: (datetime(self.year, 6, 24), datetime(self.year, 7, 24)),
             # August: Jul 25 to Aug 24
-            8: (datetime(self.year, 7, 25), datetime(self.year, 9, 2)),
+            8: (datetime(self.year, 7, 25), datetime(self.year, 8, 24)),
             # September: Aug 25 to Sep 23
-            9: (datetime(self.year, 9, 3), datetime(self.year, 10, 3)),
+            9: (datetime(self.year, 8, 25), datetime(self.year, 9, 23)),
             # October: Sep 24 to Oct 24
             10: (datetime(self.year, 10, 4), datetime(self.year, 11, 3)),
             # November: Oct 25 to Nov 23

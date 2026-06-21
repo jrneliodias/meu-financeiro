@@ -107,7 +107,7 @@ class NegativeAmountExpenseStrategyTest(TestCase):
 
         self.assertIsNotNone(error)
         self.assertIsNone(record)
-        self.assertIn('not found', error)
+        self.assertIn('não encontrada', error)
 
 
 class PositiveAmountIncomeStrategyTest(TestCase):

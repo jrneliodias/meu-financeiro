@@ -156,9 +156,6 @@ class CSVImportService:
                 errors.append(_("Error parsing amounts: %(error)s") % {'error': str(e)})
         
         # Set default values for optional columns
-        if 'type' not in df.columns:
-            df['type'] = 'expense'
-        
         if 'category' not in df.columns:
             df['category'] = 'Outros'
         

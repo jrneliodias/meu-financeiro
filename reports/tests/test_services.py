@@ -84,8 +84,14 @@ class ExpenseServiceTestCase(TestCase):
             user=self.user
         )
 
-        # Get monthly totals
-        result = self.service.calculate_monthly_payment_method_total_expense_datasets()
+        # Get monthly totals using year=2025 so January 2025 period (Dec 15 2024 - Jan 14 2025)
+        # captures both expenses
+        service_2025 = ExpenseService(
+            expense_repository=self.expense_repository,
+            income_repository=self.income_repository,
+            year=2025
+        )
+        result = service_2025.calculate_monthly_payment_method_total_expense_datasets()
 
         # Since credit card billing cycle is 15th-14th,
         # both expenses should appear in January's total
