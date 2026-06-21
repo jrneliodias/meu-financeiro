@@ -90,7 +90,7 @@ if os.getenv("DATABASE_URL"):
         "default": dj_database_url.config(
             env="DATABASE_URL",
             conn_max_age=60,  # Optimized: Reduced from 600 to 60 seconds for better balance
-            ssl_require=True,
+            ssl_require=os.getenv("DB_SSL_REQUIRE", "true").lower() == "true",
         )
     }
 else:
