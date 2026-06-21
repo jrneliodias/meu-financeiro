@@ -28,7 +28,7 @@ jobs:
       SECRET_KEY: "ci-secret-key-for-testing"
       DEBUG: "true"
       ALLOWED_HOSTS: "localhost,127.0.0.1,testserver"
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db?sslmode=disable"
     steps:
       - uses: actions/checkout@v4
 
