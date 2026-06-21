@@ -153,7 +153,7 @@ class CSVImportServiceWithStrategiesTest(TestCase):
 
         self.assertEqual(result['stats']['imported'], 0)
         self.assertEqual(result['stats']['errors'], 1)
-        self.assertIn('No strategy found', result['errors'][0])
+        self.assertIn('Nenhuma estratégia encontrada', result['errors'][0])
 
     def test_import_statistics_accuracy(self):
         """Import statistics should accurately reflect imported records"""
