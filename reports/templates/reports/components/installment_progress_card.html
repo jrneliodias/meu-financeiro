@@ -50,7 +50,7 @@
           <!-- Progress Fill - CSS-only with gradient -->
           <div
             class="h-full rounded-full transition-all duration-500 ease-out"
-            style="width: {{ installment.progress_percentage }}%;
+            style="width: {{ installment.progress_percentage|floatformat:0 }}%;
                    background: linear-gradient(90deg, #22c55e 0%, #4ade80 100%);"
           >
           </div>
