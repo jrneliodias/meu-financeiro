@@ -57,7 +57,22 @@ backup*.json
 | `PERFORMANCE_FIX_SUMMARY.md` | Sumário interno de otimização |
 | `PERFORMANCE_OPTIMIZATION_PROMPT.md` | Prompt de IA interno |
 | `gemini_process.py` | Script utilitário avulso sem contexto |
-| `scripts/` | Scripts utilitários de desenvolvimento local |
+| `scripts/clear_cache_and_test.py` | Script de desenvolvimento local avulso |
+| `scripts/convert_csv_datetime.py` | Script utilitário de migração de dados |
+| `scripts/final_performance_test.py` | Script de teste de performance local |
+| `scripts/performance_measurement.py` | Script de medição local |
+| `scripts/print_categories.py` | Script utilitário avulso |
+| `scripts/process_csv.py` | Script de processamento de CSV local |
+| `scripts/remove_columns.py` | Script utilitário avulso |
+| `scripts/replace_dash_pattern.py` | Script utilitário avulso |
+| `scripts/replace_dash_simple.py` | Script utilitário avulso |
+| `scripts/test_admin_performance.py` | Script de teste local |
+| `scripts/test_billing_calculator.py` | Script de teste local |
+| `scripts/test_calc.py` | Script de teste local |
+| `scripts/test_csv_import.py` | Script de teste local |
+| `scripts/backup-supabase.sh` | Script de backup operacional (pode manter se quiser mostrar ops) |
+
+**Manter obrigatoriamente:** `scripts/deploy.sh` — referenciado pelo `ci-cd.yml`|
 
 ### Arquivos a manter
 
