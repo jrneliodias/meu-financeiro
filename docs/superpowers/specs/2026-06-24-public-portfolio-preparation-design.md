@@ -104,7 +104,19 @@ Criar `README.md` na raiz com as seguintes seções:
 
 ### Idioma
 
-README em inglês — padrão para projetos públicos avaliados por recrutadores que podem ser internacionais.
+README em inglês — projeto sendo apresentado para vaga sênior de full stack engineer em fintech.
+
+### Framing direcionado à vaga
+
+O README deve ser escrito usando a linguagem da vaga para destacar:
+- **Production fintech application** (não apenas "personal finance app")
+- **Performance-optimized PostgreSQL queries** — eliminação de N+1 com select_related, repository pattern
+- **Scalable service layer architecture** — lógica desacoplada de views, testável e extensível
+- **CI/CD pipeline** com GitHub Actions + Docker + Nginx em VPS
+- **Third-party integration** — importação de extratos bancários Nubank via CSV com Strategy pattern
+- **Live production deployment** — link direto
+
+**Gap a não esconder:** o projeto não usa React (usa Django templates). O README não deve fingir que tem React.
 
 ---
 
