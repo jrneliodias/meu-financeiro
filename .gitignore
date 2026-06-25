@@ -140,13 +140,15 @@ GitHub.sublime-settings
 
 debug_logs/
 
-# CSV data files (processed transactions)
-csvs/*_processed.csv
-csvs/*_processed_processed.csv
+# Sensitive personal data — never commit these
+db.sqlite3
+db.sqlite3.bak
+csvs/
+db*.json
+backups/
 
 # Backup files
-
 *.dump
 *.sql
-backup_*.json
-backup_*.json.gz
+backup*.json
+backup*.json.gz
