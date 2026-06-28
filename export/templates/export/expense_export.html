@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+  <h1 class="text-2xl font-bold">Exportar Despesas</h1>
+
+  <form method="get" class="flex flex-wrap gap-3 items-end bg-zinc-800/40 p-4 rounded-lg w-fit">
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400">Mês</label>
+      <select name="month" class="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
+        {% for month_num, month_name in months %}
+          <option value="{{ month_num }}" {% if selected_month == month_num %}selected{% endif %}>{{ month_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400">Ano</label>
+      <select name="year" class="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
+        {% for year_val, year_label in years %}
+          <option value="{{ year_val }}" {% if selected_year == year_val %}selected{% endif %}>{{ year_label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-sm font-semibold">
+      <i class="fa-solid fa-eye mr-1"></i> Visualizar
+    </button>
+  </form>
+
+  {% if selected_month and selected_year %}
+    {% if expenses %}
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+        <p class="text-zinc-300 text-sm">
+          <span class="font-semibold text-white">{{ expenses|length }}</span> despesa{{ expenses|length|pluralize:"s" }} —
+          Total: <span class="font-semibold text-white">R$ {{ total }}</span>
+        </p>
+        <a href="?month={{ selected_month }}&year={{ selected_year }}&download=1"
+           class="px-4 py-2 bg-green-700 hover:bg-green-600 rounded-lg text-sm font-semibold w-fit">
+          <i class="fa-solid fa-download mr-1"></i> Baixar CSV
+        </a>
+      </div>
+
+      <div class="overflow-x-auto rounded-lg border border-zinc-700">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-800 text-zinc-400 text-xs uppercase">
+            <tr>
+              <th class="px-4 py-3 text-left">ID</th>
+              <th class="px-4 py-3 text-left">Data</th>
+              <th class="px-4 py-3 text-left">Descrição</th>
+              <th class="px-4 py-3 text-right">Valor</th>
+              <th class="px-4 py-3 text-left">Categoria</th>
+              <th class="px-4 py-3 text-left">Pagamento</th>
+              <th class="px-4 py-3 text-left">Tipo</th>
+              <th class="px-4 py-3 text-left">Criado em</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-700/50">
+            {% for e in expenses %}
+            <tr class="hover:bg-zinc-800/40">
+              <td class="px-4 py-2 text-zinc-400">{{ e.id }}</td>
+              <td class="px-4 py-2">{{ e.date }}</td>
+              <td class="px-4 py-2">{{ e.description }}</td>
+              <td class="px-4 py-2 text-right font-mono">R$ {{ e.amount }}</td>
+              <td class="px-4 py-2 text-zinc-300">{{ e.category.name|default:"N/A" }}</td>
+              <td class="px-4 py-2 text-zinc-300">{{ e.payment_method.name|default:"N/A" }}</td>
+              <td class="px-4 py-2">
+                {% if e.installment_plan_id %}
+                  <span class="text-xs px-2 py-0.5 rounded bg-purple-900/50 text-purple-300">Parcela</span>
+                {% elif e.reccurring_expense_id %}
+                  <span class="text-xs px-2 py-0.5 rounded bg-blue-900/50 text-blue-300">Recorrente</span>
+                {% else %}
+                  <span class="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">Avulsa</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 text-zinc-400 text-xs">{{ e.created_at|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% else %}
+      <div class="bg-zinc-800/40 rounded-lg p-6 text-center text-zinc-400">
+        <i class="fa-solid fa-inbox text-2xl mb-2"></i>
+        <p>Nenhuma despesa encontrada para {{ selected_month }}/{{ selected_year }}.</p>
+      </div>
+      <button disabled class="px-4 py-2 bg-zinc-700 rounded-lg text-sm font-semibold text-zinc-500 w-fit cursor-not-allowed">
+        <i class="fa-solid fa-download mr-1"></i> Baixar CSV
+      </button>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

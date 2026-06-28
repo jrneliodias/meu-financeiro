@@ -55,6 +55,11 @@
       <i class="fa-solid fa-file-csv text-sm lg:text-xs"></i>
       <span class="text-sm hidden lg:block">{% trans "CSV Import" %}</span>
     </a>
+    <a href="{% url 'expense_export' %}"
+      class="font-semibold flex items-center justify-center lg:justify-start gap-2 hover:bg-zinc-700 p-4 lg:px-4 lg:py-2 rounded-lg {% if 'export' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      <i class="fa-solid fa-file-arrow-down text-sm lg:text-xs"></i>
+      <span class="text-sm hidden lg:block">{% trans "Export" %}</span>
+    </a>
     <a href="/admin" class="font-semibold flex items-center justify-center lg:justify-start gap-2 hover:bg-zinc-700 p-4 lg:px-4 lg:py-2 rounded-lg">
       <i class="fa-solid fa-user-shield text-sm lg:text-xs"></i>
       <span class="text-sm hidden lg:block">{% trans "Admin" %}</span>
