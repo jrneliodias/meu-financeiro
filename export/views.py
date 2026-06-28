@@ -24,6 +24,10 @@ def expense_export(request):
     expenses = []
     total = Decimal('0.00')
 
+    decimal_sep = request.GET.get('decimal_sep', '.')
+    if decimal_sep not in ('.', ','):
+        decimal_sep = '.'
+
     if form_submitted:
         expenses = list(
             expense_repository.get_optimized_monthly_expenses_with_relations(
@@ -46,11 +50,12 @@ def expense_export(request):
                     kind = 'Recorrente'
                 else:
                     kind = 'Avulsa'
+                amount = f"{e.amount:.2f}".replace('.', decimal_sep)
                 writer.writerow([
                     e.id,
                     e.date,
                     e.description,
-                    e.amount,
+                    amount,
                     e.category.name if e.category else 'N/A',
                     e.payment_method.name if e.payment_method else 'N/A',
                     kind,
@@ -66,4 +71,5 @@ def expense_export(request):
         'selected_month': selected_month,
         'selected_year': selected_year,
         'form_submitted': form_submitted,
+        'decimal_sep': decimal_sep,
     })

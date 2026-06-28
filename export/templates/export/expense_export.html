@@ -22,6 +22,13 @@
         {% endfor %}
       </select>
     </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400">{% trans "Decimal separator" %}</label>
+      <select name="decimal_sep" class="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
+        <option value="." {% if decimal_sep == '.' %}selected{% endif %}>{% trans "Period" %} (1.23)</option>
+        <option value="," {% if decimal_sep == ',' %}selected{% endif %}>{% trans "Comma" %} (1,23)</option>
+      </select>
+    </div>
     <button type="submit" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-sm font-semibold">
       <i class="fa-solid fa-eye mr-1"></i> {% trans "Preview" %}
     </button>
@@ -34,7 +41,7 @@
           <span class="font-semibold text-white">{{ expenses|length }}</span> {% trans "expenses" %} —
           {% trans "Total:" %} <span class="font-semibold text-white">{{ total|format_brl }}</span>
         </p>
-        <a href="?month={{ selected_month }}&year={{ selected_year }}&download=1"
+        <a href="?month={{ selected_month }}&year={{ selected_year }}&decimal_sep={{ decimal_sep }}&download=1"
            class="px-4 py-2 bg-green-700 hover:bg-green-600 rounded-lg text-sm font-semibold w-fit">
           <i class="fa-solid fa-download mr-1"></i> {% trans "Download CSV" %}
         </a>
