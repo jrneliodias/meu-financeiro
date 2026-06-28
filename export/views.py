@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from reports.repository import ExpenseRepository
-from utils.dates import get_all_months_tuples
+from utils.dates import get_all_months_tuples, get_current_date
 
 expense_repository = ExpenseRepository()
 
@@ -16,16 +16,18 @@ def expense_export(request):
     years = expense_repository.get_distinct_years_in_tuples()
     months = get_all_months_tuples()
 
-    selected_month = request.GET.get('month')
-    selected_year = request.GET.get('year')
+    current_year, current_month = get_current_date()
+    selected_month = int(request.GET.get('month', current_month))
+    selected_year = int(request.GET.get('year', current_year))
+    form_submitted = 'month' in request.GET
 
     expenses = []
     total = Decimal('0.00')
 
-    if selected_month and selected_year:
+    if form_submitted:
         expenses = list(
             expense_repository.get_optimized_monthly_expenses_with_relations(
-                int(selected_year), int(selected_month)
+                selected_year, selected_month
             ).filter(user=request.user)
         )
         total = sum(e.amount for e in expenses)
@@ -61,6 +63,7 @@ def expense_export(request):
         'total': total,
         'years': years,
         'months': months,
-        'selected_month': int(selected_month) if selected_month else None,
-        'selected_year': int(selected_year) if selected_year else None,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+        'form_submitted': form_submitted,
     })
