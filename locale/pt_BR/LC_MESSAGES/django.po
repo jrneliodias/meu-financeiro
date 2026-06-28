@@ -16,7 +16,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: export/templates/export/expense_export.html:6
-#, fuzzy
 msgid "Export Expenses"
 msgstr "Exportar Despesas"
 
@@ -647,7 +646,7 @@ msgstr "Importar CSV"
 
 #: registers/templates/core/base.html:61
 msgid "Export"
-msgstr ""
+msgstr "Exportar"
 
 #: registers/templates/core/base.html:65
 msgid "Admin"
