@@ -17,7 +17,8 @@ fi
 
 # Pull do codigo mais recente
 echo -e "${YELLOW}==> Atualizando codigo...${NC}"
-git pull origin master
+git fetch origin master
+git reset --hard origin/master
 
 # Build das imagens Docker
 echo -e "${YELLOW}==> Construindo imagens Docker...${NC}"
