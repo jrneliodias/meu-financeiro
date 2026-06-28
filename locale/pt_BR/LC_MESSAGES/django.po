@@ -37,7 +37,6 @@ msgid "Year"
 msgstr "Ano"
 
 #: export/templates/export/expense_export.html:26
-#, fuzzy
 msgid "Decimal separator"
 msgstr "Separador decimal"
 
@@ -46,7 +45,6 @@ msgid "Period"
 msgstr "Ponto"
 
 #: export/templates/export/expense_export.html:29
-#, fuzzy
 msgid "Comma"
 msgstr "Vírgula"
 
