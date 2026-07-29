@@ -208,6 +208,15 @@ msgstr "Inglês"
 msgid "Installments"
 msgstr "Parcelas"
 
+#: registers/components/expense_form/expense_form_component.py:39
+#: registers/templates/register/expense_form.html:79
+msgid "Recurring expense"
+msgstr "Despesa recorrente"
+
+#: registers/forms.py:48
+msgid "A recurring expense cannot be split into installments. Choose only one option."
+msgstr "Uma despesa recorrente não pode ser parcelada. Escolha apenas uma opção."
+
 #: registers/constants.py:34 registers/views.py:400
 msgid "Expense not found"
 msgstr "Despesa não encontrada"

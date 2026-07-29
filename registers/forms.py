@@ -41,6 +41,14 @@ class ExpenseForm(forms.ModelForm):
         """Apply quick fill option"""
         self.form_component.apply_quick_fill(option_key, self)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('is_recurring') and cleaned_data.get('installments', 1) > 1:
+            raise forms.ValidationError(
+                _('A recurring expense cannot be split into installments. Choose only one option.')
+            )
+        return cleaned_data
+
 
 class IncomeForm(forms.ModelForm):
     class Meta:

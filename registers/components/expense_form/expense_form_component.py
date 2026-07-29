@@ -35,6 +35,14 @@ class ExpenseFormComponent(BaseFormComponent):
                 label=_('Payment Method'),
                 queryset=PaymentMethod.objects
             ),
+            'is_recurring': forms.BooleanField(
+                label=_('Recurring expense'),
+                required=False,
+                initial=False,
+                widget=forms.CheckboxInput(attrs={
+                    'class': 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500'
+                }),
+            ),
         }
 
     def apply_quick_fill(self, option_key: str, form):

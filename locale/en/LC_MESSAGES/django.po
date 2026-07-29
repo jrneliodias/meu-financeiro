@@ -68,6 +68,15 @@ msgstr ""
 msgid "Installments"
 msgstr ""
 
+#: registers/components/expense_form/expense_form_component.py:39
+#: registers/templates/register/expense_form.html:79
+msgid "Recurring expense"
+msgstr "Recurring expense"
+
+#: registers/forms.py:48
+msgid "A recurring expense cannot be split into installments. Choose only one option."
+msgstr "A recurring expense cannot be split into installments. Choose only one option."
+
 #: registers/components/expense_form/expense_form_component.py:29
 #: registers/templates/register/components/expense_details_modal.html:60
 #: registers/templates/register/csv_processor_preview.html:55

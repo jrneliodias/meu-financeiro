@@ -34,6 +34,7 @@ csv_import_service = CSVImportService()
 recent_expense_service = RecentExpenseService()
 quick_fill_preset_service = QuickFillPresetService()
 expense_list_service = ExpenseListService()
+recurring_expense_service = RecurringExpenseService()
 
 
 @login_required
@@ -75,7 +76,22 @@ def register_expense(request):
                 )
             else:
                 print(f"[DEBUG] Creating single expense")
-                expense = expense_service.create_single_expense(user, expense_data)
+                recurring_expense = None
+                if expense_data.get('is_recurring'):
+                    recurring_expense = recurring_expense_service.create_recurring_expense(
+                        user,
+                        {
+                            'description': expense_data['description'],
+                            'total_amount': expense_data['amount'],
+                            'start_date': expense_data['date'],
+                            'category': expense_data['category'],
+                            'payment_method': expense_data['payment_method'],
+                            'generate_debit': True,
+                        },
+                    )
+                expense = expense_service.create_single_expense(
+                    user, expense_data, recurring_expense=recurring_expense
+                )
                 print(f"[DEBUG] Expense created with ID: {expense.id}")
                 messages.success(
                     request,

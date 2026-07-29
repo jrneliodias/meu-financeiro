@@ -73,6 +73,13 @@
                     </div>
                 </fieldset>
 
+                <fieldset>
+                    <div class="mb-4 space-y-2 flex items-center gap-2">
+                        {{ form.is_recurring|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
+                        <label for="id_is_recurring" class="text-gray-400">{% trans "Recurring expense" %}</label>
+                    </div>
+                </fieldset>
+
                 <button type="submit"
                         class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">
                     {% trans "Submit" %}
