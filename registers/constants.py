@@ -38,3 +38,7 @@ class ApiMessages:
     DETAILS_SUCCESS = gettext_noop("Expense details retrieved")
     RECENT_EXPENSES_SUCCESS = gettext_noop("Recent expenses retrieved")
     INVALID_REQUEST = gettext_noop("Invalid request")
+    INCOME_NOT_FOUND = gettext_noop("Income not found")
+    INCOME_DELETE_SUCCESS = gettext_noop("Income '%(description)s' deleted successfully")
+    INCOME_AUTOFILL_SUCCESS = gettext_noop("Income data retrieved for autofill")
+    RECENT_INCOMES_SUCCESS = gettext_noop("Recent incomes retrieved")

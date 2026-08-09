@@ -6,6 +6,7 @@ from .services import (
     IncomeService,
     CSVImportService,
     RecentExpenseService,
+    RecentIncomeService,
     QuickFillPresetService,
 )
 from .services.expense_list_service import ExpenseListService
@@ -20,7 +21,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext as _, ngettext
-from .models import Expense, Category, CategoryBudgetEstimate
+from .models import Expense, Income, Category, CategoryBudgetEstimate
 import json
 import pandas as pd
 import io
@@ -32,6 +33,7 @@ expense_service = ExpenseService()
 income_service = IncomeService()
 csv_import_service = CSVImportService()
 recent_expense_service = RecentExpenseService()
+recent_income_service = RecentIncomeService()
 quick_fill_preset_service = QuickFillPresetService()
 expense_list_service = ExpenseListService()
 recurring_expense_service = RecurringExpenseService()
@@ -141,8 +143,12 @@ def register_income(request):
 
         user = request.user
         income = income_service.create_income(user, income_data)
+        messages.success(
+            request,
+            _("Income %(income)s has been registered.") % {'income': str(income)}
+        )
 
-        return redirect('expense_success')
+        return redirect('register_income')
 
     else:
         form = IncomeForm()
@@ -152,6 +158,76 @@ def register_income(request):
 @login_required
 def income_success(request):
     return render(request, 'register/income_success.html')
+
+
+@login_required
+@require_http_methods(["GET"])
+def recent_incomes_ajax(request):
+    """AJAX endpoint para listar entradas (incomes) recentes do usuário."""
+    try:
+        incomes = recent_income_service.get_recent_incomes(request.user)
+
+        return JsonResponse({
+            'success': True,
+            'message': _(ApiMessages.RECENT_INCOMES_SUCCESS),
+            'incomes': incomes,
+            'count': len(incomes),
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+        }, status=ApiStatus.SERVER_ERROR)
+
+
+@login_required
+@require_http_methods(["GET"])
+def income_autofill_ajax(request, pk):
+    """AJAX endpoint para obter dados de uma income para autofill do formulário."""
+    try:
+        form_data = recent_income_service.get_income_for_autofill(pk, request.user)
+
+        if form_data is None:
+            return JsonResponse({
+                'success': False,
+                'error': _(ApiMessages.INCOME_NOT_FOUND),
+            }, status=ApiStatus.NOT_FOUND)
+
+        return JsonResponse({
+            'success': True,
+            'message': _(ApiMessages.INCOME_AUTOFILL_SUCCESS),
+            'form_data': form_data,
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+        }, status=ApiStatus.SERVER_ERROR)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_income(request, pk):
+    """Delete an individual income via AJAX"""
+    try:
+        income = Income.objects.get(pk=pk)
+
+        if income.user != request.user:
+            return JsonResponse({'error': _('Unauthorized')}, status=403)
+
+        description = income.description
+        income.delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': _(ApiMessages.INCOME_DELETE_SUCCESS) % {
+                'description': description
+            }
+        })
+    except Income.DoesNotExist:
+        return JsonResponse({'error': _(ApiMessages.INCOME_NOT_FOUND)}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required
