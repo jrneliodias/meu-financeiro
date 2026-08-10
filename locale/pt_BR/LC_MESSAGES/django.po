@@ -2033,6 +2033,35 @@ msgstr ""
 msgid "month and year must be integers"
 msgstr ""
 
+#: registers/templates/register/components/recent_incomes_table.html:6
+msgid "Recent Incomes"
+msgstr "Entradas Recentes"
+
+#: registers/templates/register/components/recent_incomes_table.html:21
+msgid "Loading incomes..."
+msgstr "Carregando entradas..."
+
+#: registers/templates/register/components/recent_incomes_table.html:40
+msgid "No recent incomes found"
+msgstr "Nenhuma entrada recente encontrada"
+
+#: registers/templates/register/income_form.html:43
+msgid "Do you really want to delete the income"
+msgstr "Deseja realmente excluir a entrada"
+
+#: registers/templates/register/income_form.html:44
+msgid "Error loading incomes"
+msgstr "Erro ao carregar entradas"
+
+#: registers/templates/register/income_form.html:46
+msgid "Error deleting income"
+msgstr "Erro ao excluir entrada"
+
+#: registers/views.py:148
+#, python-format
+msgid "Income %(income)s has been registered."
+msgstr "Entrada %(income)s registrada com sucesso."
+
 #, fuzzy
 #~| msgid "Actions"
 #~ msgid "Options"

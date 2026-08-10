@@ -3376,3 +3376,25 @@ msgstr "No installment expenses found for this period."
 
 msgid "Installment Plan"
 msgstr "Installment Plan"
+
+msgid "Recent Incomes"
+msgstr "Recent Incomes"
+
+msgid "Loading incomes..."
+msgstr "Loading incomes..."
+
+msgid "No recent incomes found"
+msgstr "No recent incomes found"
+
+msgid "Do you really want to delete the income"
+msgstr "Do you really want to delete the income"
+
+msgid "Error loading incomes"
+msgstr "Error loading incomes"
+
+msgid "Error deleting income"
+msgstr "Error deleting income"
+
+#, python-format
+msgid "Income %(income)s has been registered."
+msgstr "Income %(income)s has been registered."
