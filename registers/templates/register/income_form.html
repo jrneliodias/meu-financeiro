@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load custom_filters i18n %}
+{% load custom_filters i18n static %}
 {% block content %}
     <div class="container mx-auto mt-10 max-w-lg ">
         <h2 class="text-2xl font-bold mb-6 ">{% trans "Register Income" %}</h2>
@@ -24,10 +24,28 @@
             <button type="submit"
                     class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">{% trans "Submit" %}</button>
         </form>
+
+        {% if messages %}
+            <ul class="messages mt-4 space-y-2">
+                {% for message in messages %}
+                    <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% include "register/components/recent_incomes_table.html" %}
     </div>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
-        </ul>
-    {% endif %}
+
+    <script>
+        window.RecentIncomesI18n = {
+            use: "{% trans 'Use' %}",
+            delete: "{% trans 'Delete' %}",
+            confirmDelete: "{% trans 'Do you really want to delete the income' %}",
+            loadError: "{% trans 'Error loading incomes' %}",
+            connectionError: "{% trans 'Connection error' %}",
+            deleteError: "{% trans 'Error deleting income' %}",
+            autofillError: "{% trans 'Error loading data' %}",
+        };
+    </script>
+    <script src="{% static 'js/recent_incomes.js' %}"></script>
 {% endblock content %}
