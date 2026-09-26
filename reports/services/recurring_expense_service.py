@@ -149,6 +149,19 @@ class RecurringExpenseService:
         """
         return self.repository.toggle_generate_debit(recurring_expense_id)
 
+    def toggle_paid(self, expense_id, user):
+        """
+        Alterna o status de pagamento de uma despesa gerada por despesa fixa.
+
+        Args:
+            expense_id: ID of the Expense
+            user: User instance (ownership scope)
+
+        Returns:
+            Expense: Updated expense instance
+        """
+        return self.repository.toggle_paid(expense_id, user)
+
     def get_recurring_expense_with_expenses(self, recurring_expense_id):
         """
         Busca despesa fixa com todas as despesas geradas.

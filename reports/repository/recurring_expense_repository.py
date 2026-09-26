@@ -162,3 +162,32 @@ class RecurringExpenseRepository:
         recurring_expense.generate_debit = not recurring_expense.generate_debit
         recurring_expense.save()
         return recurring_expense
+
+    def toggle_paid(self, expense_id, user):
+        """
+        Alterna o status de pagamento (is_paid) de uma Expense vinculada a
+        uma despesa fixa, restrito ao usuário dono do registro.
+
+        Args:
+            expense_id: ID of the Expense
+            user: User instance (ownership scope)
+
+        Returns:
+            Expense: Updated expense instance
+
+        Raises:
+            Expense.DoesNotExist: if no matching, user-owned, recurring-linked
+                expense is found for this id
+        """
+        from django.utils.timezone import localdate
+        from registers.models import Expense
+
+        expense = Expense.objects.get(
+            id=expense_id,
+            user=user,
+            reccurring_expense__isnull=False,
+        )
+        expense.is_paid = not expense.is_paid
+        expense.paid_at = localdate() if expense.is_paid else None
+        expense.save()
+        return expense

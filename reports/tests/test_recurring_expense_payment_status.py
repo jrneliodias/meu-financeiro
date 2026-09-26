@@ -34,3 +34,60 @@ class ProcessRecurringExpensesPaymentStatusTest(TestCase):
         expense = Expense.objects.get(reccurring_expense=self.recurring_expense)
         self.assertFalse(expense.is_paid)
         self.assertIsNone(expense.paid_at)
+
+
+class ToggleExpensePaidTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='owner', password='12345')
+        self.other_user = User.objects.create_user(username='intruder', password='12345')
+        self.category = Category.objects.create(name='Food', type='expense')
+        self.payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
+        self.recurring_expense = RecurringExpense.objects.create(
+            user=self.user,
+            description='Netflix',
+            total_amount=50,
+            start_date=date(2026, 9, 5),
+            category=self.category,
+            payment_method=self.payment_method,
+        )
+        self.expense = Expense.objects.create(
+            user=self.user,
+            description='Netflix',
+            amount=50,
+            date=date(2026, 9, 5),
+            category=self.category,
+            payment_method=self.payment_method,
+            reccurring_expense=self.recurring_expense,
+            is_paid=False,
+        )
+        self.service = RecurringExpenseService()
+
+    def test_toggle_marks_expense_as_paid(self):
+        updated = self.service.toggle_paid(self.expense.id, self.user)
+
+        self.assertTrue(updated.is_paid)
+        self.assertIsNotNone(updated.paid_at)
+
+    def test_toggle_twice_marks_expense_as_pending_again(self):
+        self.service.toggle_paid(self.expense.id, self.user)
+        updated = self.service.toggle_paid(self.expense.id, self.user)
+
+        self.assertFalse(updated.is_paid)
+        self.assertIsNone(updated.paid_at)
+
+    def test_cannot_toggle_another_users_expense(self):
+        with self.assertRaises(Expense.DoesNotExist):
+            self.service.toggle_paid(self.expense.id, self.other_user)
+
+    def test_cannot_toggle_expense_without_recurring_link(self):
+        manual_expense = Expense.objects.create(
+            user=self.user,
+            description='Coffee',
+            amount=10,
+            date=date(2026, 9, 6),
+            category=self.category,
+            payment_method=self.payment_method,
+        )
+
+        with self.assertRaises(Expense.DoesNotExist):
+            self.service.toggle_paid(manual_expense.id, self.user)
