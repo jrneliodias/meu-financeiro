@@ -246,7 +246,8 @@ class RecurringExpenseService:
                 date=expense_date,
                 category=recurring_expense.category,
                 payment_method=recurring_expense.payment_method,
-                reccurring_expense=recurring_expense
+                reccurring_expense=recurring_expense,
+                is_paid=False
             )
 
             created_count += 1
