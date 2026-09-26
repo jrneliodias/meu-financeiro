@@ -191,3 +191,57 @@ class RecurringExpenseRepository:
         expense.paid_at = localdate() if expense.is_paid else None
         expense.save()
         return expense
+
+    def get_month_expenses_with_status(self, user, month, year):
+        """
+        Get each active recurring expense for the user together with its
+        Expense for the given month/year (if generated), exposing payment
+        status. Uses exactly 2 queries regardless of how many recurring
+        expenses the user has.
+
+        Args:
+            user: User instance
+            month: Month number (1-12)
+            year: Year (e.g., 2026)
+
+        Returns:
+            list[dict]: one entry per active recurring expense, each with
+                keys 'recurring_expense', 'expense' (Expense or None) and
+                'status' ('paid', 'pending', or 'not_generated')
+        """
+        from registers.models import Expense
+
+        recurring_expenses = list(
+            RecurringExpense.objects
+            .filter(user=user, generate_debit=True)
+            .select_related('category', 'payment_method')
+            .order_by('description')
+        )
+
+        expenses_by_recurring_id = {
+            expense.reccurring_expense_id: expense
+            for expense in Expense.objects.filter(
+                user=user,
+                reccurring_expense__in=recurring_expenses,
+                date__year=year,
+                date__month=month,
+            )
+        }
+
+        results = []
+        for recurring_expense in recurring_expenses:
+            expense = expenses_by_recurring_id.get(recurring_expense.id)
+            if expense is None:
+                status = 'not_generated'
+            elif expense.is_paid:
+                status = 'paid'
+            else:
+                status = 'pending'
+
+            results.append({
+                'recurring_expense': recurring_expense,
+                'expense': expense,
+                'status': status,
+            })
+
+        return results
