@@ -5,6 +5,11 @@
     <span id="fixedExpensesDisplay" class="text-orange-400 text-xl md:text-2xl font-bold">
       {{ fixed_expenses_summary.formatted_total }}
     </span>
+    {% if fixed_expenses_summary.pending_count %}
+    <span class="text-yellow-400 text-xs mt-1">
+        {% blocktrans count count=fixed_expenses_summary.pending_count %}{{ count }} pending{% plural %}{{ count }} pending{% endblocktrans %}
+    </span>
+    {% endif %}
   </div>
 </div>
 <script>

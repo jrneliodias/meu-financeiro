@@ -84,6 +84,8 @@ class Expense(models.Model):
         Installment, on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
     reccurring_expense = models.ForeignKey(
         RecurringExpense, on_delete=models.SET_NULL, null=True, blank=True, related_name='recurring_expenses')
+    is_paid = models.BooleanField(default=True)
+    paid_at = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.description} - {self.category} - {str(self.amount)}"

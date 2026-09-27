@@ -79,7 +79,8 @@ class Command(BaseCommand):
                     date=expense_date,  # Use the day and month from start_date, and the current year
                     category=recurring_expense.category,
                     payment_method=recurring_expense.payment_method,
-                    reccurring_expense=recurring_expense
+                    reccurring_expense=recurring_expense,
+                    is_paid=False
                 )
 
                 self.stdout.write(self.style.SUCCESS(

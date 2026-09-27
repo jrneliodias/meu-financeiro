@@ -18,29 +18,34 @@ class RecurringExpenseService:
         """
         self.repository = recurring_expense_repository or RecurringExpenseRepository()
 
-    def get_total_fixed_expenses(self):
+    def get_fixed_expenses_summary(self, user, month, year):
         """
-        Calculate the total amount of fixed expenses (recurring expenses with generate_debit=True).
+        Get a summary of fixed expenses including total amount, count, and
+        payment status for the given month.
+
+        Args:
+            user: User instance
+            month: Month number (1-12)
+            year: Year (e.g., 2026)
 
         Returns:
-            Decimal: Total amount of active recurring expenses
+            dict: Summary with total amount, count, formatted total, and
+                pending/paid/not-generated counts for the given month
         """
-        return self.repository.get_total_recurring_expenses_with_debit()
+        total_amount = self.repository.get_total_recurring_expenses_with_debit(user)
+        month_status = self.repository.get_month_expenses_with_status(user, month, year)
 
-    def get_fixed_expenses_summary(self):
-        """
-        Get a summary of fixed expenses including total amount and count.
-
-        Returns:
-            dict: Summary with total amount, count, and formatted total
-        """
-        total_amount = self.get_total_fixed_expenses()
-        count = self.repository.get_recurring_expense_count()
+        pending_count = sum(1 for entry in month_status if entry['status'] == 'pending')
+        paid_count = sum(1 for entry in month_status if entry['status'] == 'paid')
+        not_generated_count = sum(1 for entry in month_status if entry['status'] == 'not_generated')
 
         return {
             'total_amount': total_amount,
-            'count': count,
-            'formatted_total': self._format_currency(total_amount)
+            'count': len(month_status),
+            'formatted_total': self._format_currency(total_amount),
+            'pending_count': pending_count,
+            'paid_count': paid_count,
+            'not_generated_count': not_generated_count,
         }
 
     def get_active_fixed_expenses_list(self):
@@ -149,6 +154,19 @@ class RecurringExpenseService:
         """
         return self.repository.toggle_generate_debit(recurring_expense_id)
 
+    def toggle_paid(self, expense_id, user):
+        """
+        Alterna o status de pagamento de uma despesa gerada por despesa fixa.
+
+        Args:
+            expense_id: ID of the Expense
+            user: User instance (ownership scope)
+
+        Returns:
+            Expense: Updated expense instance
+        """
+        return self.repository.toggle_paid(expense_id, user)
+
     def get_recurring_expense_with_expenses(self, recurring_expense_id):
         """
         Busca despesa fixa com todas as despesas geradas.
@@ -246,7 +264,8 @@ class RecurringExpenseService:
                 date=expense_date,
                 category=recurring_expense.category,
                 payment_method=recurring_expense.payment_method,
-                reccurring_expense=recurring_expense
+                reccurring_expense=recurring_expense,
+                is_paid=False
             )
 
             created_count += 1

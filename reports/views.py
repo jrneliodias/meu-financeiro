@@ -98,7 +98,9 @@ def expense_report(request):
     )
 
     # 5. Get fixed expenses summary
-    fixed_expenses_summary = recurring_expense_service.get_fixed_expenses_summary()
+    fixed_expenses_summary = recurring_expense_service.get_fixed_expenses_summary(
+        request.user, selected_month, selected_year
+    )
 
     # 6. Get installment progress data
     installments_progress = installment_calculator.get_installments_summary(
@@ -843,15 +845,35 @@ def category_expense_details_ajax(request):
 @login_required
 def recurring_expense_list(request):
     """List all user's recurring expenses"""
-    from utils.dates import get_all_months_tuples
+    from utils.dates import get_all_months_tuples, get_current_date
 
     recurring_expense_service = RecurringExpenseService()
-    recurring_expenses = recurring_expense_service.repository.get_all_recurring_expenses_by_user(request.user)
+    recurring_expenses = list(
+        recurring_expense_service.repository.get_all_recurring_expenses_by_user(request.user)
+    )
 
     # Calculate totals
     active_total = recurring_expense_service.repository.get_total_recurring_expenses_with_debit(request.user)
     inactive_total = recurring_expense_service.repository.get_total_inactive_recurring_expenses(request.user)
     total = active_total + inactive_total
+
+    current_year, current_month = get_current_date()
+    month_status = recurring_expense_service.repository.get_month_expenses_with_status(
+        request.user, current_month, current_year
+    )
+    status_by_recurring_id = {entry['recurring_expense'].id: entry for entry in month_status}
+
+    for recurring_expense in recurring_expenses:
+        status_entry = status_by_recurring_id.get(recurring_expense.id)
+        recurring_expense.current_month_status = status_entry['status'] if status_entry else 'not_generated'
+        recurring_expense.current_month_expense_id = (
+            status_entry['expense'].id if status_entry and status_entry['expense'] else None
+        )
+
+    pending_count = sum(
+        1 for recurring_expense in recurring_expenses
+        if recurring_expense.current_month_status == 'pending'
+    )
 
     context = {
         'recurring_expenses': recurring_expenses,
@@ -859,6 +881,7 @@ def recurring_expense_list(request):
         'inactive_total': inactive_total,
         'total': total,
         'all_months': get_all_months_tuples(),
+        'pending_count': pending_count,
     }
 
     return render(request, 'reports/recurring_expense_list.html', context)
@@ -936,6 +959,29 @@ def recurring_expense_toggle(request, pk):
         })
     except RecurringExpense.DoesNotExist:
         return JsonResponse({'error': _('Recurring expense not found')}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def recurring_expense_toggle_paid(request, expense_id):
+    """Toggle payment status (is_paid) of a recurring expense's Expense via AJAX"""
+    try:
+        recurring_expense_service = RecurringExpenseService()
+        updated_expense = recurring_expense_service.toggle_paid(expense_id, request.user)
+
+        return JsonResponse({
+            'success': True,
+            'is_paid': updated_expense.is_paid,
+            'message': (
+                _('Expense marked as paid.')
+                if updated_expense.is_paid
+                else _('Expense marked as pending.')
+            )
+        })
+    except Expense.DoesNotExist:
+        return JsonResponse({'error': _('Expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 

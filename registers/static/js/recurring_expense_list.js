@@ -35,6 +35,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Toggle Paid Buttons
+    const togglePaidButtons = document.querySelectorAll('.toggle-paid-btn');
+    togglePaidButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const expenseId = this.getAttribute('data-expense-id');
+
+            fetch(`/recurring-expense/${expenseId}/toggle-paid/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = this.querySelector('span');
+                    if (data.is_paid) {
+                        badge.textContent = this.getAttribute('data-paid-label');
+                        badge.className = 'px-2 py-1 rounded text-xs font-bold bg-green-900/40 text-green-400';
+                    } else {
+                        badge.textContent = this.getAttribute('data-pending-label');
+                        badge.className = 'px-2 py-1 rounded text-xs font-bold bg-yellow-900/40 text-yellow-400';
+                    }
+                    this.setAttribute('data-paid', data.is_paid ? 'true' : 'false');
+                    console.log(data.message);
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error toggling payment status');
+            });
+        });
+    });
+
     // View Expenses Buttons
     const viewButtons = document.querySelectorAll('.view-expenses-btn');
     viewButtons.forEach(button => {
