@@ -86,15 +86,6 @@ class RecurringExpenseRepository:
             .order_by('description')
         )
 
-    def get_recurring_expense_count(self):
-        """
-        Get count of active recurring expenses.
-
-        Returns:
-            int: Number of active recurring expenses
-        """
-        return RecurringExpense.objects.filter(generate_debit=True).count()
-
     def get_all_recurring_expenses_by_user(self, user):
         """
         Fetch all user's recurring expenses with optimized query including expense counts.

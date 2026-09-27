@@ -18,15 +18,6 @@ class RecurringExpenseService:
         """
         self.repository = recurring_expense_repository or RecurringExpenseRepository()
 
-    def get_total_fixed_expenses(self):
-        """
-        Calculate the total amount of fixed expenses (recurring expenses with generate_debit=True).
-
-        Returns:
-            Decimal: Total amount of active recurring expenses
-        """
-        return self.repository.get_total_recurring_expenses_with_debit()
-
     def get_fixed_expenses_summary(self, user, month, year):
         """
         Get a summary of fixed expenses including total amount, count, and

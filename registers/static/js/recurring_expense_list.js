@@ -53,10 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     const badge = this.querySelector('span');
                     if (data.is_paid) {
-                        badge.textContent = 'Pago';
+                        badge.textContent = this.getAttribute('data-paid-label');
                         badge.className = 'px-2 py-1 rounded text-xs font-bold bg-green-900/40 text-green-400';
                     } else {
-                        badge.textContent = 'Pendente';
+                        badge.textContent = this.getAttribute('data-pending-label');
                         badge.className = 'px-2 py-1 rounded text-xs font-bold bg-yellow-900/40 text-yellow-400';
                     }
                     this.setAttribute('data-paid', data.is_paid ? 'true' : 'false');

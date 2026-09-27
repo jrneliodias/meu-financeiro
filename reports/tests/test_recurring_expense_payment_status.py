@@ -291,6 +291,33 @@ class RecurringExpenseListTemplateStatusTest(TestCase):
 
         self.assertEqual(response.context['pending_count'], 0)
 
+    def test_inactive_recurring_expense_with_generated_expense_shows_dash(self):
+        # An inactive recurring expense can still have a real Expense (and
+        # is_paid state) for this month if it was deactivated after the
+        # bill was generated. It must not be mislabeled "Not generated".
+        inactive_recurring = RecurringExpense.objects.create(
+            user=self.user, description='Old Subscription', total_amount=30,
+            start_date=date(2026, 1, 1), category=self.category,
+            payment_method=self.payment_method, generate_debit=False,
+        )
+        Expense.objects.create(
+            user=self.user, description='Old Subscription', amount=30,
+            date=date(self.current_year, self.current_month, 1),
+            category=self.category, payment_method=self.payment_method,
+            reccurring_expense=inactive_recurring, is_paid=False,
+        )
+
+        response = self.client.get(reverse('recurring_expense_list'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '—')
+        content = response.content.decode()
+        old_subscription_index = content.index('Old Subscription')
+        self.assertNotIn(
+            'Not generated',
+            content[old_subscription_index:old_subscription_index + 1500],
+        )
+
 
 class RecurringExpensePaymentStatusTranslationTest(TestCase):
     def setUp(self):
