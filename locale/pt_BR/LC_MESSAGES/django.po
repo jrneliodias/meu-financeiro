@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Meu Financeiro\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 16:57-0300\n"
+"POT-Creation-Date: 2026-09-26 21:25-0300\n"
 "PO-Revision-Date: 2026-06-05 14:03-0300\n"
 "Last-Translator: jrneliodias\n"
 "Language-Team: Portuguese (Brazil)\n"
@@ -101,7 +101,7 @@ msgstr "Data"
 #: reports/templates/reports/components/expense_details_table.html:10
 #: reports/templates/reports/components/recurring_expense_modal.html:61
 #: reports/templates/reports/expense_update.html:15
-#: reports/templates/reports/recurring_expense_list.html:61
+#: reports/templates/reports/recurring_expense_list.html:72
 #: reports/templates/reports/recurring_expense_update.html:21
 msgid "Description"
 msgstr "Descrição"
@@ -119,7 +119,7 @@ msgstr "Descrição"
 #: reports/templates/reports/components/expense_details_table.html:11
 #: reports/templates/reports/components/recurring_expense_modal.html:64
 #: reports/templates/reports/expense_update.html:19
-#: reports/templates/reports/recurring_expense_list.html:62
+#: reports/templates/reports/recurring_expense_list.html:73
 #: reports/templates/reports/recurring_expense_update.html:29
 msgid "Amount"
 msgstr "Valor"
@@ -142,7 +142,7 @@ msgstr "Valor"
 #: reports/templates/reports/components/expense_details_table.html:13
 #: reports/templates/reports/components/recurring_expense_modal.html:62
 #: reports/templates/reports/expense_update.html:27
-#: reports/templates/reports/recurring_expense_list.html:64
+#: reports/templates/reports/recurring_expense_list.html:75
 #: reports/templates/reports/recurring_expense_update.html:41
 msgid "Category"
 msgstr "Categoria"
@@ -160,7 +160,7 @@ msgstr "Categoria"
 #: reports/templates/reports/components/expense_details_table.html:14
 #: reports/templates/reports/components/recurring_expense_modal.html:63
 #: reports/templates/reports/expense_update.html:31
-#: reports/templates/reports/recurring_expense_list.html:65
+#: reports/templates/reports/recurring_expense_list.html:76
 #: reports/templates/reports/recurring_expense_update.html:45
 msgid "Payment Method"
 msgstr "Forma de Pagamento"
@@ -213,11 +213,7 @@ msgstr "Parcelas"
 msgid "Recurring expense"
 msgstr "Despesa recorrente"
 
-#: registers/forms.py:48
-msgid "A recurring expense cannot be split into installments. Choose only one option."
-msgstr "Uma despesa recorrente não pode ser parcelada. Escolha apenas uma opção."
-
-#: registers/constants.py:34 registers/views.py:400
+#: registers/constants.py:34 registers/views.py:492 reports/views.py:984
 msgid "Expense not found"
 msgstr "Despesa não encontrada"
 
@@ -242,161 +238,192 @@ msgstr "Detalhes da despesa recuperados"
 msgid "Recent expenses retrieved"
 msgstr "Despesas recentes recuperadas"
 
-#: registers/constants.py:40 reports/views.py:449 reports/views.py:510
-#: reports/views.py:947 reports/views.py:997 reports/views.py:1036
+#: registers/constants.py:40 reports/views.py:451 reports/views.py:512
+#: reports/views.py:993 reports/views.py:1043 reports/views.py:1082
 msgid "Invalid request"
 msgstr "Requisição inválida"
 
-#: registers/forms.py:82 registers/forms.py:208
+#: registers/constants.py:41
+#, fuzzy
+#| msgid "Expense not found"
+msgid "Income not found"
+msgstr "Despesa não encontrada"
+
+#: registers/constants.py:42
+#, fuzzy, python-format
+#| msgid "Expense '%(description)s' deleted successfully"
+msgid "Income '%(description)s' deleted successfully"
+msgstr "Despesa '%(description)s' excluída com sucesso"
+
+#: registers/constants.py:43
+#, fuzzy
+#| msgid "Expense data retrieved for autofill"
+msgid "Income data retrieved for autofill"
+msgstr "Dados da despesa recuperados para preenchimento automático"
+
+#: registers/constants.py:44
+#, fuzzy
+#| msgid "Recent expenses retrieved"
+msgid "Recent incomes retrieved"
+msgstr "Despesas recentes recuperadas"
+
+#: registers/forms.py:48
+msgid ""
+"A recurring expense cannot be split into installments. Choose only one "
+"option."
+msgstr ""
+"Uma despesa recorrente não pode ser parcelada. Escolha apenas uma opção."
+
+#: registers/forms.py:90 registers/forms.py:216
 msgid "CSV File"
 msgstr "Arquivo CSV"
 
-#: registers/forms.py:84
+#: registers/forms.py:92
 msgid "Select a CSV file to import. Supported formats: .csv"
 msgstr "Selecione um arquivo CSV para importar. Formatos suportados: .csv"
 
-#: registers/forms.py:92 registers/forms.py:218
+#: registers/forms.py:100 registers/forms.py:226
 msgid "CSV Text"
 msgstr "Texto CSV"
 
-#: registers/forms.py:94 registers/forms.py:220
+#: registers/forms.py:102 registers/forms.py:228
 msgid ""
 "Paste your CSV data directly here. Use this as an alternative to file upload."
 msgstr ""
 "Cole seus dados CSV diretamente aqui. Use como alternativa ao envio de "
 "arquivo."
 
-#: registers/forms.py:103 registers/forms.py:229
+#: registers/forms.py:111 registers/forms.py:237
 msgid "CSV Separator"
 msgstr "Separador CSV"
 
-#: registers/forms.py:105 registers/forms.py:231
+#: registers/forms.py:113 registers/forms.py:239
 msgid "Comma (,)"
 msgstr "Vírgula (,)"
 
-#: registers/forms.py:106 registers/forms.py:232
+#: registers/forms.py:114 registers/forms.py:240
 msgid "Semicolon (;)"
 msgstr "Ponto e vírgula (;)"
 
-#: registers/forms.py:107 registers/forms.py:233
+#: registers/forms.py:115 registers/forms.py:241
 msgid "Tab"
 msgstr "Tabulação"
 
-#: registers/forms.py:108 registers/forms.py:234
+#: registers/forms.py:116 registers/forms.py:242
 msgid "Pipe (|)"
 msgstr "Pipe (|)"
 
-#: registers/forms.py:111 registers/forms.py:237
+#: registers/forms.py:119 registers/forms.py:245
 msgid "Select the character used to separate columns in your CSV file"
 msgstr "Selecione o caractere usado para separar colunas no seu arquivo CSV"
 
-#: registers/forms.py:118
+#: registers/forms.py:126
 msgid "Skip Header Row"
 msgstr "Ignorar Linha de Cabeçalho"
 
-#: registers/forms.py:121
+#: registers/forms.py:129
 msgid "Check if your CSV file has a header row that should be skipped"
 msgstr ""
 "Marque se o arquivo CSV possui linha de cabeçalho que deve ser ignorada"
 
-#: registers/forms.py:128
+#: registers/forms.py:136
 msgid "Auto-create Categories"
 msgstr "Criar Categorias Automaticamente"
 
-#: registers/forms.py:131
+#: registers/forms.py:139
 msgid "Automatically create new categories if they don't exist"
 msgstr "Cria automaticamente novas categorias se não existirem"
 
-#: registers/forms.py:138
+#: registers/forms.py:146
 msgid "Auto-create Payment Methods"
 msgstr "Criar Formas de Pagamento Automaticamente"
 
-#: registers/forms.py:141
+#: registers/forms.py:149
 msgid "Automatically create new payment methods if they don't exist"
 msgstr "Cria automaticamente novas formas de pagamento se não existirem"
 
-#: registers/forms.py:148
+#: registers/forms.py:156
 msgid "Preview Mode"
 msgstr "Modo de Prévia"
 
-#: registers/forms.py:151
+#: registers/forms.py:159
 msgid "Show a preview of the data before importing"
 msgstr "Exibe uma prévia dos dados antes de importar"
 
-#: registers/forms.py:164 registers/forms.py:292
+#: registers/forms.py:172 registers/forms.py:300
 msgid "Please upload a valid CSV file."
 msgstr "Por favor, envie um arquivo CSV válido."
 
-#: registers/forms.py:168 registers/forms.py:296
+#: registers/forms.py:176 registers/forms.py:304
 msgid "File size must be less than 10MB."
 msgstr "O tamanho do arquivo deve ser menor que 10MB."
 
-#: registers/forms.py:180 registers/forms.py:308
+#: registers/forms.py:188 registers/forms.py:316
 msgid "CSV text must contain at least 2 lines (header and data)."
 msgstr "O texto CSV deve conter pelo menos 2 linhas (cabeçalho e dados)."
 
-#: registers/forms.py:185 registers/forms.py:313
+#: registers/forms.py:193 registers/forms.py:321
 msgid "CSV text does not appear to contain valid separators."
 msgstr "O texto CSV não parece conter separadores válidos."
 
-#: registers/forms.py:196 registers/forms.py:329
+#: registers/forms.py:204 registers/forms.py:337
 msgid "Please provide either a CSV file or CSV text."
 msgstr "Por favor, forneça um arquivo CSV ou texto CSV."
 
-#: registers/forms.py:199 registers/forms.py:332
+#: registers/forms.py:207 registers/forms.py:340
 msgid "Please provide either a CSV file OR CSV text, not both."
 msgstr "Por favor, forneça um arquivo CSV OU texto CSV, não ambos."
 
-#: registers/forms.py:210
+#: registers/forms.py:218
 msgid "Select a CSV file to process. Supported formats: .csv"
 msgstr "Selecione um arquivo CSV para processar. Formatos suportados: .csv"
 
-#: registers/forms.py:244
+#: registers/forms.py:252
 msgid "Auto-detect Nubank Format"
 msgstr "Detectar Formato Nubank Automaticamente"
 
-#: registers/forms.py:247
+#: registers/forms.py:255
 msgid "Automatically detect Nubank CSV columns (Data, Valor, Description)"
 msgstr ""
 "Detecta automaticamente as colunas do CSV Nubank (Data, Valor, Descrição)"
 
-#: registers/forms.py:256
+#: registers/forms.py:264
 msgid "Date Column Name"
 msgstr "Nome da Coluna de Data"
 
-#: registers/forms.py:258
+#: registers/forms.py:266
 msgid "Name of the column containing dates (e.g., \"Data\")"
 msgstr "Nome da coluna que contém as datas (ex.: \"Data\")"
 
-#: registers/forms.py:266
+#: registers/forms.py:274
 msgid "Amount Column Name"
 msgstr "Nome da Coluna de Valor"
 
-#: registers/forms.py:268
+#: registers/forms.py:276
 msgid "Name of the column containing amounts (e.g., \"Valor\")"
 msgstr "Nome da coluna que contém os valores (ex.: \"Valor\")"
 
-#: registers/forms.py:276
+#: registers/forms.py:284
 msgid "Description Column Name"
 msgstr "Nome da Coluna de Descrição"
 
-#: registers/forms.py:278
+#: registers/forms.py:286
 msgid "Name of the column containing descriptions (e.g., \"Description\")"
 msgstr "Nome da coluna que contém as descrições (ex.: \"Descrição\")"
 
-#: registers/forms.py:338
+#: registers/forms.py:346
 msgid "Date Column"
 msgstr "Coluna de Data"
 
-#: registers/forms.py:340
+#: registers/forms.py:348
 msgid "Amount Column"
 msgstr "Coluna de Valor"
 
-#: registers/forms.py:342
+#: registers/forms.py:350
 msgid "Description Column"
 msgstr "Coluna de Descrição"
 
-#: registers/forms.py:346
+#: registers/forms.py:354
 #, python-format
 msgid "When auto-detect is disabled, you must specify: %(fields)s"
 msgstr ""
@@ -419,11 +446,11 @@ msgstr "Categorias"
 msgid "Day of the month when billing starts"
 msgstr "Dia do mês em que a fatura começa"
 
-#: registers/models.py:128
+#: registers/models.py:130
 msgid "Quick Fill Preset"
 msgstr "Atalho de Preenchimento"
 
-#: registers/models.py:129 registers/templates/core/base.html:41
+#: registers/models.py:131 registers/templates/core/base.html:41
 #: registers/templates/register/quick_fill_preset_list.html:7
 msgid "Quick Fill Presets"
 msgstr "Atalhos de Preenchimento"
@@ -506,7 +533,7 @@ msgid_plural "Could not convert dates in %(count)s rows: %(rows)s"
 msgstr[0] "Não foi possível converter datas em %(count)s linha: %(rows)s"
 msgstr[1] "Não foi possível converter datas em %(count)s linhas: %(rows)s"
 
-#: registers/services/csv_processor_service.py:291 registers/views.py:437
+#: registers/services/csv_processor_service.py:291 registers/views.py:529
 #, python-format
 msgid "Could not auto-detect Nubank format. Available columns: %(columns)s"
 msgstr ""
@@ -561,7 +588,7 @@ msgid "Payment method '%(payment_method)s' not found"
 msgstr "Forma de pagamento '%(payment_method)s' não encontrada"
 
 #: registers/services/csv_record_strategies.py:192
-#: registers/services/csv_record_strategies.py:318 registers/views.py:90
+#: registers/services/csv_record_strategies.py:318 registers/views.py:108
 #, python-format
 msgid "Error creating expense: %(error)s"
 msgstr "Erro ao criar despesa: %(error)s"
@@ -758,12 +785,12 @@ msgstr "Valor Estimado"
 #: registers/templates/register/quick_fill_preset_list.html:27
 #: reports/templates/reports/components/expense_category_table.html:117
 #: reports/templates/reports/components/expense_details_table.html:18
-#: reports/templates/reports/recurring_expense_list.html:68
+#: reports/templates/reports/recurring_expense_list.html:80
 msgid "Actions"
 msgstr "Ações"
 
 #: registers/templates/register/budget_estimate_list.html:108
-#: registers/templates/register/expense_form.html:105
+#: registers/templates/register/expense_form.html:112
 msgid "Edit"
 msgstr "Editar"
 
@@ -773,7 +800,8 @@ msgid "Remove estimate for %(category)s?"
 msgstr "Remover estimativa para %(category)s?"
 
 #: registers/templates/register/budget_estimate_list.html:115
-#: registers/templates/register/expense_form.html:106
+#: registers/templates/register/expense_form.html:113
+#: registers/templates/register/income_form.html:42
 msgid "Delete"
 msgstr "Excluir"
 
@@ -835,12 +863,25 @@ msgid "Recent Expenses"
 msgstr "Despesas Recentes"
 
 #: registers/templates/register/components/recent_expenses_table.html:12
+#: registers/templates/register/components/recent_incomes_table.html:12
 msgid "Refresh list"
 msgstr "Atualizar lista"
 
 #: registers/templates/register/components/recent_expenses_table.html:40
 msgid "No recent expenses found"
 msgstr "Nenhuma despesa recente encontrada"
+
+#: registers/templates/register/components/recent_incomes_table.html:6
+msgid "Recent Incomes"
+msgstr "Entradas Recentes"
+
+#: registers/templates/register/components/recent_incomes_table.html:21
+msgid "Loading incomes..."
+msgstr "Carregando entradas..."
+
+#: registers/templates/register/components/recent_incomes_table.html:40
+msgid "No recent incomes found"
+msgstr "Nenhuma entrada recente encontrada"
 
 #: registers/templates/register/csv_import.html:9
 msgid ""
@@ -1163,43 +1204,58 @@ msgstr "Gerenciar atalhos"
 msgid "Add Quick Fill"
 msgstr "Adicionar Atalho"
 
-#: registers/templates/register/expense_form.html:78
+#: registers/templates/register/expense_form.html:85
 #: registers/templates/register/income_form.html:25
 #: reports/templates/reports/expense_update.html:35
 msgid "Submit"
 msgstr "Enviar"
 
-#: registers/templates/register/expense_form.html:103
+#: registers/templates/register/expense_form.html:110
+#: registers/templates/register/income_form.html:41
 msgid "Use"
 msgstr "Usar"
 
-#: registers/templates/register/expense_form.html:104
+#: registers/templates/register/expense_form.html:111
 msgid "View details"
 msgstr "Ver detalhes"
 
-#: registers/templates/register/expense_form.html:107
+#: registers/templates/register/expense_form.html:114
 msgid "Do you really want to delete the expense"
 msgstr "Deseja realmente excluir a despesa"
 
-#: registers/templates/register/expense_form.html:108
+#: registers/templates/register/expense_form.html:115
 msgid "Error loading expenses"
 msgstr "Erro ao carregar despesas"
 
-#: registers/templates/register/expense_form.html:109
+#: registers/templates/register/expense_form.html:116
+#: registers/templates/register/income_form.html:45
 msgid "Connection error"
 msgstr "Erro de conexão"
 
-#: registers/templates/register/expense_form.html:110
+#: registers/templates/register/expense_form.html:117
 msgid "Error deleting expense"
 msgstr "Erro ao excluir despesa"
 
-#: registers/templates/register/expense_form.html:111
+#: registers/templates/register/expense_form.html:118
+#: registers/templates/register/income_form.html:47
 msgid "Error loading data"
 msgstr "Erro ao carregar dados"
 
 #: registers/templates/register/expense_success.html:5
 msgid "Expense registered successfully!"
 msgstr "Despesa registrada com sucesso!"
+
+#: registers/templates/register/income_form.html:43
+msgid "Do you really want to delete the income"
+msgstr "Deseja realmente excluir a entrada"
+
+#: registers/templates/register/income_form.html:44
+msgid "Error loading incomes"
+msgstr "Erro ao carregar entradas"
+
+#: registers/templates/register/income_form.html:46
+msgid "Error deleting income"
+msgstr "Erro ao excluir entrada"
 
 #: registers/templates/register/quick_fill_preset_form.html:8
 msgid "Edit Quick Fill Preset"
@@ -1231,7 +1287,7 @@ msgstr "Ordem de Exibição"
 
 #: registers/templates/register/quick_fill_preset_form.html:64
 #: registers/templates/register/quick_fill_preset_list.html:26
-#: reports/templates/reports/recurring_expense_list.html:66
+#: reports/templates/reports/recurring_expense_list.html:77
 msgid "Active"
 msgstr "Ativo"
 
@@ -1280,7 +1336,7 @@ msgid "View List"
 msgstr "Ver Lista"
 
 #: registers/templates/register/recurring_expense_form.html:33
-#: reports/templates/reports/recurring_expense_list.html:63
+#: reports/templates/reports/recurring_expense_list.html:74
 #: reports/templates/reports/recurring_expense_update.html:33
 msgid "Start Date"
 msgstr "Data de Início"
@@ -1290,170 +1346,175 @@ msgstr "Data de Início"
 msgid "Generate Monthly Debit"
 msgstr "Gerar Débito Mensal"
 
-#: registers/views.py:51 registers/views.py:223 registers/views.py:349
-#: registers/views.py:494 registers/views.py:724 registers/views.py:776
+#: registers/views.py:54 registers/views.py:315 registers/views.py:441
+#: registers/views.py:586 registers/views.py:816 registers/views.py:868
 #, python-format
 msgid "%(field)s: %(error)s"
 msgstr "%(field)s: %(error)s"
 
-#: registers/views.py:71
+#: registers/views.py:74
 #, python-format
 msgid "%(count)s installment has been registered."
 msgid_plural "%(count)s installments have been registered."
 msgstr[0] "%(count)s parcela foi registrada."
 msgstr[1] "%(count)s parcelas foram registradas."
 
-#: registers/views.py:82
+#: registers/views.py:100
 #, python-format
 msgid "Expense %(expense)s has been registered."
 msgstr "Despesa %(expense)s foi registrada."
 
-#: registers/views.py:205 registers/views.py:266
+#: registers/views.py:148
+#, python-format
+msgid "Income %(income)s has been registered."
+msgstr "Entrada %(income)s registrada com sucesso."
+
+#: registers/views.py:216 registers/views.py:480 reports/views.py:919
+#: reports/views.py:946 reports/views.py:1005
+msgid "Unauthorized"
+msgstr "Não autorizado"
+
+#: registers/views.py:297 registers/views.py:358
 #, python-format
 msgid "Import completed! %(count)s record imported successfully."
 msgid_plural "Import completed! %(count)s records imported successfully."
 msgstr[0] "Importação concluída! %(count)s registro importado com sucesso."
 msgstr[1] "Importação concluída! %(count)s registros importados com sucesso."
 
-#: registers/views.py:240
+#: registers/views.py:332
 msgid "No import data found. Please upload a file again."
 msgstr ""
 "Nenhum dado de importação encontrado. Por favor, envie o arquivo novamente."
 
-#: registers/views.py:283
+#: registers/views.py:375
 #, python-format
 msgid "Error during import: %(error)s"
 msgstr "Erro durante a importação: %(error)s"
 
-#: registers/views.py:302
+#: registers/views.py:394
 msgid "Preview functionality would be implemented here"
 msgstr "A funcionalidade de prévia seria implementada aqui"
 
-#: registers/views.py:308
+#: registers/views.py:400
 msgid "Import functionality would be implemented here"
 msgstr "A funcionalidade de importação seria implementada aqui"
 
-#: registers/views.py:313
+#: registers/views.py:405
 msgid "Invalid action"
 msgstr "Ação inválida"
 
-#: registers/views.py:318 registers/views.py:563
+#: registers/views.py:410 registers/views.py:655
 msgid "Invalid JSON data"
 msgstr "Dados JSON inválidos"
 
-#: registers/views.py:365
+#: registers/views.py:457
 #, python-format
 msgid "Recurring expense '%(description)s' registered successfully."
 msgstr "Despesa recorrente '%(description)s' registrada com sucesso."
 
-#: registers/views.py:371
+#: registers/views.py:463
 #, python-format
 msgid "Error creating recurring expense: %(error)s"
 msgstr "Erro ao criar despesa recorrente: %(error)s"
 
-#: registers/views.py:388 reports/views.py:896 reports/views.py:923
-#: reports/views.py:959
-msgid "Unauthorized"
-msgstr "Não autorizado"
-
-#: registers/views.py:395
+#: registers/views.py:487
 #, python-format
 msgid "Expense '%(description)s' deleted successfully."
 msgstr "Despesa '%(description)s' excluída com sucesso."
 
-#: registers/views.py:454
+#: registers/views.py:546
 msgid "Processing failed. No data to display."
 msgstr "Processamento falhou. Nenhum dado para exibir."
 
-#: registers/views.py:511
+#: registers/views.py:603
 msgid "No processed data found. Please upload and process a file first."
 msgstr ""
 "Nenhum dado processado encontrado. Por favor, envie e processe um arquivo "
 "primeiro."
 
-#: registers/views.py:535
+#: registers/views.py:627
 msgid "No row data provided"
 msgstr "Nenhum dado de linha fornecido"
 
-#: registers/views.py:556
+#: registers/views.py:648
 msgid "Data updated successfully"
 msgstr "Dados atualizados com sucesso"
 
-#: registers/views.py:655
+#: registers/views.py:747
 msgid "Category ID is required for category filter"
 msgstr "O ID da categoria é obrigatório para o filtro de categoria"
 
-#: registers/views.py:668
+#: registers/views.py:760
 msgid "Category not found"
 msgstr "Categoria não encontrada"
 
-#: registers/views.py:672
+#: registers/views.py:764
 msgid "Recent"
 msgstr "Recente"
 
-#: registers/views.py:677
+#: registers/views.py:769
 #, python-format
 msgid "Invalid filter type: %(filter_type)s"
 msgstr "Tipo de filtro inválido: %(filter_type)s"
 
-#: registers/views.py:693
+#: registers/views.py:785
 #, python-format
 msgid "Expenses - %(filter_title)s"
 msgstr "Despesas - %(filter_title)s"
 
-#: registers/views.py:740
+#: registers/views.py:832
 #, python-format
 msgid "Preset '%(name)s' created successfully."
 msgstr "Atalho '%(name)s' criado com sucesso."
 
-#: registers/views.py:744
+#: registers/views.py:836
 #, python-format
 msgid "Error creating preset: %(error)s"
 msgstr "Erro ao criar atalho: %(error)s"
 
-#: registers/views.py:765
+#: registers/views.py:857
 msgid "Preset not found."
 msgstr "Atalho não encontrado."
 
-#: registers/views.py:789
+#: registers/views.py:881
 #, python-format
 msgid "Preset '%(name)s' updated successfully."
 msgstr "Atalho '%(name)s' atualizado com sucesso."
 
-#: registers/views.py:793
+#: registers/views.py:885
 #, python-format
 msgid "Error updating preset: %(error)s"
 msgstr "Erro ao atualizar atalho: %(error)s"
 
-#: registers/views.py:815
+#: registers/views.py:907
 msgid "Preset not found"
 msgstr "Atalho não encontrado"
 
-#: registers/views.py:819
+#: registers/views.py:911
 msgid "Preset deleted successfully."
 msgstr "Atalho excluído com sucesso."
 
-#: registers/views.py:853
+#: registers/views.py:945
 msgid "Category name is required."
 msgstr "O nome da categoria é obrigatório."
 
-#: registers/views.py:873
+#: registers/views.py:965
 msgid "Invalid JSON."
 msgstr "JSON inválido."
 
-#: registers/views.py:890
+#: registers/views.py:982
 msgid "Estimate created successfully."
 msgstr "Estimativa criada com sucesso."
 
-#: registers/views.py:892
+#: registers/views.py:984
 msgid "An estimate already exists for this category this month."
 msgstr "Já existe uma estimativa para esta categoria neste mês."
 
-#: registers/views.py:918
+#: registers/views.py:1010
 msgid "Estimate updated."
 msgstr "Estimativa atualizada."
 
-#: registers/views.py:937
+#: registers/views.py:1029
 msgid "Estimate removed."
 msgstr "Estimativa removida."
 
@@ -1466,15 +1527,15 @@ msgstr "Sem Categoria"
 msgid "No Payment Method"
 msgstr "Sem Forma de Pagamento"
 
-#: reports/services/recurring_expense_service.py:191
+#: reports/services/recurring_expense_service.py:218
 msgid "Month must be between 1 and 12"
 msgstr "O mês deve estar entre 1 e 12"
 
-#: reports/services/recurring_expense_service.py:200
+#: reports/services/recurring_expense_service.py:227
 msgid "Invalid year"
 msgstr "Ano inválido"
 
-#: reports/services/recurring_expense_service.py:225
+#: reports/services/recurring_expense_service.py:252
 #, python-format
 msgid "%(description)s: invalid date - %(error)s"
 msgstr "%(description)s: data inválida - %(error)s"
@@ -1681,17 +1742,18 @@ msgid "No expenses found for the selected month."
 msgstr "Nenhuma despesa encontrada para o mês selecionado."
 
 #: reports/templates/reports/components/expense_details_table.html:71
-#: reports/templates/reports/recurring_expense_list.html:156
+#: reports/templates/reports/recurring_expense_list.html:181
 msgid "Date:"
 msgstr "Data:"
 
 #: reports/templates/reports/components/expense_details_table.html:75
-#: reports/templates/reports/recurring_expense_list.html:160
+#: reports/templates/reports/recurring_expense_list.html:185
 msgid "Category:"
 msgstr "Categoria:"
 
 #: reports/templates/reports/components/expense_details_table.html:79
-#: reports/templates/reports/recurring_expense_list.html:164
+#: reports/templates/reports/recurring_expense_list.html:189
+#: reports/templates/reports/recurring_expense_list.html:202
 msgid "Payment:"
 msgstr "Pagamento:"
 
@@ -1723,6 +1785,13 @@ msgstr "Saldo:"
 msgid "Fixed Expenses:"
 msgstr "Despesas Fixas:"
 
+#: reports/templates/reports/components/fixed_expenses_card.html:10
+#, python-format
+msgid "%(count)s pending"
+msgid_plural "%(count)s pending"
+msgstr[0] "%(count)s pendente"
+msgstr[1] "%(count)s pendentes"
+
 #: reports/templates/reports/components/installment_monthly_card.html:10
 msgid "Monthly Installments:"
 msgstr "Parcelas do Mês:"
@@ -1752,7 +1821,7 @@ msgid "Installment Plan"
 msgstr "Plano de Parcelas"
 
 #: reports/templates/reports/components/installment_monthly_card.html:118
-#: reports/views.py:1083
+#: reports/views.py:1129
 #, fuzzy
 #| msgid "An unexpected error occurred while fetching expense details"
 msgid "An unexpected error occurred"
@@ -1880,34 +1949,57 @@ msgstr "Despesas Inativas"
 msgid "Grand Total"
 msgstr "Total Geral"
 
-#: reports/templates/reports/recurring_expense_list.html:67
+#: reports/templates/reports/recurring_expense_list.html:59
+msgid "Pending This Month"
+msgstr "Pendentes Este Mês"
+
+#: reports/templates/reports/recurring_expense_list.html:78
 msgid "Generated"
 msgstr "Gerado"
 
-#: reports/templates/reports/recurring_expense_list.html:78
-#: reports/templates/reports/recurring_expense_list.html:140
+#: reports/templates/reports/recurring_expense_list.html:79
+msgid "Payment"
+msgstr "Pagamento"
+
+#: reports/templates/reports/recurring_expense_list.html:90
+#: reports/templates/reports/recurring_expense_list.html:165
 msgid "Active Recurring Expenses"
 msgstr "Despesas Recorrentes Ativas"
 
-#: reports/templates/reports/recurring_expense_list.html:78
-#: reports/templates/reports/recurring_expense_list.html:140
+#: reports/templates/reports/recurring_expense_list.html:90
+#: reports/templates/reports/recurring_expense_list.html:165
 msgid "Inactive Recurring Expenses"
 msgstr "Despesas Recorrentes Inativas"
 
-#: reports/templates/reports/recurring_expense_list.html:102
-#: reports/templates/reports/recurring_expense_list.html:183
+#: reports/templates/reports/recurring_expense_list.html:114
+#: reports/templates/reports/recurring_expense_list.html:222
 #, python-format
 msgid "%(count)s expense"
 msgid_plural "%(count)s expenses"
 msgstr[0] "%(count)s despesa"
 msgstr[1] "%(count)s despesas"
 
-#: reports/templates/reports/recurring_expense_list.html:123
-#: reports/templates/reports/recurring_expense_list.html:202
+#: reports/templates/reports/recurring_expense_list.html:119
+#: reports/templates/reports/recurring_expense_list.html:204
+msgid "Not generated"
+msgstr "Não gerada"
+
+#: reports/templates/reports/recurring_expense_list.html:125
+#: reports/templates/reports/recurring_expense_list.html:210
+msgid "Paid"
+msgstr "Pago"
+
+#: reports/templates/reports/recurring_expense_list.html:125
+#: reports/templates/reports/recurring_expense_list.html:210
+msgid "Pending"
+msgstr "Pendente"
+
+#: reports/templates/reports/recurring_expense_list.html:148
+#: reports/templates/reports/recurring_expense_list.html:241
 msgid "No recurring expenses found."
 msgstr "Nenhuma despesa recorrente encontrada."
 
-#: reports/templates/reports/recurring_expense_list.html:168
+#: reports/templates/reports/recurring_expense_list.html:193
 msgid "Active:"
 msgstr "Ativo:"
 
@@ -1915,66 +2007,66 @@ msgstr "Ativo:"
 msgid "Edit Recurring Expense"
 msgstr "Editar Despesa Recorrente"
 
-#: reports/views.py:194
+#: reports/views.py:196
 msgid "Expense updated successfully."
 msgstr "Despesa atualizada com sucesso."
 
-#: reports/views.py:457
+#: reports/views.py:459
 msgid "Invalid days parameter"
 msgstr "Parâmetro de dias inválido"
 
-#: reports/views.py:466
+#: reports/views.py:468
 msgid "Invalid category"
 msgstr "Categoria inválida"
 
-#: reports/views.py:491
+#: reports/views.py:493
 msgid "Failed to load daily spending data"
 msgstr "Falha ao carregar dados de gastos diários"
 
-#: reports/views.py:514
+#: reports/views.py:516
 msgid "Date parameter is required"
 msgstr "O parâmetro de data é obrigatório"
 
-#: reports/views.py:521
+#: reports/views.py:523
 msgid "Invalid date format. Expected YYYY-MM-DD"
 msgstr "Formato de data inválido. Esperado AAAA-MM-DD"
 
-#: reports/views.py:542 reports/views.py:552 reports/views.py:698
-#: reports/views.py:1066
+#: reports/views.py:544 reports/views.py:554 reports/views.py:700
+#: reports/views.py:1112
 msgid "Uncategorized"
 msgstr "Sem categoria"
 
-#: reports/views.py:543
+#: reports/views.py:545
 msgid "No payment method"
 msgstr "Sem forma de pagamento"
 
-#: reports/views.py:569
+#: reports/views.py:571
 #, python-format
 msgid "Server error: %(error)s"
 msgstr "Erro no servidor: %(error)s"
 
-#: reports/views.py:623
+#: reports/views.py:625
 msgid "Invalid request - AJAX required"
 msgstr "Requisição inválida - AJAX necessário"
 
-#: reports/views.py:641
+#: reports/views.py:643
 msgid "year"
 msgstr "ano"
 
-#: reports/views.py:643
+#: reports/views.py:645
 msgid "month"
 msgstr "mês"
 
-#: reports/views.py:645
+#: reports/views.py:647
 msgid "category"
 msgstr "categoria"
 
-#: reports/views.py:648
+#: reports/views.py:650
 #, python-format
 msgid "Missing required parameters: %(params)s"
 msgstr "Parâmetros obrigatórios ausentes: %(params)s"
 
-#: reports/views.py:667
+#: reports/views.py:669
 #, python-format
 msgid ""
 "Invalid month name: %(month)s. Expected English month name (e.g., "
@@ -1982,85 +2074,64 @@ msgid ""
 msgstr ""
 "Nome de mês inválido: %(month)s. Esperado nome em inglês (ex.: \"January\")"
 
-#: reports/views.py:699 reports/views.py:969 reports/views.py:970
-#: reports/views.py:1067
+#: reports/views.py:701 reports/views.py:1015 reports/views.py:1016
+#: reports/views.py:1113
 msgid "N/A"
 msgstr "N/D"
 
-#: reports/views.py:828
+#: reports/views.py:830
 #, python-format
 msgid "Invalid data format: %(error)s"
 msgstr "Formato de dados inválido: %(error)s"
 
-#: reports/views.py:839
+#: reports/views.py:841
 msgid "An unexpected error occurred while fetching expense details"
 msgstr "Ocorreu um erro inesperado ao buscar detalhes da despesa"
 
-#: reports/views.py:882
+#: reports/views.py:905
 msgid "Recurring expense updated successfully."
 msgstr "Despesa recorrente atualizada com sucesso."
 
-#: reports/views.py:903
+#: reports/views.py:926
 #, python-format
 msgid "Recurring expense '%(description)s' deleted successfully."
 msgstr "Despesa recorrente '%(description)s' excluída com sucesso."
 
-#: reports/views.py:908 reports/views.py:938 reports/views.py:985
+#: reports/views.py:931 reports/views.py:961 reports/views.py:1031
 msgid "Recurring expense not found"
 msgstr "Despesa recorrente não encontrada"
 
-#: reports/views.py:932
+#: reports/views.py:955
 msgid "Recurring expense activated."
 msgstr "Despesa recorrente ativada."
 
-#: reports/views.py:934
+#: reports/views.py:957
 msgid "Recurring expense deactivated."
 msgstr "Despesa recorrente desativada."
 
-#: reports/views.py:951
+#: reports/views.py:978
+msgid "Expense marked as paid."
+msgstr "Despesa marcada como paga."
+
+#: reports/views.py:980
+msgid "Expense marked as pending."
+msgstr "Despesa marcada como pendente."
+
+#: reports/views.py:997
 msgid "ID parameter required"
 msgstr "Parâmetro ID é obrigatório"
 
-#: reports/views.py:1005
+#: reports/views.py:1051
 msgid "Invalid month and year"
 msgstr "Mês e ano inválidos"
 
-#: reports/views.py:1042
+#: reports/views.py:1088
 msgid "month and year are required"
 msgstr ""
 
-#: reports/views.py:1048
+#: reports/views.py:1094
 msgid "month and year must be integers"
 msgstr ""
-
-#: registers/templates/register/components/recent_incomes_table.html:6
-msgid "Recent Incomes"
-msgstr "Entradas Recentes"
-
-#: registers/templates/register/components/recent_incomes_table.html:21
-msgid "Loading incomes..."
-msgstr "Carregando entradas..."
-
-#: registers/templates/register/components/recent_incomes_table.html:40
-msgid "No recent incomes found"
-msgstr "Nenhuma entrada recente encontrada"
-
-#: registers/templates/register/income_form.html:43
-msgid "Do you really want to delete the income"
-msgstr "Deseja realmente excluir a entrada"
-
-#: registers/templates/register/income_form.html:44
-msgid "Error loading incomes"
-msgstr "Erro ao carregar entradas"
-
-#: registers/templates/register/income_form.html:46
-msgid "Error deleting income"
-msgstr "Erro ao excluir entrada"
-
-#: registers/views.py:148
-#, python-format
-msgid "Income %(income)s has been registered."
-msgstr "Entrada %(income)s registrada com sucesso."
 
 #, fuzzy
 #~| msgid "Actions"

@@ -195,7 +195,6 @@ class FixedExpensesSummaryPaymentStatusTest(TestCase):
 
 
 from django.urls import reverse
-from django.utils.translation import override
 
 
 class RecurringExpenseTogglePaidViewTest(TestCase):
@@ -277,8 +276,11 @@ class RecurringExpenseListTemplateStatusTest(TestCase):
         )
 
     def test_page_shows_paid_and_not_generated_badges(self):
-        with override('en'):
-            response = self.client.get(reverse('recurring_expense_list'))
+        # ponytail: override() only sets the active language for this thread;
+        # LocaleMiddleware re-derives the request's language from the
+        # Accept-Language header (session/cookie absent here) and overrides
+        # it back to pt-br, so the header is what actually has to change.
+        response = self.client.get(reverse('recurring_expense_list'), HTTP_ACCEPT_LANGUAGE='en')
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Paid')
@@ -288,3 +290,22 @@ class RecurringExpenseListTemplateStatusTest(TestCase):
         response = self.client.get(reverse('recurring_expense_list'))
 
         self.assertEqual(response.context['pending_count'], 0)
+
+
+class RecurringExpensePaymentStatusTranslationTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='translationuser', password='12345')
+        self.category = Category.objects.create(name='Food', type='expense')
+        self.payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
+        self.client.force_login(self.user)
+
+    def test_not_generated_badge_is_translated_to_portuguese_by_default(self):
+        RecurringExpense.objects.create(
+            user=self.user, description='Gym', total_amount=80,
+            start_date=date(2026, 1, 15), category=self.category,
+            payment_method=self.payment_method,
+        )
+
+        response = self.client.get(reverse('recurring_expense_list'))
+
+        self.assertContains(response, 'Não gerada')
