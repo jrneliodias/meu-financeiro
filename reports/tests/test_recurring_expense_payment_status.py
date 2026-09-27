@@ -192,3 +192,99 @@ class FixedExpensesSummaryPaymentStatusTest(TestCase):
         self.assertEqual(summary['paid_count'], 0)
         self.assertEqual(summary['not_generated_count'], 0)
         self.assertEqual(summary['count'], 1)
+
+
+from django.urls import reverse
+from django.utils.translation import override
+
+
+class RecurringExpenseTogglePaidViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='viewowner', password='12345')
+        self.other_user = User.objects.create_user(username='viewintruder', password='12345')
+        self.category = Category.objects.create(name='Food', type='expense')
+        self.payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
+        self.recurring_expense = RecurringExpense.objects.create(
+            user=self.user, description='Netflix', total_amount=50,
+            start_date=date(2026, 1, 5), category=self.category,
+            payment_method=self.payment_method,
+        )
+        self.expense = Expense.objects.create(
+            user=self.user, description='Netflix', amount=50,
+            date=date(2026, 9, 5), category=self.category,
+            payment_method=self.payment_method,
+            reccurring_expense=self.recurring_expense, is_paid=False,
+        )
+        self.client.force_login(self.user)
+
+    def test_toggle_paid_marks_expense_paid(self):
+        response = self.client.post(
+            reverse('recurring_expense_toggle_paid', args=[self.expense.id])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertTrue(data['is_paid'])
+        self.expense.refresh_from_db()
+        self.assertTrue(self.expense.is_paid)
+
+    def test_toggle_paid_rejects_other_users_expense(self):
+        self.client.force_login(self.other_user)
+
+        response = self.client.post(
+            reverse('recurring_expense_toggle_paid', args=[self.expense.id])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.expense.refresh_from_db()
+        self.assertFalse(self.expense.is_paid)
+
+    def test_toggle_paid_requires_post(self):
+        response = self.client.get(
+            reverse('recurring_expense_toggle_paid', args=[self.expense.id])
+        )
+
+        self.assertEqual(response.status_code, 405)
+
+
+class RecurringExpenseListTemplateStatusTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='listowner', password='12345')
+        self.category = Category.objects.create(name='Food', type='expense')
+        self.payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
+        self.client.force_login(self.user)
+
+        from utils.dates import get_current_date
+        self.current_year, self.current_month = get_current_date()
+
+        self.paid_recurring = RecurringExpense.objects.create(
+            user=self.user, description='Netflix', total_amount=50,
+            start_date=date(2026, 1, 5), category=self.category,
+            payment_method=self.payment_method,
+        )
+        Expense.objects.create(
+            user=self.user, description='Netflix', amount=50,
+            date=date(self.current_year, self.current_month, 5),
+            category=self.category, payment_method=self.payment_method,
+            reccurring_expense=self.paid_recurring, is_paid=True,
+        )
+
+        RecurringExpense.objects.create(
+            user=self.user, description='Gym', total_amount=80,
+            start_date=date(2026, 1, 15), category=self.category,
+            payment_method=self.payment_method,
+        )
+
+    def test_page_shows_paid_and_not_generated_badges(self):
+        with override('en'):
+            response = self.client.get(reverse('recurring_expense_list'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Paid')
+        self.assertContains(response, 'Not generated')
+
+    def test_pending_count_is_zero_when_nothing_pending(self):
+        response = self.client.get(reverse('recurring_expense_list'))
+
+        self.assertEqual(response.context['pending_count'], 0)

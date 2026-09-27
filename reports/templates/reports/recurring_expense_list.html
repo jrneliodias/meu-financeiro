@@ -18,7 +18,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Active Total Card -->
         <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
             <div class="flex items-center justify-between">
@@ -51,6 +51,17 @@
                 <i class="fas fa-calculator text-blue-500 text-3xl"></i>
             </div>
         </div>
+
+        <!-- Pending This Month Card -->
+        <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-yellow-400 text-sm font-medium">{% trans "Pending This Month" %}</p>
+                    <p class="text-2xl font-bold text-white mt-1">{{ pending_count }}</p>
+                </div>
+                <i class="fas fa-exclamation-circle text-yellow-500 text-3xl"></i>
+            </div>
+        </div>
     </div>
 
     <!-- Desktop Table (hidden on mobile) -->
@@ -65,6 +76,7 @@
                     <th class="text-start p-2">{% trans "Payment Method" %}</th>
                     <th class="text-center p-2">{% trans "Active" %}</th>
                     <th class="text-center p-2">{% trans "Generated" %}</th>
+                    <th class="text-center p-2">{% trans "Payment" %}</th>
                     <th class="text-end p-2">{% trans "Actions" %}</th>
                 </tr>
             </thead>
@@ -73,7 +85,7 @@
                 {% for status_group in expenses_by_status %}
                     {# Section header #}
                     <tr class="{% if status_group.grouper %}bg-green-900/20 border-t-2 border-green-500{% else %}bg-gray-900/20 border-t-2 border-gray-500{% endif %}">
-                        <td colspan="8" class="p-3 font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
+                        <td colspan="9" class="p-3 font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
                             <i class="fas {% if status_group.grouper %}fa-check-circle{% else %}fa-pause-circle{% endif %} mr-2"></i>
                             {% if status_group.grouper %}{% trans "Active Recurring Expenses" %}{% else %}{% trans "Inactive Recurring Expenses" %}{% endif %}
                         </td>
@@ -102,6 +114,19 @@
                                 {% blocktrans count count=recurring_expense.expense_count|default:0 %}{{ count }} expense{% plural %}{{ count }} expenses{% endblocktrans %}
                             </button>
                         </td>
+                        <td class="text-center">
+                            {% if recurring_expense.current_month_status == 'not_generated' %}
+                                <span class="text-gray-500 text-sm">{% trans "Not generated" %}</span>
+                            {% else %}
+                                <button class="toggle-paid-btn cursor-pointer"
+                                        data-expense-id="{{ recurring_expense.current_month_expense_id }}"
+                                        data-paid="{% if recurring_expense.current_month_status == 'paid' %}true{% else %}false{% endif %}">
+                                    <span class="px-2 py-1 rounded text-xs font-bold {% if recurring_expense.current_month_status == 'paid' %}bg-green-900/40 text-green-400{% else %}bg-yellow-900/40 text-yellow-400{% endif %}">
+                                        {% if recurring_expense.current_month_status == 'paid' %}{% trans "Paid" %}{% else %}{% trans "Pending" %}{% endif %}
+                                    </span>
+                                </button>
+                            {% endif %}
+                        </td>
                         <td class="text-end space-x-2">
                             <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
                                class="text-blue-600 hover:text-blue-800">
@@ -119,7 +144,7 @@
 
                 {% if not recurring_expenses %}
                 <tr>
-                    <td colspan="8" class="text-center p-4">
+                    <td colspan="9" class="text-center p-4">
                         {% trans "No recurring expenses found." %}
                     </td>
                 </tr>
@@ -172,6 +197,20 @@
                             <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }}
                                       {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
                         </button>
+                    </div>
+                    <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
+                        <span class="text-gray-400">{% trans "Payment:" %}</span>
+                        {% if recurring_expense.current_month_status == 'not_generated' %}
+                            <span class="text-gray-500 text-sm">{% trans "Not generated" %}</span>
+                        {% else %}
+                            <button class="toggle-paid-btn cursor-pointer text-left"
+                                    data-expense-id="{{ recurring_expense.current_month_expense_id }}"
+                                    data-paid="{% if recurring_expense.current_month_status == 'paid' %}true{% else %}false{% endif %}">
+                                <span class="px-2 py-1 rounded text-xs font-bold {% if recurring_expense.current_month_status == 'paid' %}bg-green-900/40 text-green-400{% else %}bg-yellow-900/40 text-yellow-400{% endif %}">
+                                    {% if recurring_expense.current_month_status == 'paid' %}{% trans "Paid" %}{% else %}{% trans "Pending" %}{% endif %}
+                                </span>
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
 

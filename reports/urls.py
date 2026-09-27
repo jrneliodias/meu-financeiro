@@ -13,6 +13,8 @@ urlpatterns = [
          views.recurring_expense_delete, name="recurring_expense_delete"),
     path("recurring-expense/<int:pk>/toggle/",
          views.recurring_expense_toggle, name="recurring_expense_toggle"),
+    path("recurring-expense/<int:expense_id>/toggle-paid/",
+         views.recurring_expense_toggle_paid, name="recurring_expense_toggle_paid"),
     path("recurring-expense-details/",
          views.recurring_expense_details_ajax, name="recurring_expense_details_ajax"),
     path("process-recurring-expenses/",
