@@ -996,11 +996,25 @@ def budget_estimate_list(request):
         user=request.user, month=selected_month, year=selected_year
     ).select_related('category').order_by('category__name')
 
+    copy_candidates = budget_estimate_copy_service.get_copy_candidates(
+        request.user, selected_month, selected_year
+    )
+    copy_formset, copy_rows = None, []
+    if copy_candidates:
+        copy_formset = EstimateCopyFormSet(prefix='copy', initial=[
+            {'category_id': estimate.category_id, 'selected': True, 'amount': estimate.amount}
+            for estimate in copy_candidates.copyable
+        ])
+        copy_rows = list(zip(copy_formset.forms, copy_candidates.copyable))
+
     return render(request, 'register/budget_estimate_list.html', {
         'estimates': estimates,
         'form': form,
         'selected_month': selected_month,
         'selected_year': selected_year,
+        'copy_candidates': copy_candidates,
+        'copy_formset': copy_formset,
+        'copy_rows': copy_rows,
     })
 
 

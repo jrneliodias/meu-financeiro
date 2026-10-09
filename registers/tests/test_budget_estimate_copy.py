@@ -265,3 +265,51 @@ class BudgetEstimateCopyViewTest(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 405)
+
+
+class BudgetEstimateListCopySectionTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.market = Category.objects.create(name='Supermercado', type='expense')
+        self.uber = Category.objects.create(name='Uber', type='expense')
+        self.client.force_login(self.user)
+        self.url = reverse('budget_estimate_list') + '?month=10&year=2026'
+
+    def test_list_shows_copy_section_from_latest_month(self):
+        make_estimate(self.user, self.market, 8, 2026, '698.00')
+
+        response = self.client.get(self.url)
+
+        candidates = response.context['copy_candidates']
+        self.assertEqual((candidates.source_month, candidates.source_year), (8, 2026))
+        self.assertContains(response, 'Supermercado')
+        self.assertContains(response, reverse('budget_estimate_copy'))
+        self.assertContains(response, 'name="action" value="all"')
+
+    def test_list_prefills_copyable_rows_checked_with_source_amount(self):
+        make_estimate(self.user, self.market, 8, 2026, '698.00')
+
+        response = self.client.get(self.url)
+
+        form, estimate = response.context['copy_rows'][0]
+        self.assertEqual(estimate.category, self.market)
+        self.assertEqual(form.initial, {'category_id': self.market.id, 'selected': True, 'amount': Decimal('698.00')})
+
+    def test_list_marks_existing_categories_as_read_only(self):
+        make_estimate(self.user, self.market, 8, 2026, '698.00')
+        make_estimate(self.user, self.uber, 8, 2026, '354.00')
+        make_estimate(self.user, self.uber, 10, 2026, '300.00')
+
+        response = self.client.get(self.url)
+
+        self.assertEqual([e.category for _, e in response.context['copy_rows']], [self.market])
+        self.assertEqual(
+            [e.category for e in response.context['copy_candidates'].already_existing],
+            [self.uber],
+        )
+
+    def test_list_hides_copy_section_without_source(self):
+        response = self.client.get(self.url)
+
+        self.assertIsNone(response.context['copy_candidates'])
+        self.assertNotContains(response, reverse('budget_estimate_copy'))
