@@ -37,4 +37,5 @@ urlpatterns = [
     path("estimativas/", views.budget_estimate_list, name="budget_estimate_list"),
     path("estimativas/<int:pk>/editar/", views.budget_estimate_update, name="budget_estimate_update"),
     path("estimativas/<int:pk>/excluir/", views.budget_estimate_delete, name="budget_estimate_delete"),
+    path("estimativas/copiar/", views.budget_estimate_copy, name="budget_estimate_copy"),
 ]
