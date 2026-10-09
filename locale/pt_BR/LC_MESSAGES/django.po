@@ -1506,6 +1506,45 @@ msgstr "JSON inválido."
 msgid "Estimate created successfully."
 msgstr "Estimativa criada com sucesso."
 
+msgid "Invalid values. Check the amounts and try again."
+msgstr "Valores inválidos. Confira os valores e tente novamente."
+
+msgid "No estimates selected."
+msgstr "Nenhuma estimativa selecionada."
+
+#, python-format
+msgid "%(count)s estimate copied."
+msgid_plural "%(count)s estimates copied."
+msgstr[0] "%(count)s estimativa copiada."
+msgstr[1] "%(count)s estimativas copiadas."
+
+#, python-format
+msgid "%(count)s skipped because it already existed."
+msgid_plural "%(count)s skipped because they already existed."
+msgstr[0] "%(count)s ignorada porque já existia."
+msgstr[1] "%(count)s ignoradas porque já existiam."
+
+#, python-format
+msgid "Estimates from %(month)s/%(year)s"
+msgstr "Estimativas de %(month)s/%(year)s"
+
+#, python-format
+msgid "Amount for %(category)s"
+msgstr "Valor para %(category)s"
+
+#, python-format
+msgid "Copy selected to %(month)s/%(year)s"
+msgstr "Copiar selecionadas para %(month)s/%(year)s"
+
+msgid "Copy all"
+msgstr "Copiar todas"
+
+msgid "All categories already exist this month."
+msgstr "Todas as categorias já existem neste mês."
+
+msgid "Already exists this month"
+msgstr "Já existe neste mês"
+
 #: registers/views.py:984
 msgid "An estimate already exists for this category this month."
 msgstr "Já existe uma estimativa para esta categoria neste mês."
