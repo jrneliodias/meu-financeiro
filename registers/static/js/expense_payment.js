@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     label.classList.toggle('text-green-400', data.is_paid);
                     label.classList.toggle('text-yellow-400', !data.is_paid);
                 });
+                document.dispatchEvent(new CustomEvent('expense-payment-saved'));
             } catch (error) {
                 control.checked = !requestedState;
                 alert(control.dataset.errorLabel);

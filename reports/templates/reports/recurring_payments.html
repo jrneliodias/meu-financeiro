@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% load static currency_filters %}
+{% block content %}
+<article class="space-y-6">
+  <header class="space-y-3">
+    <h1 class="text-2xl font-bold">Pagamentos do mês</h1>
+    <p class="text-gray-400">Controle as despesas recorrentes de {{ selected_month|stringformat:'02d' }}/{{ selected_year }}. Ao marcar, o pagamento é salvo com a data de hoje.</p>
+    <form method="get" class="flex flex-wrap gap-3 items-end">
+      <label>Mês
+        <select name="month" class="block bg-zinc-800 border border-zinc-600 rounded p-2">
+          {% for number, name in all_months %}<option value="{{ number }}" {% if number == selected_month %}selected{% endif %}>{{ name|translate_month }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Ano<input name="year" type="number" min="2000" max="2100" required value="{{ selected_year }}" class="block bg-zinc-800 border border-zinc-600 rounded p-2 w-28"></label>
+      <button class="bg-blue-700 hover:bg-blue-600 rounded px-4 py-2">Ver mês</button>
+      <a href="{% url 'recurring_expense_list' %}" class="text-blue-400 py-2">Gerenciar recorrentes e gerar despesas</a>
+    </form>
+  </header>
+  {% if filter_error %}<p role="alert" class="text-red-400">{{ filter_error }}</p>{% else %}
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div class="bg-zinc-800 rounded-lg p-4 border-l-4 border-yellow-500"><p>A pagar</p><p class="text-3xl font-bold">{{ pending_count }}</p><p>{{ pending_total|format_brl }}</p></div>
+    <div class="bg-zinc-800 rounded-lg p-4 border-l-4 border-green-500"><p>Pagas</p><p class="text-3xl font-bold">{{ paid_count }}</p><p>{{ paid_total|format_brl }}</p></div>
+    <div class="bg-zinc-800 rounded-lg p-4"><p>Ainda não geradas</p><p class="text-3xl font-bold">{{ missing_count }}</p><p class="text-sm text-gray-400">Recorrentes sem lançamento neste mês</p></div>
+  </div>
+  <section aria-labelledby="pending-heading" class="space-y-3">
+    <h2 id="pending-heading" class="text-xl font-bold text-yellow-400">A pagar ({{ pending_count }})</h2>
+    {% for expense in pending_expenses %}{% include 'reports/components/recurring_payment_row.html' %}{% empty %}<p class="bg-zinc-800/50 rounded-lg p-4">Nenhuma despesa recorrente gerada está pendente neste mês.</p>{% endfor %}
+  </section>
+  {% if missing_schedules %}
+  <section aria-labelledby="missing-heading" class="space-y-3">
+    <h2 id="missing-heading" class="text-xl font-bold">Ainda não geradas ({{ missing_count }})</h2>
+    <p class="text-sm text-gray-400">Gere os lançamentos na tela de recorrentes para controlar o pagamento. Estas despesas não estão incluídas no total a pagar acima.</p>
+    {% for schedule in missing_schedules %}<div class="bg-zinc-800/50 rounded-lg p-4 flex flex-wrap justify-between gap-2"><span>{{ schedule.description }}</span><span>{{ schedule.total_amount|format_brl }} · Não gerada</span></div>{% endfor %}
+  </section>
+  {% endif %}
+  <section aria-labelledby="paid-heading" class="space-y-3">
+    <h2 id="paid-heading" class="text-xl font-bold text-green-400">Pagas ({{ paid_count }})</h2>
+    {% for expense in paid_expenses %}{% include 'reports/components/recurring_payment_row.html' %}{% empty %}<p class="bg-zinc-800/50 rounded-lg p-4">Nenhuma despesa recorrente marcada como paga neste mês.</p>{% endfor %}
+  </section>
+  {% endif %}
+</article>
+<script src="{% static 'js/expense_payment.js' %}"></script>
+<script src="{% static 'js/recurring_payments.js' %}"></script>
+{% endblock %}

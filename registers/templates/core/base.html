@@ -45,6 +45,11 @@
       <i class="fa-solid fa-repeat text-sm lg:text-xs"></i>
       <span class="text-sm hidden lg:block">{% trans "Recurring Expenses" %}</span>
     </a>
+    <a href="{% url 'recurring_payments' %}" title="Pagamentos do mês"
+      class="font-semibold flex items-center justify-center lg:justify-start gap-2 hover:bg-zinc-700 p-4 lg:px-4 lg:py-2 rounded-lg {% if request.resolver_match.url_name == 'recurring_payments' %}bg-blue-800{% endif %}">
+      <i class="fa-solid fa-list-check text-sm lg:text-xs"></i>
+      <span class="text-sm hidden lg:block">Pagamentos do mês</span>
+    </a>
     <a href="{% url 'budget_estimate_list' %}"
       class="font-semibold flex items-center justify-center lg:justify-start gap-2 hover:bg-zinc-700 p-4 lg:px-4 lg:py-2 rounded-lg {% if 'estimativas' in request.path %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
       <i class="fa-solid fa-chart-pie text-sm lg:text-xs"></i>

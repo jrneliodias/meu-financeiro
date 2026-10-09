@@ -1,0 +1,12 @@
+{% load currency_filters %}
+<div class="bg-zinc-800/50 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+  <div>
+    <h3 class="font-bold">{{ expense.description }}</h3>
+    <p class="text-sm text-gray-400">Data da despesa: {{ expense.date|date:'d/m/Y' }}{% if expense.payment_method %} · {{ expense.payment_method.name }}{% endif %}</p>
+    {% if expense.is_paid %}<p class="text-sm text-green-400">Pagamento: {% if expense.paid_at %}{{ expense.paid_at|date:'d/m/Y' }}{% else %}data não registrada{% endif %}</p>{% endif %}
+  </div>
+  <div class="flex flex-wrap items-center gap-4">
+    <span class="font-bold">{{ expense.amount|format_brl }}</span>
+    {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
+  </div>
+</div>

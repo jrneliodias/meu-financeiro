@@ -843,6 +843,29 @@ def category_expense_details_ajax(request):
 
 
 @login_required
+def recurring_payments(request):
+    """Dedicated monthly recurring payment control."""
+    from django.utils.timezone import localdate
+    from reports.services.recurring_payment_service import RecurringPaymentService
+
+    today = localdate()
+    try:
+        month = int(request.GET.get('month', today.month))
+        year = int(request.GET.get('year', today.year))
+        overview = RecurringPaymentService().get_overview(request.user, month, year)
+    except (ValueError, TypeError):
+        return render(request, 'reports/recurring_payments.html', {
+            'filter_error': 'Selecione um mês e ano válidos (2000 a 2100).',
+            'selected_month': today.month, 'selected_year': today.year,
+            'all_months': get_all_months_tuples(),
+        }, status=400)
+    return render(request, 'reports/recurring_payments.html', {
+        **overview, 'selected_month': month, 'selected_year': year,
+        'all_months': get_all_months_tuples(),
+    })
+
+
+@login_required
 def recurring_expense_list(request):
     """List all user's recurring expenses"""
     from utils.dates import get_all_months_tuples, get_current_date
