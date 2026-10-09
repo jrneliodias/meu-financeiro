@@ -231,6 +231,27 @@ class BudgetEstimateCopyViewTest(TestCase):
         messages = list(response.context['messages'])
         self.assertEqual(messages[0].level, django_messages.ERROR)
 
+    def test_copy_selected_ignores_blank_amount_on_unchecked_rows(self):
+        response = self.client.post(self.url, self.post_data([
+            (self.market, '698.00', True),
+            (self.uber, '', False),
+        ]))
+
+        self.assertRedirects(response, self.target_url, fetch_redirect_response=False)
+        self.assertEqual([e.category for e in self.target_estimates()], [self.market])
+
+    def test_copy_rejects_blank_amount_on_rows_being_copied(self):
+        for action, selected in [('selected', True), ('all', False)]:
+            with self.subTest(action=action):
+                response = self.client.post(self.url, self.post_data([
+                    (self.market, '698.00', True),
+                    (self.uber, '', selected),
+                ], action=action), follow=True)
+
+                self.assertFalse(self.target_estimates().exists())
+                messages = list(response.context['messages'])
+                self.assertEqual(messages[0].level, django_messages.ERROR)
+
     def test_copy_ignores_blank_extra_rows(self):
         data = self.post_data([], action='all')
         data['copy-TOTAL_FORMS'] = '1'

@@ -423,7 +423,9 @@ class EstimateCopyRowForm(forms.Form):
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'w-4 h-4 accent-blue-600'}),
     )
+    # Opcional aqui: só é exigido nas linhas que vão ser copiadas (a view decide).
     amount = forms.DecimalField(
+        required=False,
         max_digits=10,
         decimal_places=2,
         min_value=0,

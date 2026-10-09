@@ -1075,11 +1075,16 @@ def budget_estimate_copy(request):
 
     # "Copiar todas" ignora os checkboxes, mas respeita os valores editados.
     copy_all = request.POST.get('action') == 'all'
-    items = [
-        CopyItem(form.cleaned_data['category_id'], form.cleaned_data['amount'])
+    rows_to_copy = [
+        form.cleaned_data
         for form in formset.forms
         if form.cleaned_data and (copy_all or form.cleaned_data['selected'])
     ]
+    if any(row['amount'] is None for row in rows_to_copy):
+        messages.error(request, _('Invalid values. Check the amounts and try again.'))
+        return redirect(redirect_url)
+
+    items = [CopyItem(row['category_id'], row['amount']) for row in rows_to_copy]
     if not items:
         messages.error(request, _('No estimates selected.'))
         return redirect(redirect_url)
