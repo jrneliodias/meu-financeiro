@@ -21,7 +21,7 @@ Fora de escopo (decidido no brainstorming): sobrescrever estimativas já existen
 5. Nunca sobrescreve: no POST, categorias que já existem no destino (inclusive criadas entre o GET e o POST) são ignoradas e contadas como `skipped`.
 6. O mês de origem é **recalculado no servidor** no POST; o cliente só envia `category_id`, `selected` e `amount`. `category_id` que não pertence ao mês de origem do usuário é descartado silenciosamente (proteção contra POST forjado).
 7. Valor deve ser `>= 0` (mesma regra do formulário de criação).
-8. Criação é atômica (`transaction.atomic` + `bulk_create`).
+8. Criação é atômica: um único `bulk_create` (o Django já o executa dentro de uma transação). Linhas repetidas com o mesmo `category_id` no POST são deduplicadas (vale a última).
 
 ## Fluxo do Usuário
 
@@ -108,7 +108,7 @@ class BudgetEstimateCopyService:
 
     def copy_estimates(self, user, month, year, items: list[CopyItem]) -> CopyResult:
         """Recalcula a origem; descarta category_id fora da origem; ignora (skipped)
-        categorias já existentes no destino; cria o restante em transaction.atomic()."""
+        categorias já existentes no destino; deduplica por category_id; cria o restante com um bulk_create."""
 ```
 
 O service **não sabe** se os itens vieram de "selecionadas" ou "todas" — essa interpretação é da view (quem lê o formulário).
