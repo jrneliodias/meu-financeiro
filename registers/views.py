@@ -13,6 +13,7 @@ from .services.expense_list_service import ExpenseListService
 from .constants import ApiStatus, ApiMessages
 from .services.csv_processor_service import CSVProcessorService
 from reports.services.recurring_expense_service import RecurringExpenseService
+from django.db import IntegrityError
 from django.contrib import messages
 from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -980,7 +981,7 @@ def budget_estimate_list(request):
             try:
                 estimate.save()
                 messages.success(request, _('Estimate created successfully.'))
-            except Exception:
+            except IntegrityError:
                 messages.error(request, _('An estimate already exists for this category this month.'))
             return redirect(
                 f"{request.path}?month={estimate.month}&year={estimate.year}"
