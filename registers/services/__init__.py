@@ -11,6 +11,7 @@ from .csv_import_service import CSVImportService
 from .recent_expense_service import RecentExpenseService
 from .recent_income_service import RecentIncomeService
 from .quick_fill_preset_service import QuickFillPresetService
+from .budget_estimate_copy_service import BudgetEstimateCopyService
 
 __all__ = [
     'ExpenseService',
@@ -20,4 +21,5 @@ __all__ = [
     'RecentExpenseService',
     'RecentIncomeService',
     'QuickFillPresetService',
+    'BudgetEstimateCopyService',
 ]
