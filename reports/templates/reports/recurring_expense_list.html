@@ -57,7 +57,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-yellow-400 text-sm font-medium">{% trans "Pending This Month" %}</p>
-                    <p class="text-2xl font-bold text-white mt-1">{{ pending_count }}</p>
+                    <p class="text-2xl font-bold text-white mt-1" data-pending-count>{{ pending_count }}</p>
                 </div>
                 <i class="fas fa-exclamation-circle text-yellow-500 text-3xl"></i>
             </div>
@@ -122,15 +122,7 @@
                                     <span class="text-gray-500 text-sm">—</span>
                                 {% endif %}
                             {% else %}
-                                <button class="toggle-paid-btn cursor-pointer"
-                                        data-expense-id="{{ recurring_expense.current_month_expense_id }}"
-                                        data-paid="{% if recurring_expense.current_month_status == 'paid' %}true{% else %}false{% endif %}"
-                                        data-paid-label="{% trans 'Paid' %}"
-                                        data-pending-label="{% trans 'Pending' %}">
-                                    <span class="px-2 py-1 rounded text-xs font-bold {% if recurring_expense.current_month_status == 'paid' %}bg-green-900/40 text-green-400{% else %}bg-yellow-900/40 text-yellow-400{% endif %}">
-                                        {% if recurring_expense.current_month_status == 'paid' %}{% trans "Paid" %}{% else %}{% trans "Pending" %}{% endif %}
-                                    </span>
-                                </button>
+                                {% include "reports/components/payment_checkbox.html" with expense_id=recurring_expense.current_month_expense_id is_paid=recurring_expense.current_month_is_paid description=recurring_expense.description %}
                             {% endif %}
                         </td>
                         <td class="text-end space-x-2">
@@ -213,15 +205,7 @@
                                 <span class="text-gray-500 text-sm">—</span>
                             {% endif %}
                         {% else %}
-                            <button class="toggle-paid-btn cursor-pointer text-left"
-                                    data-expense-id="{{ recurring_expense.current_month_expense_id }}"
-                                    data-paid="{% if recurring_expense.current_month_status == 'paid' %}true{% else %}false{% endif %}"
-                                    data-paid-label="{% trans 'Paid' %}"
-                                    data-pending-label="{% trans 'Pending' %}">
-                                <span class="px-2 py-1 rounded text-xs font-bold {% if recurring_expense.current_month_status == 'paid' %}bg-green-900/40 text-green-400{% else %}bg-yellow-900/40 text-yellow-400{% endif %}">
-                                    {% if recurring_expense.current_month_status == 'paid' %}{% trans "Paid" %}{% else %}{% trans "Pending" %}{% endif %}
-                                </span>
-                            </button>
+                            {% include "reports/components/payment_checkbox.html" with expense_id=recurring_expense.current_month_expense_id is_paid=recurring_expense.current_month_is_paid description=recurring_expense.description %}
                         {% endif %}
                     </div>
                 </div>
@@ -262,4 +246,5 @@
 
 <!-- Incluir JavaScript -->
 <script src="{% static 'js/recurring_expense_list.js' %}"></script>
+<script src="{% static 'js/expense_payment.js' %}"></script>
 {% endblock content %}

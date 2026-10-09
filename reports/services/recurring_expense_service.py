@@ -154,6 +154,12 @@ class RecurringExpenseService:
         """
         return self.repository.toggle_generate_debit(recurring_expense_id)
 
+    def set_paid(self, expense_id, user, is_paid):
+        """Set an occurrence's payment state without changing other months."""
+        if not isinstance(is_paid, bool):
+            raise ValueError('is_paid must be a boolean')
+        return self.repository.set_paid(expense_id, user, is_paid)
+
     def toggle_paid(self, expense_id, user):
         """
         Alterna o status de pagamento de uma despesa gerada por despesa fixa.

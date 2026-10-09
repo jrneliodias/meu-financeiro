@@ -866,6 +866,7 @@ def recurring_expense_list(request):
     for recurring_expense in recurring_expenses:
         status_entry = status_by_recurring_id.get(recurring_expense.id)
         recurring_expense.current_month_status = status_entry['status'] if status_entry else 'not_generated'
+        recurring_expense.current_month_is_paid = recurring_expense.current_month_status == 'paid'
         recurring_expense.current_month_expense_id = (
             status_entry['expense'].id if status_entry and status_entry['expense'] else None
         )
@@ -961,6 +962,28 @@ def recurring_expense_toggle(request, pk):
         return JsonResponse({'error': _('Recurring expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def recurring_expense_set_paid(request, expense_id):
+    """Save the explicit checkbox state for a user-owned occurrence."""
+    import json
+
+    try:
+        payload = json.loads(request.body)
+        if not isinstance(payload, dict) or not isinstance(payload.get('is_paid'), bool):
+            return JsonResponse({'error': 'is_paid must be a boolean'}, status=400)
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    try:
+        expense = RecurringExpenseService().set_paid(
+            expense_id, request.user, payload['is_paid'],
+        )
+    except Expense.DoesNotExist:
+        return JsonResponse({'error': _('Expense not found')}, status=404)
+    return JsonResponse({'success': True, 'is_paid': expense.is_paid})
 
 
 @login_required

@@ -183,6 +183,22 @@ class RecurringExpenseRepository:
         expense.save()
         return expense
 
+    def set_paid(self, expense_id, user, is_paid):
+        """Persist the requested state only for an owned recurring occurrence."""
+        from django.db import transaction
+        from django.utils.timezone import localdate
+        from registers.models import Expense
+
+        with transaction.atomic():
+            expense = Expense.objects.select_for_update().get(
+                id=expense_id, user=user, reccurring_expense__isnull=False,
+            )
+            if expense.is_paid != is_paid:
+                expense.is_paid = is_paid
+                expense.paid_at = localdate() if is_paid else None
+                expense.save(update_fields=['is_paid', 'paid_at', 'updated_at'])
+            return expense
+
     def get_month_expenses_with_status(self, user, month, year):
         """
         Get each active recurring expense for the user together with its

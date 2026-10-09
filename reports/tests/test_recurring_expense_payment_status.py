@@ -336,3 +336,81 @@ class RecurringExpensePaymentStatusTranslationTest(TestCase):
         response = self.client.get(reverse('recurring_expense_list'))
 
         self.assertContains(response, 'Não gerada')
+
+
+class SetExpensePaidViewTest(RecurringExpenseTogglePaidViewTest):
+    def set_paid(self, value):
+        return self.client.post(
+            reverse('recurring_expense_set_paid', args=[self.expense.id]),
+            data={'is_paid': value}, content_type='application/json',
+        )
+
+    def test_repeated_request_preserves_paid_state_and_date(self):
+        self.assertEqual(self.set_paid(True).status_code, 200)
+        self.expense.refresh_from_db()
+        paid_at = self.expense.paid_at
+        self.assertEqual(self.set_paid(True).status_code, 200)
+        self.expense.refresh_from_db()
+        self.assertTrue(self.expense.is_paid)
+        self.assertEqual(self.expense.paid_at, paid_at)
+        self.assertEqual(self.set_paid(False).status_code, 200)
+        self.expense.refresh_from_db()
+        self.assertFalse(self.expense.is_paid)
+        self.assertIsNone(self.expense.paid_at)
+
+    def test_payment_does_not_change_another_month(self):
+        other_month = Expense.objects.create(
+            user=self.user, description='Netflix', amount=50,
+            date=date(2026, 10, 5), reccurring_expense=self.recurring_expense,
+            is_paid=False,
+        )
+        self.set_paid(True)
+        other_month.refresh_from_db()
+        self.assertFalse(other_month.is_paid)
+
+    def test_rejects_invalid_state(self):
+        for value in ['false', 1, None]:
+            self.assertEqual(self.set_paid(value).status_code, 400)
+
+    def test_rejects_other_user(self):
+        self.client.force_login(self.other_user)
+        self.assertEqual(self.set_paid(True).status_code, 404)
+
+    def test_rejects_manual_expense(self):
+        self.expense.reccurring_expense = None
+        self.expense.save()
+        self.assertEqual(self.set_paid(True).status_code, 404)
+
+    def test_requires_post_and_login(self):
+        url = reverse('recurring_expense_set_paid', args=[self.expense.id])
+        self.assertEqual(self.client.get(url).status_code, 405)
+        self.client.logout()
+        self.assertEqual(self.set_paid(True).status_code, 302)
+
+    def test_checkbox_renders_persisted_state(self):
+        self.set_paid(True)
+        self.expense.refresh_from_db()
+        from utils.dates import get_current_date
+        year, month = get_current_date()
+        self.expense.date = date(year, month, 5)
+        self.expense.save()
+        response = self.client.get(reverse('recurring_expense_list'))
+        self.assertContains(response, 'expense-payment-checkbox')
+        self.assertContains(response, 'checked')
+
+    def test_monthly_table_shows_recurring_payment_controls_only(self):
+        from django.template.loader import render_to_string
+        manual = Expense.objects.create(
+            user=self.user, description='Coffee', amount=10,
+            date=date(2026, 9, 6),
+        )
+        self.set_paid(True)
+        self.expense.refresh_from_db()
+        html = render_to_string(
+            'reports/components/expense_details_table.html',
+            {'monthly_expenses_queryset': [self.expense, manual]},
+        )
+        self.assertEqual(html.count('expense-payment-checkbox'), 2)
+        self.assertEqual(html.count('data-expense-id="%s"' % self.expense.id), 2)
+        self.assertNotIn('data-expense-id="%s"' % manual.id, html)
+        self.assertEqual(html.count('checked'), 2)
