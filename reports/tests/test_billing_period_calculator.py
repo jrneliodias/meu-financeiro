@@ -1,6 +1,6 @@
 from django.test import TestCase
 from reports.services.billing_period_calculator import BillingPeriodCalculator
-from datetime import datetime
+from datetime import date, datetime
 from freezegun import freeze_time
 
 
@@ -99,3 +99,21 @@ class BillingPeriodCalculatorTestCase(TestCase):
         self.assertEqual(period['start_date'], '2025-03-25')
         self.assertEqual(period['end_date'], '2025-04-23')
         self.assertEqual(period['days_between'], 30)
+
+
+class CalculatePeriodTestCase(TestCase):
+    """Bill of month M runs from M/start_billing_day to (M+1)/(start_billing_day-1)."""
+
+    def test_october_bill_with_start_day_3(self):
+        period = BillingPeriodCalculator(2026).calculate_period(10, 3)
+        self.assertEqual((period.start_date, period.end_date, period.billing_month),
+                         (date(2026, 10, 3), date(2026, 11, 2), 'October'))
+
+    def test_december_bill_spills_into_next_year(self):
+        period = BillingPeriodCalculator(2026).calculate_period(12, 3)
+        self.assertEqual((period.start_date, period.end_date), (date(2026, 12, 3), date(2027, 1, 2)))
+
+    def test_start_day_past_month_end(self):
+        calc = BillingPeriodCalculator(2026)
+        self.assertEqual(calc.calculate_period(1, 30).end_date, date(2026, 2, 28))
+        self.assertEqual(calc.calculate_period(2, 30).start_date, date(2026, 3, 1))

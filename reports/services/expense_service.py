@@ -355,7 +355,7 @@ class ExpenseService:
 
         # Process the single query result
         for item in expenses_by_month_category:
-            month_name = item['month'].strftime('%B')
+            month_name = date(self.year, item['billing_month'], 1).strftime('%B')
             category_name = item['category__name'] or _('No Category')
             amount = float(item['total_amount'])
 
@@ -426,8 +426,8 @@ class ExpenseService:
         # Group by month for monthly totals format
         monthly_data = defaultdict(list)
         for item in payment_method_expenses:
-            month_name = item['month'].strftime('%B')
-            month_index = item['month'].month - 1  # 0-based index for arrays
+            month_name = calendar.month_name[item['billing_month']]
+            month_index = item['billing_month'] - 1  # 0-based index for arrays
             payment_method = item['payment_method__name'] or _('No Payment Method')
             amount = float(item['total_amount'])
             

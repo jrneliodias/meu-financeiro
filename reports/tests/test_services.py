@@ -84,25 +84,17 @@ class ExpenseServiceTestCase(TestCase):
             user=self.user
         )
 
-        # Get monthly totals using year=2025 so January 2025 period (Dec 15 2024 - Jan 14 2025)
-        # captures both expenses
-        service_2025 = ExpenseService(
-            expense_repository=self.expense_repository,
-            income_repository=self.income_repository,
-            year=2025
-        )
-        result = service_2025.calculate_monthly_payment_method_total_expense_datasets()
+        # December 2024 bill runs Dec 15 2024 - Jan 14 2025 and captures both expenses
+        result = self.service.calculate_monthly_payment_method_total_expense_datasets()
 
-        # Since credit card billing cycle is 15th-14th,
-        # both expenses should appear in January's total
-        january_data = None
+        december_data = None
         for dataset in result['datasets']:
             if dataset['label'] == 'Credit Card':
-                january_index = result['labels'].index('January')
-                january_data = dataset['data'][january_index]
+                december_index = result['labels'].index('December')
+                december_data = dataset['data'][december_index]
                 break
 
-        self.assertEqual(january_data, 250.0)  # 100 + 150
+        self.assertEqual(december_data, 250.0)  # 100 + 150
 
     def test_total_expenses_calculation(self):
         """Test total expenses calculation"""

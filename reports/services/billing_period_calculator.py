@@ -25,26 +25,24 @@ class BillingPeriodCalculator:
         return BillingPeriod(start_date, end_date, billing_month)
 
     def _calculate_custom_billing_period(self, month: int, billing_day: int) -> BillingPeriod:
-        """Calculate period for custom billing day."""
-        # For month M, the period is from M-1/billing_day to M/billing_day-1
-        # The expenses are attributed to month M
+        """Bill of month M runs from M/billing_day to (M+1)/(billing_day-1).
 
-        # Calculate end date first (this determines the billing month)
-        if month == 12:
-            end_date = date(self.year, 12, billing_day - 1)
-        else:
-            end_date = date(self.year, month, billing_day - 1)
-
-        # Calculate start date
-        if month == 1:
-            start_date = date(self.year - 1, 12, billing_day)
-        else:
-            start_date = date(self.year, month - 1, billing_day)
-
-        # The billing month is the month containing the end date
-        billing_month = end_date.strftime('%B')
+        Example: billing_day=3 → October bill is Oct 3 .. Nov 2.
+        """
+        start_date = self._period_start(self.year, month, billing_day)
+        next_year, next_month = (self.year + 1, 1) if month == 12 else (self.year, month + 1)
+        end_date = self._period_start(next_year, next_month, billing_day) - timedelta(days=1)
+        billing_month = date(self.year, month, 1).strftime('%B')
 
         return BillingPeriod(start_date, end_date, billing_month)
+
+    @staticmethod
+    def _period_start(year: int, month: int, billing_day: int) -> date:
+        # ponytail: billing_day past month end (e.g. 30 in Feb) starts on the 1st of the next
+        # month, matching expense_repository.with_billing_month (day < billing_day → previous bill).
+        if billing_day <= monthrange(year, month)[1]:
+            return date(year, month, billing_day)
+        return date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
 
     def _calculate_billing_period_for_month(self, month: int):
         """

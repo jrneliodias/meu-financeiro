@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 from django.db.models import Count, Sum, Q
 from django.contrib.auth.models import User
 from registers.models import Installment, Expense
+from reports.repository.expense_repository import expenses_in_billing_month
 
 
 class InstallmentRepository:
@@ -181,9 +182,7 @@ class InstallmentRepository:
         user: Optional[User] = None,
     ) -> Decimal:
         """Sum of Expense amounts linked to an installment plan for the given month/year."""
-        queryset = Expense.objects.filter(
-            date__month=month,
-            date__year=year,
+        queryset = expenses_in_billing_month(year, month).filter(
             installment_plan__isnull=False,
         )
         if user:
@@ -203,9 +202,7 @@ class InstallmentRepository:
         Usado pelo endpoint AJAX do modal do installment_monthly_card.
         Retorna valores via .values() para serialização direta em JSON.
         """
-        queryset = Expense.objects.filter(
-            date__month=month,
-            date__year=year,
+        queryset = expenses_in_billing_month(year, month).filter(
             installment_plan__isnull=False,
         ).select_related('category', 'payment_method', 'installment_plan')
 

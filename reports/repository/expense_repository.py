@@ -1,9 +1,46 @@
 from registers.models import Expense
-from django.db.models import Sum
-from django.db.models.functions import TruncMonth, TruncYear, TruncDate
+from django.db.models import Sum, Case, When, F, Q
+from django.db.models.functions import TruncMonth, TruncYear, TruncDate, ExtractDay, ExtractMonth, ExtractYear
+from datetime import date
 from decimal import Decimal
 
 import calendar
+
+
+def with_billing_month(queryset):
+    """
+    Annotate billing_year/billing_month: an expense dated before its payment
+    method's start_billing_day belongs to the previous month's bill
+    (start day 3 → Oct 3..Nov 2 is October).
+    """
+    before_start = Q(date__day__lt=F('payment_method__start_billing_day'))
+    return queryset.annotate(
+        billing_month=Case(
+            When(before_start & Q(date__month=1), then=12),
+            When(before_start, then=ExtractMonth('date') - 1),
+            default=ExtractMonth('date'),
+        ),
+        billing_year=Case(
+            When(before_start & Q(date__month=1), then=ExtractYear('date') - 1),
+            default=ExtractYear('date'),
+        ),
+    )
+
+
+def expenses_in_billing_year(year):
+    # Billing year spills into early next year (e.g. Jan 1-2 → December bill).
+    return with_billing_month(
+        Expense.objects.filter(date__gte=date(year, 1, 1), date__lt=date(year + 1, 2, 1))
+    ).filter(billing_year=year)
+
+
+def expenses_in_billing_month(year, month, queryset=None):
+    # Bill of month M only holds expenses dated in M or M+1.
+    range_end = date(year + 1, 2, 1) if month == 12 else date(year + (month + 1) // 12, (month + 1) % 12 + 1, 1)
+    return with_billing_month(
+        (queryset if queryset is not None else Expense.objects)
+        .filter(date__gte=date(year, month, 1), date__lt=range_end)
+    ).filter(billing_year=year, billing_month=month)
 
 
 class ExpenseRepository:
@@ -251,9 +288,7 @@ class ExpenseRepository:
 
     def get_monthly_regular_expenses_total(self, month: int, year: int, user=None) -> Decimal:
         """Total de despesas avulsas no mês: exclui recorrentes e parcelas."""
-        qs = Expense.objects.filter(
-            date__month=month,
-            date__year=year,
+        qs = expenses_in_billing_month(year, month).filter(
             installment_plan__isnull=True,
             reccurring_expense__isnull=True,
         )
@@ -304,10 +339,9 @@ class ExpenseRepository:
             - Only fetches required fields via values()
         """
         expense_queryset_with_relations = (
-            Expense.objects
+            expenses_in_billing_year(target_year)
             .filter(
-                date__year=target_year,
-                date__month=target_month_number,
+                billing_month=target_month_number,
                 category__name=category_name_filter
             )
             .select_related('category', 'payment_method')  # Eager loading to prevent N+1 queries
@@ -337,12 +371,10 @@ class ExpenseRepository:
         Performance: ~50+ queries reduced to 1 query
         """
         return (
-            Expense.objects
-            .filter(date__year=year)
-            .annotate(month=TruncMonth('date'))
-            .values('month', 'category__name')
+            expenses_in_billing_year(year)
+            .values('billing_month', 'category__name')
             .annotate(total_amount=Sum('amount'))
-            .order_by('month', 'category__name')
+            .order_by('billing_month', 'category__name')
         )
 
     def get_optimized_payment_method_expenses_by_month(self, year):
@@ -353,12 +385,10 @@ class ExpenseRepository:
         Performance: ~12+ queries reduced to 1 query
         """
         return (
-            Expense.objects
-            .filter(date__year=year)
-            .annotate(month=TruncMonth('date'))
-            .values('month', 'payment_method__name')
+            expenses_in_billing_year(year)
+            .values('billing_month', 'payment_method__name')
             .annotate(total_amount=Sum('amount'))
-            .order_by('month', 'payment_method__name')
+            .order_by('billing_month', 'payment_method__name')
         )
 
     def get_optimized_monthly_expenses_with_relations(self, year, month):

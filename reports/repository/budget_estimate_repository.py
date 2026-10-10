@@ -1,14 +1,15 @@
 from decimal import Decimal
 from django.db.models import Sum, OuterRef, Subquery
 from django.db.models.functions import Coalesce
-from registers.models import CategoryBudgetEstimate, Expense
+from registers.models import CategoryBudgetEstimate
+from reports.repository.expense_repository import expenses_in_billing_month
 
 
 class BudgetEstimateRepository:
     def get_estimates_with_actuals(self, user, month: int, year: int):
         actual_subquery = (
-            Expense.objects
-            .filter(user=user, date__month=month, date__year=year, category=OuterRef('category'))
+            expenses_in_billing_month(year, month)
+            .filter(user=user, category=OuterRef('category'))
             .values('category')
             .annotate(total=Sum('amount'))
             .values('total')
