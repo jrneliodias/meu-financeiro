@@ -5,8 +5,40 @@
   --font-mono: "Geist Mono", ui-monospace, monospace;
 }
 
+/* Respect the browser's text size preference: 16px by default on mobile. */
+html {
+  font-size: 100%;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 112.5%;
+  }
+}
+
 body {
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Keep secondary text legible, including labels in dense tables. */
+body .text-xs {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+body .text-sm {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Readable form controls also avoid focus zoom on mobile browsers. */
+body input:not([type="checkbox"]):not([type="radio"]),
+body select,
+body textarea {
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 button,
