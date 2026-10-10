@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 from .models import Expense, Income, Category, RecurringExpense, PaymentMethod, QuickFillPreset, CategoryBudgetEstimate
 from .components.expense_form.expense_form_component import ExpenseFormComponent
@@ -413,3 +414,27 @@ class CategoryBudgetEstimateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.filter(type='expense').order_by('name')
+
+
+class EstimateCopyRowForm(forms.Form):
+    """Uma linha da cópia de estimativas: categoria, se foi marcada e o valor a usar."""
+    category_id = forms.IntegerField(widget=forms.HiddenInput)
+    selected = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'w-4 h-4 accent-blue-600'}),
+    )
+    # Opcional aqui: só é exigido nas linhas que vão ser copiadas (a view decide).
+    amount = forms.DecimalField(
+        required=False,
+        max_digits=10,
+        decimal_places=2,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'bg-zinc-700 border border-zinc-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5',
+            'step': '0.01',
+            'min': '0',
+        }),
+    )
+
+
+EstimateCopyFormSet = formset_factory(EstimateCopyRowForm, extra=0)

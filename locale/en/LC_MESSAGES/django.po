@@ -1474,6 +1474,45 @@ msgstr ""
 msgid "Estimate created successfully."
 msgstr ""
 
+msgid "Invalid values. Check the amounts and try again."
+msgstr ""
+
+msgid "No estimates selected."
+msgstr ""
+
+#, python-format
+msgid "%(count)s estimate copied."
+msgid_plural "%(count)s estimates copied."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(count)s skipped because it already existed."
+msgid_plural "%(count)s skipped because they already existed."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Estimates from %(month)s/%(year)s"
+msgstr ""
+
+#, python-format
+msgid "Amount for %(category)s"
+msgstr ""
+
+#, python-format
+msgid "Copy selected to %(month)s/%(year)s"
+msgstr ""
+
+msgid "Copy all"
+msgstr ""
+
+msgid "All categories already exist this month."
+msgstr ""
+
+msgid "Already exists this month"
+msgstr ""
+
 #: registers/views.py:984
 msgid "An estimate already exists for this category this month."
 msgstr ""

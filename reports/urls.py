@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("recurring-payments/", views.recurring_payments, name="recurring_payments"),
     path("", views.expense_report, name="expense_report"),
     path("expense/<int:pk>/update/",
          views.ExpenseUpdateView.as_view(), name="expense_update"),
@@ -13,6 +14,8 @@ urlpatterns = [
          views.recurring_expense_delete, name="recurring_expense_delete"),
     path("recurring-expense/<int:pk>/toggle/",
          views.recurring_expense_toggle, name="recurring_expense_toggle"),
+    path("recurring-expense/<int:expense_id>/payment/",
+         views.recurring_expense_set_paid, name="recurring_expense_set_paid"),
     path("recurring-expense/<int:expense_id>/toggle-paid/",
          views.recurring_expense_toggle_paid, name="recurring_expense_toggle_paid"),
     path("recurring-expense-details/",

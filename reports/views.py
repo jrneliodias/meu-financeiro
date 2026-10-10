@@ -843,6 +843,29 @@ def category_expense_details_ajax(request):
 
 
 @login_required
+def recurring_payments(request):
+    """Dedicated monthly recurring payment control."""
+    from django.utils.timezone import localdate
+    from reports.services.recurring_payment_service import RecurringPaymentService
+
+    today = localdate()
+    try:
+        month = int(request.GET.get('month', today.month))
+        year = int(request.GET.get('year', today.year))
+        overview = RecurringPaymentService().get_overview(request.user, month, year)
+    except (ValueError, TypeError):
+        return render(request, 'reports/recurring_payments.html', {
+            'filter_error': 'Selecione um mês e ano válidos (2000 a 2100).',
+            'selected_month': today.month, 'selected_year': today.year,
+            'all_months': get_all_months_tuples(),
+        }, status=400)
+    return render(request, 'reports/recurring_payments.html', {
+        **overview, 'selected_month': month, 'selected_year': year,
+        'all_months': get_all_months_tuples(),
+    })
+
+
+@login_required
 def recurring_expense_list(request):
     """List all user's recurring expenses"""
     from utils.dates import get_all_months_tuples, get_current_date
@@ -866,6 +889,7 @@ def recurring_expense_list(request):
     for recurring_expense in recurring_expenses:
         status_entry = status_by_recurring_id.get(recurring_expense.id)
         recurring_expense.current_month_status = status_entry['status'] if status_entry else 'not_generated'
+        recurring_expense.current_month_is_paid = recurring_expense.current_month_status == 'paid'
         recurring_expense.current_month_expense_id = (
             status_entry['expense'].id if status_entry and status_entry['expense'] else None
         )
@@ -961,6 +985,28 @@ def recurring_expense_toggle(request, pk):
         return JsonResponse({'error': _('Recurring expense not found')}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def recurring_expense_set_paid(request, expense_id):
+    """Save the explicit checkbox state for a user-owned occurrence."""
+    import json
+
+    try:
+        payload = json.loads(request.body)
+        if not isinstance(payload, dict) or not isinstance(payload.get('is_paid'), bool):
+            return JsonResponse({'error': 'is_paid must be a boolean'}, status=400)
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    try:
+        expense = RecurringExpenseService().set_paid(
+            expense_id, request.user, payload['is_paid'],
+        )
+    except Expense.DoesNotExist:
+        return JsonResponse({'error': _('Expense not found')}, status=404)
+    return JsonResponse({'success': True, 'is_paid': expense.is_paid})
 
 
 @login_required

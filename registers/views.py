@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm, QuickFillPresetForm, CategoryBudgetEstimateForm
+from .forms import ExpenseForm, IncomeForm, CSVImportForm, RecurringExpenseForm, CSVProcessorForm, QuickFillPresetForm, CategoryBudgetEstimateForm, EstimateCopyFormSet
 from .services import (
     ExpenseService,
     InstallmentService,
@@ -10,6 +10,7 @@ from .services import (
     QuickFillPresetService,
 )
 from .services.expense_list_service import ExpenseListService
+from .services.budget_estimate_copy_service import BudgetEstimateCopyService, CopyItem
 from .constants import ApiStatus, ApiMessages
 from .services.csv_processor_service import CSVProcessorService
 from reports.services.recurring_expense_service import RecurringExpenseService
@@ -18,7 +19,8 @@ from django.contrib import messages
 from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext as _, ngettext
@@ -38,6 +40,7 @@ recent_income_service = RecentIncomeService()
 quick_fill_preset_service = QuickFillPresetService()
 expense_list_service = ExpenseListService()
 recurring_expense_service = RecurringExpenseService()
+budget_estimate_copy_service = BudgetEstimateCopyService()
 
 
 @login_required
@@ -993,11 +996,25 @@ def budget_estimate_list(request):
         user=request.user, month=selected_month, year=selected_year
     ).select_related('category').order_by('category__name')
 
+    copy_candidates = budget_estimate_copy_service.get_copy_candidates(
+        request.user, selected_month, selected_year
+    )
+    copy_formset, copy_rows = None, []
+    if copy_candidates:
+        copy_formset = EstimateCopyFormSet(prefix='copy', initial=[
+            {'category_id': estimate.category_id, 'selected': True, 'amount': estimate.amount}
+            for estimate in copy_candidates.copyable
+        ])
+        copy_rows = list(zip(copy_formset.forms, copy_candidates.copyable))
+
     return render(request, 'register/budget_estimate_list.html', {
         'estimates': estimates,
         'form': form,
         'selected_month': selected_month,
         'selected_year': selected_year,
+        'copy_candidates': copy_candidates,
+        'copy_formset': copy_formset,
+        'copy_rows': copy_rows,
     })
 
 
@@ -1029,3 +1046,59 @@ def budget_estimate_delete(request, pk):
     estimate.delete()
     messages.success(request, _('Estimate removed.'))
     return redirect(f"/register/estimativas/?month={month}&year={year}")
+
+
+def _parse_target_month(data):
+    """Lê month/year do POST; retorna None se ausentes ou inválidos."""
+    try:
+        month, year = int(data.get('month', '')), int(data.get('year', ''))
+    except ValueError:
+        return None
+    if not 1 <= month <= 12:
+        return None
+    return month, year
+
+
+@login_required
+@require_http_methods(["POST"])
+def budget_estimate_copy(request):
+    target = _parse_target_month(request.POST)
+    if target is None:
+        return HttpResponseBadRequest()
+    month, year = target
+    redirect_url = f"{reverse('budget_estimate_list')}?month={month}&year={year}"
+
+    formset = EstimateCopyFormSet(request.POST, prefix='copy')
+    if not formset.is_valid():
+        messages.error(request, _('Invalid values. Check the amounts and try again.'))
+        return redirect(redirect_url)
+
+    # "Copiar todas" ignora os checkboxes, mas respeita os valores editados.
+    copy_all = request.POST.get('action') == 'all'
+    rows_to_copy = [
+        form.cleaned_data
+        for form in formset.forms
+        if form.cleaned_data and (copy_all or form.cleaned_data['selected'])
+    ]
+    if any(row['amount'] is None for row in rows_to_copy):
+        messages.error(request, _('Invalid values. Check the amounts and try again.'))
+        return redirect(redirect_url)
+
+    items = [CopyItem(row['category_id'], row['amount']) for row in rows_to_copy]
+    if not items:
+        messages.error(request, _('No estimates selected.'))
+        return redirect(redirect_url)
+
+    result = budget_estimate_copy_service.copy_estimates(request.user, month, year, items)
+
+    message = ngettext(
+        '%(count)s estimate copied.', '%(count)s estimates copied.', result.created,
+    ) % {'count': result.created}
+    if result.skipped:
+        message += ' ' + ngettext(
+            '%(count)s skipped because it already existed.',
+            '%(count)s skipped because they already existed.',
+            result.skipped,
+        ) % {'count': result.skipped}
+    messages.success(request, message)
+    return redirect(redirect_url)

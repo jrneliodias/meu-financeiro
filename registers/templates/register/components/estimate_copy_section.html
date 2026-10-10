@@ -1,0 +1,58 @@
+{% load currency_filters i18n %}
+{% if copy_candidates %}
+<section class="bg-zinc-700/50 rounded-lg p-4 space-y-3" aria-labelledby="copy-estimates-title">
+  <h3 id="copy-estimates-title" class="text-sm font-semibold text-gray-300">
+    {% blocktrans with month=copy_candidates.source_month year=copy_candidates.source_year %}Estimates from {{ month }}/{{ year }}{% endblocktrans %}
+  </h3>
+
+  {% if copy_rows %}
+  <form method="post" action="{% url 'budget_estimate_copy' %}" class="space-y-3">
+    {% csrf_token %}
+    {{ copy_formset.management_form }}
+    <input type="hidden" name="month" value="{{ selected_month }}">
+    <input type="hidden" name="year" value="{{ selected_year }}">
+
+    <ul class="divide-y divide-zinc-700/50">
+      {% for row_form, estimate in copy_rows %}
+      <li class="flex items-center gap-3 py-2">
+        {{ row_form.category_id }}
+        {{ row_form.selected }}
+        <label for="{{ row_form.selected.id_for_label }}" class="flex-1 text-white text-sm font-medium">
+          {{ estimate.category.name }}
+        </label>
+        <label for="{{ row_form.amount.id_for_label }}" class="sr-only">
+          {% blocktrans with category=estimate.category.name %}Amount for {{ category }}{% endblocktrans %}
+        </label>
+        <div class="w-36">{{ row_form.amount }}</div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="flex flex-wrap gap-2 justify-end">
+      <button type="submit" name="action" value="selected"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm">
+        {% blocktrans with month=selected_month year=selected_year %}Copy selected to {{ month }}/{{ year }}{% endblocktrans %}
+      </button>
+      <button type="submit" name="action" value="all"
+              class="bg-zinc-600 hover:bg-zinc-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm">
+        {% trans "Copy all" %}
+      </button>
+    </div>
+  </form>
+  {% else %}
+  <p class="text-gray-500 text-sm">{% trans "All categories already exist this month." %}</p>
+  {% endif %}
+
+  {% if copy_candidates.already_existing %}
+  <ul class="divide-y divide-zinc-700/50">
+    {% for estimate in copy_candidates.already_existing %}
+    <li class="flex items-center gap-3 py-2 text-sm text-gray-500">
+      <span class="flex-1">{{ estimate.category.name }}</span>
+      <span>{{ estimate.amount|format_brl }}</span>
+      <span class="text-xs">{% trans "Already exists this month" %}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
