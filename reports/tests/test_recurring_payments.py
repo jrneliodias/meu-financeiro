@@ -43,12 +43,18 @@ class RecurringPaymentsTest(TestCase):
         self.assertEqual(overview['pending_total'], Decimal('100'))
         self.assertEqual(overview['paid_total'], Decimal('90'))
 
-    def test_deactivated_schedule_keeps_existing_bills(self):
+    def test_deactivated_schedule_is_excluded_from_lists_and_totals(self):
         self.schedule.generate_debit = False
         self.schedule.save()
         overview = self.service.get_overview(self.user, 10, 2026)
-        self.assertEqual(overview['pending_count'], 1)
-        self.assertEqual(overview['paid_count'], 1)
+        self.assertEqual(overview['pending_count'], 0)
+        self.assertEqual(overview['paid_count'], 0)
+        self.assertEqual(overview['pending_total'], Decimal('0'))
+        self.assertEqual(overview['paid_total'], Decimal('0'))
+        self.assertEqual(overview['missing_count'], 0)
+        response = self.client.get(reverse('recurring_payments'), {'month': 10, 'year': 2026})
+        self.assertNotContains(response, 'Internet')
+        self.assertTrue(Expense.objects.filter(pk=self.pending.pk).exists())
 
     def test_missing_excludes_future_and_other_user_schedules(self):
         missing = RecurringExpense.objects.create(user=self.user, description='Gym', total_amount=50,
@@ -57,6 +63,8 @@ class RecurringPaymentsTest(TestCase):
                                        start_date=date(2026, 11, 1))
         RecurringExpense.objects.create(user=self.other, description='Private', total_amount=50,
                                        start_date=date(2026, 10, 1))
+        RecurringExpense.objects.create(user=self.user, description='Inactive', total_amount=50,
+                                       start_date=date(2026, 10, 1), generate_debit=False)
         overview = self.service.get_overview(self.user, 10, 2026)
         self.assertEqual(overview['missing_schedules'], [missing])
         self.assertEqual(overview['missing_count'], 1)
