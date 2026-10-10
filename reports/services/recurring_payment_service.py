@@ -38,6 +38,10 @@ class RecurringPaymentService:
             user, end, {expense.reccurring_expense_id for expense in occurrences},
         )
         return {
+            'overdue_expenses': [expense for expense in pending if expense.due_status == 'overdue'],
+            'today_expenses': [expense for expense in pending if expense.due_status == 'today'],
+            'upcoming_expenses': [expense for expense in pending if expense.due_status == 'upcoming'],
+            'next_expense': next((expense for expense in pending if expense.date >= today), None),
             'pending_expenses': pending,
             'paid_expenses': paid,
             'missing_schedules': missing,

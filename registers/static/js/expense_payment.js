@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const controls = [...document.querySelectorAll('.expense-payment-checkbox')];
-    const csrfToken = document.cookie.split('; ')
-        .find(cookie => cookie.startsWith('csrftoken='))?.split('=').slice(1).join('=');
 
-    controls.forEach(control => {
-        control.addEventListener('change', async () => {
+    document.addEventListener('change', async event => {
+            const control = event.target.closest('.expense-payment-checkbox');
+            if (!control) return;
+            const csrfToken = document.cookie.split('; ')
+                .find(cookie => cookie.startsWith('csrftoken='))?.split('=').slice(1).join('=');
+            const controls = [...document.querySelectorAll('.expense-payment-checkbox')];
             const requestedState = control.checked;
             const previousState = !requestedState;
             const peers = controls.filter(peer => peer.dataset.expenseId === control.dataset.expenseId);
@@ -38,7 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     label.classList.toggle('text-green-400', data.is_paid);
                     label.classList.toggle('text-yellow-400', !data.is_paid);
                 });
-                document.dispatchEvent(new CustomEvent('expense-payment-saved'));
+                document.dispatchEvent(new CustomEvent('expense-payment-saved', {
+                    detail: {expenseId: control.dataset.expenseId, isPaid: data.is_paid, fromNotifications: Boolean(control.closest('#payment-notifications'))},
+                }));
             } catch (error) {
                 peers.forEach(peer => {
                     peer.checked = previousState;
@@ -52,6 +55,5 @@ document.addEventListener('DOMContentLoaded', () => {
                     peer.closest('label').removeAttribute('aria-busy');
                 });
             }
-        });
     });
 });

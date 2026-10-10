@@ -1,0 +1,8 @@
+<dialog id="payment-notifications" class="notification-dialog" aria-labelledby="notification-heading">
+  <header class="flex items-center justify-between gap-4 border-b border-zinc-700 p-4">
+    <h2 id="notification-heading" class="text-xl font-bold">Pagamentos do mês</h2>
+    <button type="button" id="payment-notifications-close" class="notification-close" aria-label="Fechar notificações">✕</button>
+  </header>
+  <div id="payment-notifications-content" class="p-4 space-y-4" aria-live="polite"></div>
+  <footer class="border-t border-zinc-700 p-4"><a href="{% url 'recurring_payments' %}" class="text-blue-300 underline">Abrir controle completo</a></footer>
+</dialog>

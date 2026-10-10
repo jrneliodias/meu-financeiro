@@ -1,0 +1,9 @@
+{% load currency_filters %}
+<div class="notification-row">
+  <div class="min-w-0">
+    <p class="font-semibold break-words">{{ expense.description }}</p>
+    <p class="text-sm {% if expense.due_status == 'overdue' %}text-red-300{% else %}text-gray-300{% endif %}">Vencimento: {{ expense.date|date:'d/m/Y' }} · {{ expense.amount|format_brl }}</p>
+    {% if expense.is_paid %}<p class="text-sm text-green-300">Pago em: {{ expense.paid_at|date:'d/m/Y'|default:'data não registrada' }}</p>{% endif %}
+  </div>
+  {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
+</div>

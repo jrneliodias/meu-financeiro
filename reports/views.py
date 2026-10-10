@@ -843,6 +843,29 @@ def category_expense_details_ajax(request):
 
 
 @login_required
+@require_http_methods(["GET"])
+def payment_notifications(request):
+    """Current-month notification summary scoped to the authenticated user."""
+    from django.template.loader import render_to_string
+    from django.utils.timezone import localdate
+    from reports.services.recurring_payment_service import RecurringPaymentService
+
+    today = localdate()
+    overview = RecurringPaymentService().get_overview(
+        request.user, today.month, today.year, today=today,
+    )
+    response = JsonResponse({
+        'pending_count': overview['pending_count'],
+        'overdue_count': len(overview['overdue_expenses']),
+        'html': render_to_string('reports/components/payment_notifications_content.html', {
+            **overview, 'today': today,
+        }, request=request),
+    })
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
+@login_required
 def recurring_payments(request):
     """Dedicated monthly recurring payment control."""
     from django.utils.timezone import localdate
