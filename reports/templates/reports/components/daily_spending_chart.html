@@ -152,7 +152,6 @@
     dailySpending: "{% trans 'Daily Spending' %}",
     sevenDayAverage: "{% trans '7-Day Average' %}",
     dateLabel: "{% trans 'Date' %}",
-    amountLabel: "{% trans 'Amount (R$)' %}",
     loadingData: "{% trans 'Loading new data...' %}",
     errorLoadingData: "{% trans 'Error loading new data. Please try again.' %}",
     noExpenses: "{% trans 'No expenses found for this date.' %}",
@@ -312,12 +311,6 @@
           scales: {
             x: {
               display: true,
-              title: {
-                display: true,
-                text: dc.dateLabel,
-                color: 'white',
-                font: { size: 14, weight: 'bold' }
-              },
               ticks: {
                 color: 'white',
                 maxTicksLimit: 10,
@@ -330,12 +323,6 @@
             y: {
               display: true,
               beginAtZero: true,
-              title: {
-                display: true,
-                text: dc.amountLabel,
-                color: 'white',
-                font: { size: 14, weight: 'bold' }
-              },
               ticks: {
                 color: 'white',
                 font: { size: 11 },
