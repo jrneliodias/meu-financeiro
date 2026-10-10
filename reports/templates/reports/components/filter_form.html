@@ -1,7 +1,9 @@
 {% load currency_filters i18n %}
 <header class="flex flex-col gap-2 justify-between">
-  <section class="flex flex-col lg:flex-row justify-between"> 
+  <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
     <h1 class="text-2xl md:text-3xl font-bold my-2 md:my-3">{% trans "Dashboard" %}</h1>
+<div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4">
+    {% include "reports/components/payment_notifications_toggle.html" %}
 <form method="get"
         class="flex bg-zinc-800/40 p-3 md:p-4 rounded-lg space-x-2 md:space-x-4 w-full sm:w-fit">
     <select name="month"
@@ -23,6 +25,7 @@
       {% endfor %}
     </select>
   </form>
+  </div>
   </section>
   <div class="flex flex-col sm:flex-row gap-2">
     <div class="flex flex-col items-start bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">

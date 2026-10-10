@@ -1,0 +1,8 @@
+    <button type="button" id="payment-notifications-toggle"
+      data-url="{% url 'payment_notifications' %}" aria-haspopup="dialog" aria-controls="payment-notifications"
+      title="Notificações de pagamentos" aria-label="Notificações de pagamentos"
+      class="relative min-h-[44px] bg-zinc-800/40 font-semibold flex items-center justify-center  gap-2 hover:bg-zinc-700 p-4 px-4 py-2 rounded-lg">
+      <i class="fa-solid fa-bell" aria-hidden="true"></i>
+      <span class="text-sm">Notificações</span>
+      <span id="payment-notifications-count" class="notification-count" hidden></span>
+    </button>
