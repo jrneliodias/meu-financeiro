@@ -1,12 +1,14 @@
 {% load currency_filters %}
-<div class="bg-zinc-800/50 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-  <div>
-    <h3 class="font-bold">{{ expense.description }}</h3>
-    <p class="text-sm text-gray-400">Data da despesa: {{ expense.date|date:'d/m/Y' }}{% if expense.payment_method %} · {{ expense.payment_method.name }}{% endif %}</p>
-    {% if expense.is_paid %}<p class="text-sm text-green-400">Pagamento: {% if expense.paid_at %}{{ expense.paid_at|date:'d/m/Y' }}{% else %}data não registrada{% endif %}</p>{% endif %}
+<div class="payment-row payment-row--{{ expense.due_status }}">
+  <div class="payment-name"><h3 class="payment-description" title="{{ expense.description }}">{{ expense.description }}</h3><span class="payment-mobile-amount">{{ expense.amount|format_brl }}</span>{% if expense.is_paid %}<span class="payment-mobile-date">Pago: {{ expense.paid_at|date:'d/m/Y'|default:'sem data' }}</span>{% endif %}</div>
+  <div class="payment-due">
+    <span class="payment-caption">Vencimento</span>
+    <strong>{{ expense.date|date:'d/m/Y' }}</strong>
+    {% if expense.due_status == 'overdue' %}<span class="payment-badge">Vencida</span>{% elif expense.due_status == 'today' %}<span class="payment-badge">Vence hoje</span>{% endif %}
   </div>
-  <div class="flex flex-wrap items-center gap-4">
-    <span class="font-bold">{{ expense.amount|format_brl }}</span>
-    {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
+  <div class="payment-method" {% if expense.is_paid %}title="Pagamento: {{ expense.paid_at|date:'d/m/Y'|default:'data não registrada' }}"{% endif %}>
+    {% if expense.is_paid %}<span>Pagamento: {% if expense.paid_at %}{{ expense.paid_at|date:'d/m/Y' }}{% else %}data não registrada{% endif %}</span>{% elif expense.payment_method %}<span title="{{ expense.payment_method.name }}">{{ expense.payment_method.name }}</span>{% else %}<span>—</span>{% endif %}
   </div>
+  <strong class="payment-amount">{{ expense.amount|format_brl }}</strong>
+  {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
 </div>

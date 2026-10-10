@@ -2,6 +2,8 @@ import calendar
 from datetime import date
 from decimal import Decimal
 
+from django.utils.timezone import localdate
+
 from reports.repository.recurring_payment_repository import RecurringPaymentRepository
 
 
@@ -11,13 +13,23 @@ class RecurringPaymentService:
     def __init__(self, repository=None):
         self.repository = repository or RecurringPaymentRepository()
 
-    def get_overview(self, user, month, year):
+    def get_overview(self, user, month, year, today=None):
         if not 1 <= month <= 12 or not 2000 <= year <= 2100:
             raise ValueError('Invalid month or year')
         start = date(year, month, 1)
         end = date(year, month, calendar.monthrange(year, month)[1])
         occurrences = self.repository.get_occurrences(user, start, end)
-        pending = [expense for expense in occurrences if not expense.is_paid]
+        today = today or localdate()
+        for expense in occurrences:
+            expense.due_status = (
+                'paid' if expense.is_paid else
+                'overdue' if expense.date < today else
+                'today' if expense.date == today else 'upcoming'
+            )
+        pending = sorted(
+            (expense for expense in occurrences if not expense.is_paid),
+            key=lambda expense: (expense.date, expense.description, expense.id),
+        )
         paid = sorted(
             (expense for expense in occurrences if expense.is_paid),
             key=lambda expense: (expense.paid_at or date.min, expense.id), reverse=True,

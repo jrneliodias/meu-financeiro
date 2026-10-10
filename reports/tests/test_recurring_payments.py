@@ -100,3 +100,29 @@ class RecurringPaymentsTest(TestCase):
         response = self.client.get(reverse('recurring_payments'), {'month': 12, 'year': 2026})
         self.assertContains(response, 'Nenhuma despesa recorrente marcada como paga')
         self.assertEqual(response.context['pending_count'], 0)
+
+    def test_pending_order_prioritizes_overdue_today_then_future(self):
+        self.pending.date = date(2026, 10, 20)
+        self.pending.save()
+        today_expense = Expense.objects.create(
+            user=self.user, description='Vence hoje', amount=30,
+            date=date(2026, 10, 9), reccurring_expense=self.schedule, is_paid=False,
+        )
+        overdue = Expense.objects.create(
+            user=self.user, description='Vencida', amount=40,
+            date=date(2026, 10, 2), reccurring_expense=self.schedule, is_paid=False,
+        )
+        overview = self.service.get_overview(self.user, 10, 2026, today=date(2026, 10, 9))
+        pending = overview['pending_expenses']
+        self.assertEqual([item.pk for item in pending], [overdue.pk, today_expense.pk, self.pending.pk])
+        self.assertEqual([item.due_status for item in pending], ['overdue', 'today', 'upcoming'])
+        self.assertEqual(overview['paid_expenses'][0].due_status, 'paid')
+
+    def test_page_highlights_due_date_and_urgency(self):
+        from unittest.mock import patch
+        with patch('reports.services.recurring_payment_service.localdate', return_value=date(2026, 10, 5)):
+            response = self.client.get(reverse('recurring_payments'), {'month': 10, 'year': 2026})
+        self.assertContains(response, 'Vencimento')
+        self.assertContains(response, 'Vence hoje')
+        self.assertContains(response, 'payment-row--today')
+        self.assertNotContains(response, 'Vencida')

@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const requestedState = control.checked;
             const previousState = !requestedState;
             const peers = controls.filter(peer => peer.dataset.expenseId === control.dataset.expenseId);
-            peers.forEach(peer => { peer.disabled = true; });
+            peers.forEach(peer => {
+                peer.disabled = true;
+                peer.closest('label').setAttribute('aria-busy', 'true');
+                peer.closest('label').querySelector('.payment-label').textContent = peer.dataset.savingLabel;
+            });
             try {
                 const response = await fetch(control.dataset.url, {
                     method: 'POST',
@@ -36,10 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 document.dispatchEvent(new CustomEvent('expense-payment-saved'));
             } catch (error) {
-                control.checked = !requestedState;
+                peers.forEach(peer => {
+                    peer.checked = previousState;
+                    peer.closest('label').querySelector('.payment-label').textContent =
+                        previousState ? peer.dataset.paidLabel : peer.dataset.pendingLabel;
+                });
                 alert(control.dataset.errorLabel);
             } finally {
-                peers.forEach(peer => { peer.disabled = false; });
+                peers.forEach(peer => {
+                    peer.disabled = false;
+                    peer.closest('label').removeAttribute('aria-busy');
+                });
             }
         });
     });

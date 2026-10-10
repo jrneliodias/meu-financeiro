@@ -24,7 +24,9 @@
   </div>
   <section aria-labelledby="pending-heading" class="space-y-3">
     <h2 id="pending-heading" class="text-xl font-bold text-yellow-400">A pagar ({{ pending_count }})</h2>
+    <div class="payment-list">
     {% for expense in pending_expenses %}{% include 'reports/components/recurring_payment_row.html' %}{% empty %}<p class="bg-zinc-800/50 rounded-lg p-4">Nenhuma despesa recorrente gerada está pendente neste mês.</p>{% endfor %}
+    </div>
   </section>
   {% if missing_schedules %}
   <section aria-labelledby="missing-heading" class="space-y-3">
@@ -35,7 +37,9 @@
   {% endif %}
   <section aria-labelledby="paid-heading" class="space-y-3">
     <h2 id="paid-heading" class="text-xl font-bold text-green-400">Pagas ({{ paid_count }})</h2>
+    <div class="payment-list">
     {% for expense in paid_expenses %}{% include 'reports/components/recurring_payment_row.html' %}{% empty %}<p class="bg-zinc-800/50 rounded-lg p-4">Nenhuma despesa recorrente marcada como paga neste mês.</p>{% endfor %}
+    </div>
   </section>
   {% endif %}
 </article>

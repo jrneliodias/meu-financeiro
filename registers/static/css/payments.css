@@ -1,0 +1,64 @@
+.payment-list {
+  overflow-x: auto;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.25rem;
+}
+.payment-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) 15rem minmax(8rem, 0.7fr) 7rem auto;
+  align-items: center;
+  gap: 1rem;
+  min-width: 48rem;
+  padding: 1rem;
+  border: 1px solid #3f3f46;
+  border-left: 4px solid #52525b;
+  border-radius: 0.75rem;
+  background: #27272a80;
+}
+.payment-mobile-amount, .payment-mobile-date { display: none; }
+.payment-name { min-width: 0; }
+.payment-description, .payment-method { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.payment-description, .payment-amount { font-weight: 700; }
+.payment-amount { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.payment-due { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; }
+.payment-due strong { font-variant-numeric: tabular-nums; }
+.payment-caption, .payment-method { color: #d4d4d8; font-size: 0.875rem; }
+.payment-badge { border-radius: 999px; padding: 0.15rem 0.5rem; font-size: 0.875rem; font-weight: 700; }
+.payment-row--overdue { border-left-color: #f87171; background: #7f1d1d26; }
+.payment-row--overdue .payment-due { color: #fca5a5; }
+.payment-row--overdue .payment-badge { background: #7f1d1d80; }
+.payment-row--today { border-left-color: #fbbf24; background: #78350f26; }
+.payment-row--today .payment-due { color: #fcd34d; }
+.payment-row--today .payment-badge { background: #78350f80; }
+.payment-row--paid { border-left-color: #4ade80; }
+.payment-control {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+  min-height: 44px; padding: 0.5rem 0.75rem; border-radius: 0.65rem;
+  border: 1px solid #a16207; background: #713f1226; cursor: pointer;
+  white-space: nowrap; font-weight: 600;
+  transition: background-color 150ms, border-color 150ms;
+}
+.payment-control:hover { background: #713f1259; }
+.payment-control:has(input:checked) { border-color: #22c55e; background: #14532d66; }
+.payment-control:has(input:disabled) { opacity: 0.7; cursor: progress; }
+.expense-payment-checkbox {
+  appearance: none; width: 1.6rem; height: 1.6rem; flex-shrink: 0; margin: 0;
+  border: 2px solid #fbbf24; border-radius: 0.4rem; background: #18181b; cursor: inherit;
+}
+.expense-payment-checkbox:checked {
+  border-color: #4ade80; background-color: #16a34a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4 10-10'/%3E%3C/svg%3E");
+}
+.expense-payment-checkbox:focus-visible { outline: 3px solid #93c5fd; outline-offset: 4px; }
+@media (max-width: 639px) {
+  .payment-row { gap: 0.5rem; padding: 0.75rem; min-width: 0; grid-template-columns: minmax(0, 1fr) 6.25rem auto; }
+  .payment-row .payment-method, .payment-row .payment-amount { display: none; }
+  .payment-row .payment-mobile-amount { display: block; color: #d4d4d8; font-size: 0.875rem; }
+  .payment-row .payment-mobile-date { display: block; color: #86efac; font-size: 0.875rem; }
+  .payment-row .payment-due { gap: 0.2rem; font-size: 0.875rem; }
+  .payment-row .payment-badge { font-size: 0.75rem; }
+  .payment-row .payment-control { padding: 0.5rem; min-width: 44px; }
+  .payment-row .payment-label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .payment-control { transition: none; } }

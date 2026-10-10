@@ -1,9 +1,10 @@
 {% load i18n %}
 {% csrf_token %}
-<label class="inline-flex items-center gap-2 cursor-pointer">
+<label class="payment-control">
   <input type="checkbox" class="expense-payment-checkbox" data-expense-id="{{ expense_id }}"
          data-url="{% url 'recurring_expense_set_paid' expense_id %}"
          data-paid-label="{% trans 'Paid' %}" data-pending-label="{% trans 'Pending' %}"
+         data-saving-label="Salvando…"
          data-error-label="Não foi possível salvar o pagamento. Tente novamente."
          aria-label="Pagamento de {{ description }}" {% if is_paid %}checked{% endif %}>
   <span class="payment-label {% if is_paid %}text-green-400{% else %}text-yellow-400{% endif %}">{% if is_paid %}{% trans 'Paid' %}{% else %}{% trans 'Pending' %}{% endif %}</span>
