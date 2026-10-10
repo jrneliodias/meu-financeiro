@@ -86,6 +86,9 @@ const RecentExpenses = {
         // Delegate events para botoes dinamicos
         if (this.elements.cardList) {
             this.elements.cardList.addEventListener('click', (e) => this.handleRowAction(e));
+            // 'toggle' doesn't bubble, so listen in capture phase
+            this.elements.cardList.addEventListener('toggle', (e) => this.positionMenu(e), true);
+            window.addEventListener('scroll', () => document.querySelector('[popover]:popover-open')?.hidePopover(), { passive: true });
         }
 
         if (this.elements.modal) {
@@ -142,21 +145,29 @@ const RecentExpenses = {
     renderExpenseCard: function (expense) {
         return `
             <div class="bg-zinc-700/30 rounded-lg p-4 flex flex-col gap-2">
-                <p class="text-white font-semibold text-base">${expense.description}</p>
+                <div class="flex items-start justify-between gap-2">
+                    <p class="text-white font-semibold text-base">${expense.description}</p>
+                    <button type="button" popovertarget="expense-menu-${expense.id}" aria-label="${i18n.actions || 'Ações'}"
+                        class="-mr-2 -mt-1 w-9 h-9 shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-zinc-600 transition-colors">
+                        <i class="fas fa-ellipsis-vertical"></i>
+                    </button>
+                </div>
                 <p class="text-green-400 font-bold text-xl">${expense.amount_formatted}</p>
                 <p class="text-gray-400 text-sm">${expense.date_formatted}</p>
-                <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-600">
-                    <button type="button" class="action-btn flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="autofill">
-                        <i class="fas fa-copy"></i>${i18n.use || 'Usar'}
+                <div id="expense-menu-${expense.id}" popover
+                    class="fixed inset-auto m-0 min-w-[180px] p-1 rounded-lg bg-zinc-800 border border-zinc-600 shadow-xl text-sm text-white">
+                    <button type="button" class="action-btn w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700" data-id="${expense.id}" data-action="autofill">
+                        <i class="fas fa-copy w-4 text-blue-400"></i>${i18n.use || 'Usar'}
                     </button>
-                    <button type="button" class="action-btn flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-action="details">
-                        <i class="fas fa-eye"></i>${i18n.viewDetails || 'Ver detalhes'}
+                    <button type="button" class="action-btn w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700" data-id="${expense.id}" data-action="details">
+                        <i class="fas fa-eye w-4 text-gray-400"></i>${i18n.viewDetails || 'Ver detalhes'}
                     </button>
-                    <a href="/expense/${expense.id}/update/" class="flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm transition-colors">
-                        <i class="fas fa-edit"></i>${i18n.edit || 'Editar'}
+                    <a href="/expense/${expense.id}/update/" class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700">
+                        <i class="fas fa-edit w-4 text-yellow-500"></i>${i18n.edit || 'Editar'}
                     </a>
-                    <button type="button" class="action-btn flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm transition-colors" data-id="${expense.id}" data-description="${expense.description}" data-action="delete">
-                        <i class="fas fa-trash"></i>${i18n.delete || 'Excluir'}
+                    <div class="my-1 border-t border-zinc-600"></div>
+                    <button type="button" class="action-btn w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-400 hover:bg-red-900/40" data-id="${expense.id}" data-description="${expense.description}" data-action="delete">
+                        <i class="fas fa-trash w-4"></i>${i18n.delete || 'Excluir'}
                     </button>
                 </div>
             </div>
@@ -170,6 +181,7 @@ const RecentExpenses = {
         const btn = e.target.closest('.action-btn');
         if (!btn) return;
 
+        btn.closest('[popover]')?.hidePopover();
         const action = btn.dataset.action;
         const id = btn.dataset.id;
 
@@ -192,6 +204,18 @@ const RecentExpenses = {
                 this.deleteExpense(id, description);
                 break;
         }
+    },
+
+    /**
+     * Posiciona o menu de acoes abaixo do botao (ou acima, se nao couber)
+     */
+    positionMenu: function (e) {
+        if (e.newState !== 'open') return;
+        const menu = e.target;
+        const rect = document.querySelector(`[popovertarget="${menu.id}"]`).getBoundingClientRect();
+        const fitsBelow = rect.bottom + menu.offsetHeight + 8 < window.innerHeight;
+        menu.style.top = `${fitsBelow ? rect.bottom + 4 : rect.top - menu.offsetHeight - 4}px`;
+        menu.style.left = `${Math.max(8, rect.right - menu.offsetWidth)}px`;
     },
 
     /**
