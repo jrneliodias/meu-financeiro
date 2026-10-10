@@ -85,11 +85,7 @@ const RecentExpenses = {
 
         // Delegate events para botoes dinamicos
         if (this.elements.cardList) {
-            this.elements.cardList.addEventListener('click', (e) => this.handleRowAction(e));
-            // 'toggle' doesn't bubble, so listen in capture phase
-            this.elements.cardList.addEventListener('toggle', (e) => this.positionMenu(e), true);
-            window.addEventListener('scroll', () => document.querySelector('[popover]:popover-open')?.hidePopover(), { passive: true });
-        }
+            this.elements.cardList.addEventListener('click', (e) => this.handleRowAction(e));        }
 
         if (this.elements.modal) {
             this.elements.modal.addEventListener('click', (e) => this.handleModalAction(e));
@@ -153,8 +149,11 @@ const RecentExpenses = {
                     </button>
                 </div>
                 <p class="text-green-400 font-bold text-xl">${expense.amount_formatted}</p>
-                <p class="text-gray-400 text-sm">${expense.date_formatted}</p>
-                <div id="expense-menu-${expense.id}" popover
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="text-gray-400">${expense.date_formatted}</span>
+                    ${expense.category_name ? `<span class="px-2 py-0.5 rounded-full bg-zinc-600/60 text-gray-200 text-xs">${expense.category_name}</span>` : ''}
+                </div>
+                <div id="expense-menu-${expense.id}" popover data-menu
                     class="fixed inset-auto m-0 min-w-[180px] p-1 rounded-lg bg-zinc-800 border border-zinc-600 shadow-xl text-sm text-white">
                     <button type="button" class="action-btn w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700" data-id="${expense.id}" data-action="autofill">
                         <i class="fas fa-copy w-4 text-blue-400"></i>${i18n.use || 'Usar'}
@@ -204,18 +203,6 @@ const RecentExpenses = {
                 this.deleteExpense(id, description);
                 break;
         }
-    },
-
-    /**
-     * Posiciona o menu de acoes abaixo do botao (ou acima, se nao couber)
-     */
-    positionMenu: function (e) {
-        if (e.newState !== 'open') return;
-        const menu = e.target;
-        const rect = document.querySelector(`[popovertarget="${menu.id}"]`).getBoundingClientRect();
-        const fitsBelow = rect.bottom + menu.offsetHeight + 8 < window.innerHeight;
-        menu.style.top = `${fitsBelow ? rect.bottom + 4 : rect.top - menu.offsetHeight - 4}px`;
-        menu.style.left = `${Math.max(8, rect.right - menu.offsetWidth)}px`;
     },
 
     /**
