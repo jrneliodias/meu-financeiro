@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -61,8 +62,20 @@ class RecurringExpense(models.Model):
     payment_method = models.ForeignKey(
         PaymentMethod, on_delete=models.SET_NULL, null=True)
     generate_debit = models.BooleanField(default=True)
+    is_international = models.BooleanField(
+        default=False, help_text=_("Charged in foreign currency: IOF is added to the generated expense"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # IOF on international credit card purchases (3.5% since 2025)
+    IOF_RATE = Decimal('0.035')
+
+    @property
+    def charged_amount(self):
+        """Amount that lands on the bill: total_amount (BRL, before IOF) + IOF if international."""
+        if self.is_international:
+            return (self.total_amount * (1 + self.IOF_RATE)).quantize(Decimal('0.01'))
+        return self.total_amount
 
     def __str__(self):
         return f"{self.description}"

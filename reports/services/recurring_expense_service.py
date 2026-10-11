@@ -266,7 +266,7 @@ class RecurringExpenseService:
             expense = Expense.objects.create(
                 user=user,
                 description=recurring_expense.description,
-                amount=recurring_expense.total_amount,
+                amount=recurring_expense.charged_amount,
                 date=expense_date,
                 category=recurring_expense.category,
                 payment_method=recurring_expense.payment_method,

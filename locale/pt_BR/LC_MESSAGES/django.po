@@ -1346,6 +1346,12 @@ msgstr "Data de Início"
 msgid "Generate Monthly Debit"
 msgstr "Gerar Débito Mensal"
 
+msgid "International (adds 3.5% IOF)"
+msgstr "Internacional (soma 3,5% de IOF)"
+
+msgid "Charged in foreign currency: IOF is added to the generated expense"
+msgstr "Cobrada em moeda estrangeira: o IOF é somado à despesa gerada"
+
 #: registers/views.py:54 registers/views.py:315 registers/views.py:441
 #: registers/views.py:586 registers/views.py:816 registers/views.py:868
 #, python-format

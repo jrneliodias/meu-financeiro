@@ -66,7 +66,7 @@ class RecurringExpenseForm(forms.ModelForm):
     class Meta:
         model = RecurringExpense
         fields = ['description', 'total_amount', 'start_date',
-                  'category', 'payment_method', 'generate_debit']
+                  'category', 'payment_method', 'generate_debit', 'is_international']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }
