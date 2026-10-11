@@ -12,6 +12,21 @@
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Font scale 1px smaller than Tailwind defaults (xs 12, sm 14, base 16, lg 18)
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontSize: {
+              xs: ['0.6875rem', { lineHeight: '1rem' }],
+              sm: ['0.8125rem', { lineHeight: '1.25rem' }],
+              base: ['0.9375rem', { lineHeight: '1.5rem' }],
+              lg: ['1.0625rem', { lineHeight: '1.625rem' }],
+            },
+          },
+        },
+      };
+    </script>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
