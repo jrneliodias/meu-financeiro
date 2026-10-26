@@ -11,7 +11,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 
 from .models import Category, Expense, Income, PaymentMethod
 from .services.expense_service import ExpenseService
@@ -143,7 +143,7 @@ def _handle(msg, user):
 
 
 @csrf_exempt
-@require_POST
+@require_http_methods(["GET", "POST"])
 def mcp(request, token):
     expected = os.getenv("MCP_TOKEN", "")
     # 404 (nao 403) para nao revelar que o endpoint existe
@@ -152,6 +152,9 @@ def mcp(request, token):
     user = User.objects.filter(username=os.getenv("MCP_USER", "")).first()
     if not user:
         raise Http404
+    # ponytail: GET (sondagem do conector) responde 200; nao ha stream SSE servidor->cliente
+    if request.method == "GET":
+        return JsonResponse({"name": "meu-financeiro", "mcp": PROTOCOL_VERSION})
     try:
         msg = json.loads(request.body)
     except ValueError:

@@ -27,9 +27,10 @@ class McpTest(TestCase):
         r = self.rpc("tools/call", {"name": name, "arguments": args}).json()["result"]
         return r["isError"], r["content"][0]["text"]
 
-    def test_token_errado_404_e_get_405(self):
+    def test_token_errado_404_e_get_200(self):
         self.assertEqual(self.rpc("tools/list", token="errado").status_code, 404)
-        self.assertEqual(self.client.get("/mcp/segredo/").status_code, 405)
+        self.assertEqual(self.client.get("/mcp/segredo/").status_code, 200)
+        self.assertEqual(self.client.get("/mcp/errado/").status_code, 404)
 
     def test_initialize_list_e_notificacao(self):
         self.assertEqual(self.rpc("initialize").json()["result"]["serverInfo"]["name"], "meu-financeiro")
