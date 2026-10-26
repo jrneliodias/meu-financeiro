@@ -6,5 +6,6 @@
   "[django-html]": {
     "editor.defaultFormatter": "junstyle.vscode-django-support",
     "editor.formatOnSave": true
-  }
+  },
+  "python.terminal.useEnvFile": true
 }
