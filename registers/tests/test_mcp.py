@@ -32,6 +32,11 @@ class McpTest(TestCase):
         self.assertEqual(self.client.get("/mcp/segredo/").status_code, 200)
         self.assertEqual(self.client.get("/mcp/errado/").status_code, 404)
 
+    def test_url_sem_barra_final_nao_redireciona(self):
+        r = self.client.post("/mcp/segredo", json.dumps({"jsonrpc": "2.0", "id": 1, "method": "ping"}),
+                             content_type="application/json")
+        self.assertEqual(r.status_code, 200)
+
     def test_initialize_list_e_notificacao(self):
         self.assertEqual(self.rpc("initialize").json()["result"]["serverInfo"]["name"], "meu-financeiro")
         self.assertEqual(len(self.rpc("tools/list").json()["result"]["tools"]), 3)
