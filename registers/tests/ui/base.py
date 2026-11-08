@@ -36,6 +36,7 @@ class UITestCase(StaticLiveServerTestCase):
         super().setUp()
         self.context = self._browser.new_context(viewport=self.viewport)
         self.page = self.context.new_page()
+        self.page.set_default_timeout(5000)
 
     def tearDown(self):
         self.context.close()
