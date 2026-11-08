@@ -40,3 +40,9 @@ class ExpenseAmountRoundingTest(TestCase):
 
     def test_widget_step_is_any(self):
         self.assertEqual(self.form('1').fields['amount'].widget.attrs.get('step'), 'any')
+
+    def test_huge_or_exponent_amounts_are_validation_errors_not_crashes(self):
+        for value in ('1e30', '9' * 30, 'Infinity', 'NaN'):
+            form = self.form(value)
+            self.assertFalse(form.is_valid(), value)
+            self.assertIn('amount', form.errors)

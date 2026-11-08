@@ -122,3 +122,38 @@ class ExpenseCategoryKeyboardTest(CategoryKeyboardMixin, UITestCase):
 
 class IncomeCategoryKeyboardTest(CategoryKeyboardMixin, UITestCase):
     kind, path, next_selector = 'income', '/register/income', 'button[type=submit]'
+
+
+class IncomeCategoryRequiredUITest(UITestCase):
+    def test_submit_without_category_shows_message_and_stays(self):
+        user = User.objects.create_user(username='rq', password='pw12345!')
+        Category.objects.create(name='Salario', type='income')
+        self.login(user)
+        self.page.goto(self.url('/register/income'))
+        self.page.fill('#id_description', 'Pay')
+        self.page.fill('#id_amount', '10')
+        self.page.fill('#id_date', '2026-11-08')
+        self.page.click('form button[type=submit]')
+        msg = self.page.evaluate("document.querySelector('#category-search-input').validationMessage")
+        self.assertTrue(msg, 'the visible category input must explain why the form was not sent')
+        self.assertIn('/register/income', self.page.url)
+
+
+class StaleSearchUITest(UITestCase):
+    def test_double_enter_with_slow_search_creates_only_final_category(self):
+        user = User.objects.create_user(username='st', password='pw12345!')
+        self.login(user)
+        self.page.goto(self.url('/register/income'))
+        inp = self.page.locator('#category-search-input')
+        inp.click()
+        inp.press_sequentially('Zz')
+        expect(self.page.locator('#category-dropdown li[role=option]')).to_have_count(1)
+        # from now on searches are slow, so the first Enter's search is superseded
+        self.page.route('**/categories/search/**',
+                        lambda route: (self.page.wait_for_timeout(1200), route.continue_()))
+        inp.press_sequentially('x')
+        inp.press('Enter')
+        inp.press('Enter')
+        expect(self.page.locator('#id_category')).not_to_have_value('', timeout=8000)
+        self.page.wait_for_timeout(1500)
+        self.assertEqual(sorted(Category.objects.values_list('name', flat=True)), ['Zzx'])

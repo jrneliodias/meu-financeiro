@@ -45,7 +45,16 @@ const CategoryAutocomplete = {
         var input = this.elements.searchInput;
         var wrapper = this.elements.wrapper;
 
+        // The real <select> is hidden, so the browser can't show its "required" bubble:
+        // show it on the visible input instead.
+        this.elements.hiddenSelect.addEventListener('invalid', function (e) {
+            e.preventDefault();
+            input.setCustomValidity(self.elements.hiddenSelect.validationMessage || 'Select a category');
+            input.reportValidity();
+        });
+
         input.addEventListener('input', function () {
+            input.setCustomValidity('');
             clearTimeout(self.debounceTimer);
             self.debounceTimer = setTimeout(function () {
                 self.onSearch();
@@ -79,7 +88,7 @@ const CategoryAutocomplete = {
                 // Search again right now so Enter never picks from stale results.
                 clearTimeout(self.debounceTimer);
                 self.keepHighlight();
-                self.onSearch().then(function () { self.activateHighlighted(); });
+                self.onSearch().then(function (rendered) { if (rendered) self.activateHighlighted(); });
             } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                 e.preventDefault();
                 self.moveHighlight(e.key === 'ArrowDown' ? 1 : -1, false);
@@ -193,8 +202,9 @@ const CategoryAutocomplete = {
             '&type=' + this.categoryType)
             .then(function (response) { return response.json(); })
             .then(function (data) {
-                if (request !== self.latestRequest) return; // a newer search is in flight
+                if (request !== self.latestRequest) return false; // a newer search is in flight
                 self.renderDropdown(data.categories, searchTerm);
+                return true;
             })
             .catch(function () {
                 self.closeDropdown();
@@ -278,6 +288,7 @@ const CategoryAutocomplete = {
         }
 
         select.value = id;
+        this.elements.searchInput.setCustomValidity('');
         this.elements.searchInput.value = name;
         this.closeDropdown();
     },

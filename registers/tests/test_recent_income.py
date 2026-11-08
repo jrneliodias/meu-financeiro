@@ -208,3 +208,13 @@ class RecentIncomesAjaxViewsTest(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Income.objects.filter(id=income.id).exists())
+
+
+class RegisterIncomeMissingCategoryTest(TestCase):
+    def test_missing_category_shows_django_error(self):
+        user = User.objects.create_user(username='mc', password='x')
+        self.client.force_login(user)
+        response = self.client.post(reverse('register_income'), {
+            'description': 'Pay', 'amount': '10', 'date': '2026-11-08'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'errorlist')

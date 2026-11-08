@@ -1,6 +1,7 @@
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 class ThreePlacesDecimalField(forms.DecimalField):
@@ -19,4 +20,7 @@ class ThreePlacesDecimalField(forms.DecimalField):
         value = super().to_python(value)
         if value is None:
             return value
-        return value.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        try:
+            return value.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        except InvalidOperation:  # too many digits to represent, e.g. 1e30
+            raise ValidationError(self.error_messages['invalid'], code='invalid')
