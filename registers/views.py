@@ -918,14 +918,19 @@ def quick_fill_preset_delete(request, pk):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+def _category_type(value):
+    """'income' or 'expense' (default) from a request value."""
+    return 'income' if value == 'income' else 'expense'
+
+
 @login_required
 @require_http_methods(["GET"])
 def category_search_ajax(request):
-    """AJAX endpoint to search expense categories by name."""
+    """AJAX endpoint to search categories (expense by default, income with ?type=income)."""
     search_term = request.GET.get('q', '').strip()
     categories = (
         Category.objects
-        .filter(type='expense', name__icontains=search_term)
+        .filter(type=_category_type(request.GET.get('type')), name__icontains=search_term)
         .order_by('name')[:10]
     )
     return JsonResponse({
@@ -939,10 +944,11 @@ def category_search_ajax(request):
 @login_required
 @require_http_methods(["POST"])
 def category_create_ajax(request):
-    """AJAX endpoint to create a new expense category."""
+    """AJAX endpoint to create a category (expense by default, income with type=income)."""
     try:
         data = json.loads(request.body)
         category_name = data.get('name', '').strip()
+        category_type = _category_type(data.get('type'))
 
         if not category_name:
             return JsonResponse(
@@ -950,7 +956,7 @@ def category_create_ajax(request):
             )
 
         existing = Category.objects.filter(
-            type='expense', name__iexact=category_name
+            type=category_type, name__iexact=category_name
         ).first()
         if existing:
             return JsonResponse({
@@ -959,7 +965,7 @@ def category_create_ajax(request):
             })
 
         category = Category.objects.create(
-            name=category_name, type='expense'
+            name=category_name, type=category_type
         )
         return JsonResponse({
             'success': True,

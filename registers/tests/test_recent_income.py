@@ -106,6 +106,7 @@ class RecentIncomeServiceTest(TestCase):
         self.assertEqual(result['amount'], '1234.500')
         self.assertEqual(result['date'], '2026-07-01')
         self.assertEqual(result['category_id'], self.category.id)
+        self.assertEqual(result['category_name'], 'Salary')
 
 
 class RegisterIncomeSuccessFlowTest(TestCase):

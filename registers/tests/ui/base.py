@@ -6,9 +6,9 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 os.environ.setdefault('DJANGO_ALLOW_ASYNC_UNSAFE', 'true')
 
 try:
-    from playwright.sync_api import sync_playwright
+    from playwright.sync_api import expect, sync_playwright
 except ImportError:  # pragma: no cover
-    sync_playwright = None
+    expect = sync_playwright = None
 
 
 class UITestCase(StaticLiveServerTestCase):

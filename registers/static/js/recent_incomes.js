@@ -167,7 +167,9 @@ const RecentIncomes = {
         }
 
         const categorySelect = document.getElementById('id_category');
-        if (categorySelect && formData.category_id) {
+        if (formData.category_id && formData.category_name && typeof CategoryAutocomplete !== 'undefined') {
+            CategoryAutocomplete.selectCategory(formData.category_id, formData.category_name);
+        } else if (categorySelect && formData.category_id) {
             categorySelect.value = formData.category_id;
         }
     },
