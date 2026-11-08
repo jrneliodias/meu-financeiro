@@ -12,8 +12,10 @@
     </header>
 
     <section class="bg-zinc-800/40 p-6 rounded-lg shadow-lg">
-        <form method="post" class="space-y-4">
+        <form method="post" class="space-y-4" id="recurring-form"
+              data-has-month-expense="{{ month_expense|yesno:'true,false' }}">
             {% csrf_token %}
+            <input type="hidden" name="sync_month" id="sync-month" value="0">
 
             <!-- Description -->
             <fieldset>
@@ -64,6 +66,44 @@
             </button>
         </form>
     </section>
+
+
+    <dialog id="sync-dialog" class="notification-dialog bg-zinc-800 text-white rounded-lg p-6 max-w-sm">
+        <h2 class="text-lg font-bold mb-2">{% trans "Update this month's expense too?" %}</h2>
+        {% if month_expense %}
+        <p class="text-sm text-gray-300 mb-4">{{ month_expense.description }} · {{ month_expense.date|date:'d/m/Y' }}{% if month_expense.is_paid %} · {% trans "already paid" %}{% endif %}</p>
+        {% endif %}
+        <div class="flex flex-col gap-2">
+            <button type="button" id="sync-both" class="bg-blue-500 hover:bg-blue-700 text-white py-2 rounded-lg">{% trans "Registry and this month's expense" %}</button>
+            <button type="button" id="sync-registry-only" class="bg-zinc-700 hover:bg-zinc-600 text-white py-2 rounded-lg">{% trans "Registry only" %}</button>
+            <button type="button" id="sync-cancel" class="text-gray-400 py-1">{% trans "Cancel" %}</button>
+        </div>
+    </dialog>
+    <script>
+        (function () {
+            var form = document.getElementById('recurring-form');
+            var dialog = document.getElementById('sync-dialog');
+            var flag = document.getElementById('sync-month');
+            function changed() {
+                return Array.prototype.some.call(form.elements, function (el) {
+                    if (!el.name || el.type === 'hidden' || el.type === 'submit') return false;
+                    if (el.type === 'checkbox') return el.checked !== el.defaultChecked;
+                    if (el.tagName === 'SELECT') return Array.prototype.some.call(el.options, function (o) { return o.selected !== o.defaultSelected; });
+                    return el.value !== el.defaultValue;
+                });
+            }
+            function send(value) { flag.value = value; dialog.close(); form.submit(); }
+            form.addEventListener('submit', function (e) {
+                if (form.dataset.hasMonthExpense === 'true' && flag.value === '0' && changed()) {
+                    e.preventDefault();
+                    dialog.showModal();
+                }
+            });
+            document.getElementById('sync-both').addEventListener('click', function () { send('1'); });
+            document.getElementById('sync-registry-only').addEventListener('click', function () { send('2'); });
+            document.getElementById('sync-cancel').addEventListener('click', function () { dialog.close(); });
+        })();
+    </script>
 
     {% if messages %}
     <aside class="mt-4">

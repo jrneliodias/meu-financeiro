@@ -8,6 +8,8 @@ from django.db.models.functions import TruncMonth
 from reports.repository import ExpenseRepository, IncomeRepository, CategoryRepository
 from reports.services import ExpenseService, BalanceService, BudgetEstimateService
 from reports.services.recurring_expense_service import RecurringExpenseService
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.timezone import localdate
 from django.views.generic import UpdateView
 from registers.models import Category, Expense, Income, PaymentMethod, RecurringExpense
 from registers.forms import ExpenseForm, RecurringExpenseForm
@@ -190,6 +192,21 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
         if 'installments' in form.fields:
             del form.fields['installments']
         return form
+
+    def _next_url(self):
+        candidate = self.request.POST.get('next') or self.request.GET.get('next')
+        if candidate and url_has_allowed_host_and_scheme(
+                candidate, allowed_hosts={self.request.get_host()}):
+            return candidate
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self._next_url()
+        return context
+
+    def get_success_url(self):
+        return self._next_url() or super().get_success_url()
 
     def form_valid(self, form):
         """Save and add success message."""
@@ -947,10 +964,21 @@ class RecurringExpenseUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['user'] = self.request.user
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['month_expense'] = RecurringExpenseService().get_month_expense(
+            self.object, localdate())
+        return context
+
     def form_valid(self, form):
-        """Add success message"""
-        messages.success(self.request, _("Recurring expense updated successfully."))
-        return super().form_valid(form)
+        """Save, optionally syncing this month's expense (sync_month=1)."""
+        response = super().form_valid(form)
+        if self.request.POST.get('sync_month') == '1' and RecurringExpenseService().sync_month_expense(
+                self.object, localdate()):
+            messages.success(self.request, _("Recurring expense and this month's expense updated successfully."))
+        else:
+            messages.success(self.request, _("Recurring expense updated successfully."))
+        return response
 
 
 @login_required

@@ -56,6 +56,7 @@ class RecentIncomeService:
             'amount': str(income.amount),
             'date': income.date.isoformat(),
             'category_id': income.category.id if income.category else '',
+            'category_name': income.category.name if income.category else '',
         }
 
     def _format_currency(self, value) -> str:

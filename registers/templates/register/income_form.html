@@ -18,8 +18,9 @@
                 {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
             </div>
             <div class="mb-4 space-y-2">
-                <label for="id_category" class=" text-gray-400">{% trans "Category" %}</label>
-                {{ form.category|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
+                <label for="category-search-input" class=" text-gray-400">{% trans "Category" %}</label>
+                {% include "register/components/category_autocomplete.html" with category_type="income" %}
+                {{ form.category.errors }}
             </div>
             <button type="submit"
                     class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">{% trans "Submit" %}</button>
@@ -48,4 +49,5 @@
         };
     </script>
     <script src="{% static 'js/recent_incomes.js' %}"></script>
+    <script src="{% static 'js/category_autocomplete.js' %}"></script>
 {% endblock content %}

@@ -5,5 +5,6 @@
     <p class="text-sm {% if expense.due_status == 'overdue' %}text-red-300{% else %}text-gray-300{% endif %}">Vencimento: {{ expense.date|date:'d/m/Y' }} · {{ expense.amount|format_brl }}</p>
     {% if expense.is_paid %}<p class="text-sm text-green-300">Pago em: {{ expense.paid_at|date:'d/m/Y'|default:'data não registrada' }}</p>{% endif %}
   </div>
+  <a href="{% url 'expense_update' expense.id %}" data-edit-expense aria-label="Editar {{ expense.description }}" title="Editar" class="text-blue-300 hover:text-blue-200 p-2"><i class="fa-solid fa-pen"></i></a>
   {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
 </div>

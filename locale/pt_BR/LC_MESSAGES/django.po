@@ -2383,3 +2383,18 @@ msgstr ""
 #, python-format
 #~ msgid "Fixed %(fixed)s + Inst. %(installments)s + Est. %(estimated)s"
 #~ msgstr "Fixo %(fixed)s + Parc. %(installments)s + Est. %(estimated)s"
+
+msgid "Update this month's expense too?"
+msgstr "Atualizar também a despesa deste mês?"
+
+msgid "already paid"
+msgstr "já paga"
+
+msgid "Registry and this month's expense"
+msgstr "Cadastro e despesa do mês"
+
+msgid "Registry only"
+msgstr "Só o cadastro"
+
+msgid "Recurring expense and this month's expense updated successfully."
+msgstr "Despesa recorrente e despesa do mês atualizadas com sucesso."

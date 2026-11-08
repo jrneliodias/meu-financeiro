@@ -43,6 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!content.childElementCount) content.textContent = 'Carregando pagamentos…';
         refresh();
     });
+    content.addEventListener('click', event => {
+        const link = event.target.closest('a[data-edit-expense]');
+        if (!link) return;
+        const url = new URL(link.href);
+        url.searchParams.set('next', location.pathname + location.search);
+        link.href = url.pathname + url.search;
+    });
     document.getElementById('payment-notifications-close').addEventListener('click', () => dialog.close());
     dialog.addEventListener('click', event => {
         const bounds = dialog.getBoundingClientRect();
