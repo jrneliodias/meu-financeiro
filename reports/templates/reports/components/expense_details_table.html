@@ -24,11 +24,11 @@
         <tr class="*:p-1 border-b border-zinc-700">
           <td>{{ expense.description }}</td>
           <td class="amount">{{ expense.amount|format_brl }}</td>
-          <td>{{ expense.date }}</td>
+          <td>{{ expense.date|date:"d-m-Y" }}</td>
           <td>{{ expense.category.name }}</td>
           <td>{{ expense.payment_method.name }}</td>
-          <td>{{ expense.created_at }}</td>
-          <td>{{ expense.updated_at }}</td>
+          <td>{{ expense.created_at|date:"d-m-Y H:i" }}</td>
+          <td>{{ expense.updated_at|date:"d-m-Y H:i" }}</td>
           <td>
             {% if expense.reccurring_expense %} {{ expense.reccurring_expense }}
             {% endif %}
@@ -73,7 +73,7 @@
           <div class="grid grid-cols-1 gap-x-4 gap-y-2 text-sm border-t border-zinc-600 pt-3">
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
               <span class="text-gray-400">{% trans "Date:" %}</span>
-              <span>{{ expense.date }}</span>
+              <span>{{ expense.date|date:"d-m-Y" }}</span>
             </div>
             <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
               <span class="text-gray-400">{% trans "Category:" %}</span>
@@ -102,11 +102,11 @@
             <div class="grid grid-cols-1 gap-y-2 pt-2 pl-2 text-sm border-t border-zinc-600/50">
               <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
                 <span class="text-gray-400">{% trans "Created:" %}</span>
-                <span>{{ expense.created_at }}</span>
+                <span>{{ expense.created_at|date:"d-m-Y H:i" }}</span>
               </div>
               <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
                 <span class="text-gray-400">{% trans "Updated:" %}</span>
-                <span>{{ expense.updated_at }}</span>
+                <span>{{ expense.updated_at|date:"d-m-Y H:i" }}</span>
               </div>
             </div>
           </details>

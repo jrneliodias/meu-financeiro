@@ -414,3 +414,20 @@ class SetExpensePaidViewTest(RecurringExpenseTogglePaidViewTest):
         self.assertEqual(html.count('data-expense-id="%s"' % self.expense.id), 2)
         self.assertNotIn('data-expense-id="%s"' % manual.id, html)
         self.assertEqual(html.count('checked'), 2)
+
+    def test_monthly_table_formats_dates_as_dd_mm_yyyy(self):
+        from datetime import datetime
+        from django.template.loader import render_to_string
+        from django.utils import timezone
+        expense = Expense.objects.create(
+            user=self.user, description='Coffee', amount=10, date=date(2026, 9, 6))
+        stamp = timezone.make_aware(datetime(2026, 11, 8, 14, 5))
+        Expense.objects.filter(pk=expense.pk).update(created_at=stamp, updated_at=stamp)
+        expense.refresh_from_db()
+        html = render_to_string(
+            'reports/components/expense_details_table.html',
+            {'monthly_expenses_queryset': [expense]},
+        )
+        self.assertIn('06-09-2026', html)
+        self.assertIn('08-11-2026 14:05', html)
+        self.assertNotIn('2026-09-06', html)
