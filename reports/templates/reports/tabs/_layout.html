@@ -1,0 +1,10 @@
+{% extends "core/base.html" %}
+{% block content %}
+  <article class="space-y-4 pb-24 lg:pb-0">
+    {% include "reports/components/filter_form.html" %}
+    {% include "reports/tabs/_nav.html" %}
+    <section class="flex flex-col space-y-4">
+      {% block tab_content %}{% endblock %}
+    </section>
+  </article>
+{% endblock content %}

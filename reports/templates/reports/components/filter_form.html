@@ -3,7 +3,7 @@
   <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
     <h1 class="text-2xl md:text-3xl font-bold my-2 md:my-3">{% trans "Dashboard" %}</h1>
 <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4">
-    {% include "reports/components/payment_notifications_toggle.html" %}
+    {% if active_tab == "resumo" %}{% include "reports/components/payment_notifications_toggle.html" %}{% endif %}
 <form method="get"
         class="flex bg-zinc-800/40 p-3 md:p-4 rounded-lg space-x-2 md:space-x-4 w-full sm:w-fit">
     <select name="month"
@@ -27,32 +27,5 @@
   </form>
   </div>
   </section>
-  <div class="flex flex-col sm:flex-row gap-2">
-    <div class="flex flex-col items-start bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
-      <p class="text-white text-xs md:text-sm">{% trans "Balance:" %}</p>
-      <span id="balanceDisplay" class="text-white text-xl md:text-2xl font-bold">{{ global_balance|format_brl }}</span>
-    </div>
-    {% include "reports/components/fixed_expenses_card.html" %}
-    {% include "reports/components/installment_monthly_card.html" %}
-    {% include "reports/components/regular_expenses_card.html" %}
-    {% include "reports/components/estimated_expenses_card.html" %}
-    {% include "reports/components/monthly_budget_card.html" %}
-    {% include "reports/components/daily_total_card.html" with today_total=today_total today_date=today_date %}
-  </div>
-  
 </header>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Get the balance value
-    const balanceValue = {{ global_balance|default:0 }};
 
-    // Format as BRL currency
-    const formattedBalance = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(balanceValue);
-
-    // Display the formatted value
-    document.getElementById('balanceDisplay').textContent = formattedBalance;
-  });
-</script>

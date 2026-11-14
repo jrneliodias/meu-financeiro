@@ -31,7 +31,7 @@
   <div id="nav-overlay" class="fixed inset-0 z-40 bg-black/60 hidden lg:hidden"></div>
   <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:w-auto h-screen overflow-y-auto pt-6 lg:pt-10 p-3 text-white flex flex-col gap-1 lg:gap-4 border-r border-zinc-700 min-w-[190px] bg-zinc-900">
     <a href="{% url 'expense_report' %}"
-      class="font-semibold flex items-center justify-start gap-2 hover:bg-zinc-700 px-4 py-3 lg:py-2 rounded-lg {% if request.path == '/' %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
+      class="font-semibold flex items-center justify-start gap-2 hover:bg-zinc-700 px-4 py-3 lg:py-2 rounded-lg {% if request.path == '/' or request.resolver_match.url_name == 'expense_report' or 'dashboard_' in request.resolver_match.url_name %}bg-blue-800 font-semibold hover:bg-blue-800{% endif %}">
       <i class="fa-solid fa-house text-sm lg:text-xs"></i>
       <span class="text-sm">{% trans "Dashboard" %}</span>
     </a>

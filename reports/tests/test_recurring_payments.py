@@ -141,7 +141,7 @@ class RecurringPaymentsTest(TestCase):
         )
         Expense.objects.create(user=self.other, description='Conta privada', amount=500,
                                date=date(2026, 10, 1), reccurring_expense=other_schedule, is_paid=False)
-        with patch('django.utils.timezone.localdate', return_value=date(2026, 10, 9)):
+        with patch('reports.views.recurring.localdate', return_value=date(2026, 10, 9)):
             response = self.client.get(reverse('payment_notifications'))
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -155,7 +155,7 @@ class RecurringPaymentsTest(TestCase):
 
     def test_notification_payment_updates_summary_and_excludes_inactive(self):
         from unittest.mock import patch
-        with patch('django.utils.timezone.localdate', return_value=date(2026, 10, 9)):
+        with patch('reports.views.recurring.localdate', return_value=date(2026, 10, 9)):
             self.client.post(reverse('recurring_expense_set_paid', args=[self.pending.pk]),
                              {'is_paid': True}, content_type='application/json')
             response = self.client.get(reverse('payment_notifications'))
