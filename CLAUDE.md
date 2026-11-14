@@ -48,6 +48,13 @@ Data access layer with performance-optimized queries:
 - **IncomeRepository**: Income data access with performance optimizations
 - **RecurringExpenseRepository**: Recurring expense data access
 
+#### reports/views (pacote)
+Dashboard em 5 abas, cada uma calcula só o que mostra (`dashboard.py`):
+- `/` resumo (`expense_report`), `/gastos/`, `/categorias/`, `/parcelas/`, `/despesas/`
+- Templates em `reports/templates/reports/tabs/` (herdam `_layout.html`; `_nav.html` é a barra de abas)
+- `ajax.py` (endpoints JSON), `recurring.py` (recorrentes/pagamentos), `expense_update.py`, `_common.py` (singletons e helpers)
+- JS grande vive em `registers/static/js/` (`daily_spending_chart.js`, `category_table.js`); o template só injeta config
+
 #### registers/components
 Form component architecture using dependency injection:
 - **ExpenseFormComponent**: Configures expense form fields with user context

@@ -1,0 +1,16 @@
+{% load i18n %}
+{# Barra de abas: fixa embaixo no mobile, horizontal no topo do conteúdo no desktop. #}
+<nav aria-label="{% trans 'Dashboard sections' %}"
+     class="fixed inset-x-0 bottom-0 z-30 bg-zinc-900/95 backdrop-blur border-t border-zinc-700 pb-[env(safe-area-inset-bottom)] lg:static lg:bg-transparent lg:border-0 lg:pb-0">
+  <ul class="grid grid-cols-5 gap-0.5 p-1.5 lg:flex lg:gap-2 lg:p-0 max-w-xl mx-auto lg:max-w-none lg:mx-0">
+    {% for key, url_name, icon, label in dashboard_tabs %}
+    <li class="lg:flex-none">
+      <a href="{% url url_name %}?month={{ selected_month }}&year={{ selected_year }}"
+         {% if key == active_tab %}aria-current="page"{% endif %}
+         class="flex flex-col lg:flex-row items-center gap-1 lg:gap-2 px-1 py-2 lg:px-4 rounded-xl text-[11px] lg:text-sm font-medium {% if key == active_tab %}bg-blue-800 text-white{% else %}text-zinc-400 hover:bg-zinc-800{% endif %}">
+        <i class="fa-solid {{ icon }} text-base lg:text-sm" aria-hidden="true"></i>{{ label }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
