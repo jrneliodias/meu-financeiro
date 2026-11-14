@@ -100,11 +100,6 @@
         {% include "register/components/recent_expenses_table.html" %}
     </main>
 
-    {% include "register/components/expense_details_modal.html" %}
-
-    <!-- Expense List Modal Scripts (SOLID Architecture) -->
-    <script src="{% static 'js/expense_card_renderer.js' %}"></script>
-    <script src="{% static 'js/expense_list_modal.js' %}"></script>
     <script>
         window.RecentExpensesI18n = {
             use: "{% trans 'Use' %}",
@@ -119,16 +114,6 @@
             autofillError: "{% trans 'Error loading data' %}",
         };
 
-        // Initialize expense list modal with dependency injection
-        document.addEventListener('DOMContentLoaded', () => {
-            const expenseListApiClient = new ExpenseListApiClient();
-            const expenseListModalManager = new ExpenseListModalManager('expenseDetailsModal');
-            const expenseListRenderer = new ExpenseListRenderer('expenseListTableBody', 'expenseListCardContainer');
-            const expenseListModal = new ExpenseListModal(expenseListApiClient, expenseListModalManager, expenseListRenderer);
-
-            // Make it globally accessible for recent_expenses.js
-            window.expenseListModal = expenseListModal;
-        });
     </script>
 
     <!-- Recent Expenses and Category Autocomplete -->

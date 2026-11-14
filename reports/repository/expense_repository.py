@@ -238,54 +238,6 @@ class ExpenseRepository:
             .order_by('date_only', 'payment_method__name')
         )
 
-    def get_expenses_by_date(self, target_date):
-        """
-        Get all expenses for a specific date with related category and payment method data.
-        
-        Returns detailed expense information for modal display:
-        - Individual expense records (not aggregated)
-        - Category and payment method names via joins
-        - Ordered by amount (highest first) for better UX
-        
-        Why this design?
-        1. Single date focus - optimized for modal use case
-        2. Full expense details - description, amount, category, payment method
-        3. Efficient joins - avoid N+1 queries
-        4. User-friendly ordering - most expensive items first
-        """
-        return (
-            Expense.objects
-            .filter(date=target_date)
-            .select_related('category', 'payment_method')  # Efficient joins
-            .values(
-                'id',
-                'description',
-                'amount',
-                'category__name',
-                'payment_method__name',
-                'created_at',
-                'reccurring_expense_id',
-                'installment_plan_id',
-            )
-            .order_by('-amount', 'description')  # Highest amounts first
-        )
-
-    def get_recurring_total_by_date(self, target_date):
-        result = (
-            Expense.objects
-            .filter(date=target_date, reccurring_expense__isnull=False)
-            .aggregate(total=Sum('amount'))
-        )
-        return result['total'] or 0
-
-    def get_installment_total_by_date(self, target_date):
-        result = (
-            Expense.objects
-            .filter(date=target_date, installment_plan__isnull=False)
-            .aggregate(total=Sum('amount'))
-        )
-        return result['total'] or 0
-
     def get_monthly_regular_expenses_total(self, month: int, year: int, user=None) -> Decimal:
         """Total de despesas avulsas no mês: exclui recorrentes e parcelas."""
         qs = expenses_in_billing_month(year, month).filter(
@@ -297,67 +249,30 @@ class ExpenseRepository:
         result = qs.aggregate(total=Sum('amount'))
         return result['total'] or Decimal('0.00')
 
-    def get_category_totals_by_date(self, target_date):
-        return (
-            Expense.objects
-            .filter(date=target_date)
-            .values('category__name')
-            .annotate(total=Sum('amount'))
-            .order_by('-total')
-        )
-
     def get_total_by_date(self, target_date):
         """Return the total sum of all expenses for a specific date."""
         result = Expense.objects.filter(date=target_date).aggregate(total=Sum('amount'))
         return result['total'] or Decimal('0.00')
 
-    def get_expenses_by_category_and_month(
-        self,
-        target_year: int,
-        target_month_number: int,
-        category_name_filter: str
-    ):
-        """
-        Get all expenses for a specific category and month with related data.
-
-        Single Responsibility: This method only retrieves expense data.
-        It does NOT format, validate, or transform the data.
-
-        Args:
-            target_year: Year to filter expenses (e.g., 2024)
-            target_month_number: Month number (1-12, where 1=January, 12=December)
-            category_name_filter: Category name to filter by (e.g., "Groceries")
-
-        Returns:
-            QuerySet containing expense records with related category and payment method data.
-            Each record includes: id, date, description, amount, category name, payment method name, created_at.
-            Results are ordered chronologically by date, then by amount (highest first) within each day.
-
-        Performance:
-            - Uses select_related() to avoid N+1 queries
-            - Single optimized database query with JOIN operations
-            - Only fetches required fields via values()
-        """
-        expense_queryset_with_relations = (
-            expenses_in_billing_year(target_year)
-            .filter(
-                billing_month=target_month_number,
-                category__name=category_name_filter
-            )
-            .select_related('category', 'payment_method')  # Eager loading to prevent N+1 queries
-            .values(
-                'id',
-                'date',
-                'description',
-                'amount',
-                'category__name',
-                'payment_method__name',
-                'created_at'
-            )
-            .order_by('date', '-amount')  # Chronological, then highest amounts first
-        )
-
-        return expense_queryset_with_relations
+    def get_expense_list(self, user, *, on_date=None, category_id=None,
+                         installments=False, month=None, year=None, limit=None):
+        """Despesas do usuário para a página de lista. Filtros: dia, ou mês de fatura
+        (+ categoria e/ou só parcelas). Sem dia nem mês: mais recentes primeiro (use `limit`)."""
+        has_period = on_date is not None or month is not None
+        if on_date is not None:
+            qs = Expense.objects.filter(date=on_date)
+        elif month is not None:
+            qs = expenses_in_billing_month(year, month)
+        else:
+            qs = Expense.objects.all()
+        if category_id is not None:
+            qs = qs.filter(category_id=category_id)
+        if installments:
+            qs = qs.filter(installment_plan__isnull=False)
+        qs = (qs.filter(user=user)
+              .select_related('category', 'payment_method', 'installment_plan', 'reccurring_expense')
+              .order_by(*(('date', '-amount') if has_period else ('-date', '-amount'))))
+        return qs[:limit] if limit else qs
 
     def get_optimized_expenses_by_month_and_category(self, year):
         """

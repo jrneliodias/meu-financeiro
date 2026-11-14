@@ -1,4 +1,4 @@
-// Tabela por categoria (aba Categorias): mapa de calor, lista mobile e modal de detalhes.
+// Tabela por categoria (aba Categorias): mapa de calor, lista mobile e links para a lista de despesas.
 // Lê window.CategoryTableConfig definido no template.
 const CFG = window.CategoryTableConfig;
 // JavaScript to handle the mobile view functionality and enhanced statistics heatmap
@@ -401,458 +401,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ================================================================================
-// SOLID Principles Applied in JavaScript
+// Clique numa célula (categoria x mês) abre a página de lista de despesas
 // ================================================================================
-
-// Class 1: API Client (SRP - Only handles API communication)
-class CategoryExpenseApiClient {
-    /**
-     * Handles all API communication for category expense details.
-     *
-     * Single Responsibility: Only makes HTTP requests, no UI manipulation.
-     * Open/Closed: Can be extended to support other API endpoints without modification.
-     */
-
-    constructor(baseEndpointUrl = '/category-expense-details/') {
-        this.baseEndpointUrl = baseEndpointUrl;
-    }
-
-    async fetchCategoryExpenses(selectedYear, selectedMonthName, selectedCategoryName) {
-        const queryParameters = new URLSearchParams({
-            year: selectedYear,
-            month: selectedMonthName,
-            category: selectedCategoryName
-        });
-
-        const fullEndpointUrl = `${this.baseEndpointUrl}?${queryParameters.toString()}`;
-
-        const apiResponse = await fetch(fullEndpointUrl, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!apiResponse.ok) {
-            throw new Error(`HTTP error! status: ${apiResponse.status}`);
-        }
-
-        const categoryExpenseData = await apiResponse.json();
-
-        if (categoryExpenseData.error) {
-            throw new Error(categoryExpenseData.error);
-        }
-
-        return categoryExpenseData;
-    }
-}
-
-
-// Class 2: Data Renderer (SRP - Only renders data to DOM)
-class ExpenseTableRenderer {
-    /**
-     * Renders expense data in table and card formats.
-     *
-     * Single Responsibility: DOM manipulation and rendering only.
-     */
-
-    constructor(tableBodyElementId, cardListElementId = 'categoryExpensesCardList') {
-        this.tableBodyElement = document.getElementById(tableBodyElementId);
-        this.cardListElement = document.getElementById(cardListElementId);
-        this.currencyFormatter = new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-        this.dateFormatter = new Intl.DateTimeFormat('pt-BR');
-    }
-
-    renderExpenseList(expenseDataArray) {
-        this.tableBodyElement.innerHTML = '';
-        if (this.cardListElement) {
-            this.cardListElement.innerHTML = '';
-        }
-
-        if (expenseDataArray.length === 0) {
-            this.renderEmptyState();
-            return;
-        }
-
-        expenseDataArray.forEach(expenseItem => {
-            // Desktop table row
-            const expenseTableRow = this.createExpenseRow(expenseItem);
-            this.tableBodyElement.appendChild(expenseTableRow);
-
-            // Mobile card
-            if (this.cardListElement) {
-                const expenseCard = this.createExpenseCard(expenseItem);
-                this.cardListElement.appendChild(expenseCard);
-            }
-        });
-
-        // Attach action button event listeners
-        this.attachActionButtonListeners();
-    }
-
-    attachActionButtonListeners() {
-        // Attach listeners to table delete buttons
-        const tableDeleteButtons = this.tableBodyElement.querySelectorAll('.delete-expense-btn');
-        tableDeleteButtons.forEach(button => {
-            button.addEventListener('click', async (event) => {
-                event.stopPropagation();
-                const expenseId = button.getAttribute('data-expense-id');
-                const expenseDescription = button.getAttribute('data-expense-description');
-
-                if (confirm(`Tem certeza que deseja excluir "${expenseDescription}"?`)) {
-                    await this.deleteExpense(expenseId, button);
-                }
-            });
-        });
-
-        // Attach listeners to card delete buttons
-        if (this.cardListElement) {
-            const cardDeleteButtons = this.cardListElement.querySelectorAll('.delete-expense-btn');
-            cardDeleteButtons.forEach(button => {
-                button.addEventListener('click', async (event) => {
-                    event.stopPropagation();
-                    button.closest('[popover]')?.hidePopover();
-                    const expenseId = button.getAttribute('data-expense-id');
-                    const expenseDescription = button.getAttribute('data-expense-description');
-
-                    if (confirm(`Tem certeza que deseja excluir "${expenseDescription}"?`)) {
-                        await this.deleteExpense(expenseId, button);
-                    }
-                });
-            });
-        }
-    }
-
-    async deleteExpense(expenseId, buttonElement) {
-        // Find both the table row and card for this expense
-        const tableRow = this.tableBodyElement.querySelector(`tr[data-expense-id="${expenseId}"]`);
-        const card = this.cardListElement?.querySelector(`div[data-expense-id="${expenseId}"]`);
-
-        const originalButtonHtml = buttonElement.innerHTML;
-
-        try {
-            // Disable button during deletion
-            buttonElement.disabled = true;
-            buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-            const response = await fetch(`/register/expense/${expenseId}/delete/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': this.getCsrfToken(),
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // Remove both table row and card with animation
-                [tableRow, card].forEach(element => {
-                    if (element) {
-                        element.style.opacity = '0';
-                        element.style.transition = 'opacity 0.3s ease-out';
-                    }
-                });
-
-                setTimeout(() => {
-                    tableRow?.remove();
-                    card?.remove();
-
-                    // Update expense count
-                    const countElement = document.getElementById('categoryModalExpenseCount');
-                    const currentCount = parseInt(countElement.textContent);
-                    countElement.textContent = currentCount - 1;
-
-                    // Check if table is now empty
-                    const remainingRows = this.tableBodyElement.querySelectorAll('tr').length;
-                    if (remainingRows === 0) {
-                        this.renderEmptyState();
-                    }
-                }, 300);
-
-                console.log(data.message);
-            } else {
-                alert(data.error || 'Falha ao excluir despesa');
-                buttonElement.disabled = false;
-                buttonElement.innerHTML = originalButtonHtml;
-            }
-        } catch (error) {
-            console.error('Error deleting expense:', error);
-            alert('Ocorreu um erro ao excluir a despesa');
-            buttonElement.disabled = false;
-            buttonElement.innerHTML = originalButtonHtml;
-        }
-    }
-
-    getCsrfToken() {
-        const cookieName = 'csrftoken';
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, cookieName.length + 1) === (cookieName + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(cookieName.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    renderEmptyState() {
-        this.tableBodyElement.innerHTML = `
-            <tr>
-                <td colspan="5" class="px-4 py-8 text-center text-gray-400">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Nenhuma despesa encontrada para esta categoria e mês.
-                </td>
-            </tr>
-        `;
-        if (this.cardListElement) {
-            this.cardListElement.innerHTML = `
-                <div class="text-center text-gray-400 py-8">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Nenhuma despesa encontrada para esta categoria e mês.
-                </div>
-            `;
-        }
-    }
-
-    createExpenseRow(expenseItem) {
-        const expenseRow = document.createElement('tr');
-        expenseRow.className = 'hover:bg-zinc-600 transition-colors duration-150';
-        expenseRow.setAttribute('data-expense-id', expenseItem.id);
-
-        const formattedExpenseDate = this.dateFormatter.format(
-            new Date(expenseItem.date + 'T00:00:00')
-        );
-        const formattedExpenseAmount = this.currencyFormatter.format(expenseItem.amount);
-        const sanitizedDescription = this.sanitizeHtmlContent(expenseItem.description);
-        const sanitizedPaymentMethod = this.sanitizeHtmlContent(expenseItem.payment_method);
-
-        expenseRow.innerHTML = `
-            <td class="px-4 py-3 text-gray-300 text-sm">${formattedExpenseDate}</td>
-            <td class="px-4 py-3">
-                <div class="font-medium text-white">${sanitizedDescription}</div>
-            </td>
-            <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-blue-100">
-                    ${sanitizedPaymentMethod}
-                </span>
-            </td>
-            <td class="px-4 py-3 text-right">
-                <span class="font-semibold text-green-400">
-                    ${formattedExpenseAmount}
-                </span>
-            </td>
-            <td class="px-4 py-3 text-center">
-                <div class="flex items-center justify-center gap-3">
-                    <a href="/expense/${expenseItem.id}/update/"
-                       class="text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
-                       title="Editar despesa">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <button class="delete-expense-btn text-red-400 hover:text-red-300 transition-colors duration-200"
-                            data-expense-id="${expenseItem.id}"
-                            data-expense-description="${sanitizedDescription}"
-                            title="Excluir despesa">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-
-        return expenseRow;
-    }
-
-    createExpenseCard(expenseItem) {
-        const expenseCard = document.createElement('div');
-        expenseCard.className = 'bg-zinc-600/50 rounded-lg p-4 flex flex-col gap-2';
-        expenseCard.setAttribute('data-expense-id', expenseItem.id);
-
-        const formattedExpenseDate = this.dateFormatter.format(
-            new Date(expenseItem.date + 'T00:00:00')
-        );
-        const formattedExpenseAmount = this.currencyFormatter.format(expenseItem.amount);
-        const sanitizedDescription = this.sanitizeHtmlContent(expenseItem.description);
-        const sanitizedPaymentMethod = this.sanitizeHtmlContent(expenseItem.payment_method);
-
-        expenseCard.innerHTML = `
-            <div class="flex items-start justify-between gap-2">
-                <p class="text-white font-semibold text-base">${sanitizedDescription}</p>
-                <button type="button" popovertarget="category-expense-menu-${expenseItem.id}" aria-label="${CFG.i18n.actions}"
-                    class="-mr-2 -mt-1 w-9 h-9 shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-zinc-500 transition-colors">
-                    <i class="fas fa-ellipsis-vertical"></i>
-                </button>
-            </div>
-            <p class="text-green-400 font-bold text-xl">${formattedExpenseAmount}</p>
-            <p class="text-gray-400 text-sm">${formattedExpenseDate}</p>
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-blue-100 w-fit">
-                ${sanitizedPaymentMethod}
-            </span>
-            <div id="category-expense-menu-${expenseItem.id}" popover data-menu
-                class="fixed inset-auto m-0 min-w-[160px] p-1 rounded-lg bg-zinc-800 border border-zinc-600 shadow-xl text-sm text-white">
-                <a href="/expense/${expenseItem.id}/update/" class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700">
-                    <i class="fas fa-edit w-4 text-yellow-500"></i>${CFG.i18n.edit}
-                </a>
-                <div class="my-1 border-t border-zinc-600"></div>
-                <button type="button" class="delete-expense-btn w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-400 hover:bg-red-900/40"
-                        data-expense-id="${expenseItem.id}"
-                        data-expense-description="${sanitizedDescription}">
-                    <i class="fas fa-trash-alt w-4"></i>${CFG.i18n.del}
-                </button>
-            </div>
-        `;
-
-        return expenseCard;
-    }
-
-    sanitizeHtmlContent(userInputText) {
-        const temporaryDiv = document.createElement('div');
-        temporaryDiv.textContent = userInputText;
-        return temporaryDiv.innerHTML;
-    }
-}
-
-
-// Class 3: Modal State Manager (SRP - Only manages modal visibility and state)
-class ModalStateManager {
-    /**
-     * Manages modal display states (loading, error, content).
-     *
-     * Single Responsibility: UI state management only.
-     */
-
-    constructor(modalElementId) {
-        this.modalElement = document.getElementById(modalElementId);
-        this.loadingStateElement = document.getElementById('categoryModalLoading');
-        this.errorStateElement = document.getElementById('categoryModalError');
-        this.contentStateElement = document.getElementById('categoryModalContent');
-        this.errorMessageElement = document.getElementById('categoryModalErrorMessage');
-        this.modalTitleElement = document.getElementById('categoryModalTitle');
-        this.totalAmountElement = document.getElementById('categoryModalTotalAmount');
-        this.expenseCountElement = document.getElementById('categoryModalExpenseCount');
-
-        this.currencyFormatter = new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-    }
-
-    openModal() {
-        this.modalElement.classList.remove('hidden');
-    }
-
-    closeModal() {
-        this.modalElement.classList.add('hidden');
-    }
-
-    setModalTitle(categoryName, monthName, yearValue) {
-        this.modalTitleElement.textContent = `${categoryName} - ${monthName} ${yearValue}`;
-    }
-
-    showLoadingState() {
-        this.loadingStateElement.classList.remove('hidden');
-        this.errorStateElement.classList.add('hidden');
-        this.contentStateElement.classList.add('hidden');
-    }
-
-    showErrorState(errorMessage) {
-        this.loadingStateElement.classList.add('hidden');
-        this.contentStateElement.classList.add('hidden');
-        this.errorStateElement.classList.remove('hidden');
-        this.errorMessageElement.textContent = errorMessage;
-    }
-
-    showContentState(totalAmount, expenseCount) {
-        this.loadingStateElement.classList.add('hidden');
-        this.errorStateElement.classList.add('hidden');
-        this.contentStateElement.classList.remove('hidden');
-
-        this.totalAmountElement.textContent = this.currencyFormatter.format(totalAmount);
-        this.expenseCountElement.textContent = expenseCount;
-    }
-}
-
-
-// Class 4: Main Modal Controller (Coordinates all components)
-class CategoryExpenseModal {
-    /**
-     * Main controller that coordinates API client, renderer, and state manager.
-     *
-     * Single Responsibility: Orchestration of components.
-     * Dependency Inversion: Depends on abstractions (injected dependencies).
-     */
-
-    constructor(apiClient, stateManager, tableRenderer) {
-        this.apiClient = apiClient;
-        this.stateManager = stateManager;
-        this.tableRenderer = tableRenderer;
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
-        const closeButtonElement = document.getElementById('categoryModalCloseBtn');
-        const closeFooterButtonElement = document.getElementById('categoryModalCloseFooterBtn');
-
-        closeButtonElement?.addEventListener('click', () => this.close());
-        closeFooterButtonElement?.addEventListener('click', () => this.close());
-
-        this.stateManager.modalElement?.addEventListener('click', (clickEvent) => {
-            if (clickEvent.target === this.stateManager.modalElement) {
-                this.close();
-            }
-        });
-
-        document.addEventListener('keydown', (keyboardEvent) => {
-            if (keyboardEvent.key === 'Escape' &&
-                !this.stateManager.modalElement.classList.contains('hidden')) {
-                this.close();
-            }
-        });
-    }
-
-    async open(selectedYear, selectedMonthName, selectedCategoryName) {
-        this.stateManager.setModalTitle(selectedCategoryName, selectedMonthName, selectedYear);
-        this.stateManager.openModal();
-        this.stateManager.showLoadingState();
-
-        try {
-            const categoryExpenseData = await this.apiClient.fetchCategoryExpenses(
-                selectedYear,
-                selectedMonthName,
-                selectedCategoryName
-            );
-
-            this.displayExpenseData(categoryExpenseData);
-        } catch (fetchError) {
-            console.error('Error fetching category expenses:', fetchError);
-            this.stateManager.showErrorState(
-                fetchError.message || 'Failed to load expense details'
-            );
-        }
-    }
-
-    displayExpenseData(categoryExpenseData) {
-        this.stateManager.showContentState(
-            categoryExpenseData.total_amount,
-            categoryExpenseData.count
-        );
-        this.tableRenderer.renderExpenseList(categoryExpenseData.expenses);
-    }
-
-    close() {
-        this.stateManager.closeModal();
-    }
-}
-
-
-// Class 5: Click Handler (SRP - Only handles user click interactions)
 class CategoryTableClickHandler {
     /**
      * Handles click events on category table cells.
@@ -860,10 +410,18 @@ class CategoryTableClickHandler {
      * Single Responsibility: Event handling and delegation only.
      */
 
-    constructor(expenseModal, selectedYear, monthNamesArray) {
-        this.expenseModal = expenseModal;
+    constructor(selectedYear, monthNamesArray, categoryIds) {
         this.selectedYear = selectedYear;
         this.monthNamesArray = monthNamesArray;
+        this.categoryIds = categoryIds;
+    }
+
+    openExpenseList(categoryName, monthName) {
+        const categoryId = this.categoryIds[categoryName];
+        const month = this.monthNamesArray.indexOf(monthName) + 1;
+        if (!categoryId || !month) return;
+        const back = encodeURIComponent(location.pathname + location.search);
+        location.href = `/despesas/lista/?category_id=${categoryId}&month=${month}&year=${this.selectedYear}&back=${back}`;
     }
 
     attachDesktopTableClickHandlers() {
@@ -939,7 +497,7 @@ class CategoryTableClickHandler {
             `;
 
             tableCellElement.addEventListener('click', () => {
-                this.expenseModal.open(this.selectedYear, monthName, categoryName);
+                this.openExpenseList(categoryName, monthName);
             });
         }
     }
@@ -961,32 +519,13 @@ class CategoryTableClickHandler {
 
 
 // ================================================================================
-// Initialization - Dependency Injection (following Dependency Inversion Principle)
+// Initialization
 // ================================================================================
 
 // Wait for DOM to be fully loaded before initializing
 document.addEventListener('DOMContentLoaded', () => {
-    // Create instances with explicit dependencies
-    const categoryExpenseApiClient = new CategoryExpenseApiClient();
-    const modalStateManager = new ModalStateManager('categoryExpenseModal');
-    const expenseTableRenderer = new ExpenseTableRenderer('categoryExpensesList');
-
-    // Inject dependencies into main modal controller
-    const categoryExpenseModal = new CategoryExpenseModal(
-        categoryExpenseApiClient,
-        modalStateManager,
-        expenseTableRenderer
-    );
-
-    // Initialize click handler with dependencies
-    const currentSelectedYear = CFG.year;
-    const monthNamesArray = CFG.months;
-
-    const categoryTableClickHandler = new CategoryTableClickHandler(
-        categoryExpenseModal,
-        currentSelectedYear,
-        monthNamesArray
-    );
+    const categoryIds = JSON.parse(document.getElementById('category-ids').textContent);
+    const categoryTableClickHandler = new CategoryTableClickHandler(CFG.year, CFG.months, categoryIds);
 
     // Attach event handlers
     categoryTableClickHandler.attachDesktopTableClickHandlers();

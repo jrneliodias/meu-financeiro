@@ -9,7 +9,6 @@ from .services import (
     RecentIncomeService,
     QuickFillPresetService,
 )
-from .services.expense_list_service import ExpenseListService
 from .services.budget_estimate_copy_service import BudgetEstimateCopyService, CopyItem
 from .constants import ApiStatus, ApiMessages
 from .services.csv_processor_service import CSVProcessorService
@@ -38,7 +37,6 @@ csv_import_service = CSVImportService()
 recent_expense_service = RecentExpenseService()
 recent_income_service = RecentIncomeService()
 quick_fill_preset_service = QuickFillPresetService()
-expense_list_service = ExpenseListService()
 recurring_expense_service = RecurringExpenseService()
 budget_estimate_copy_service = BudgetEstimateCopyService()
 
@@ -728,70 +726,6 @@ def expense_autofill_ajax(request, pk):
             'message': _(ApiMessages.AUTOFILL_SUCCESS),
             'form_data': form_data,
         })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e),
-        }, status=ApiStatus.SERVER_ERROR)
-
-
-@login_required
-@require_http_methods(["GET"])
-def expense_list_details_ajax(request):
-    """AJAX endpoint para obter lista filtrada de despesas."""
-    try:
-        filter_type = request.GET.get('filter_type', 'recent')
-        filter_value = request.GET.get('filter_value')
-
-        # Get filtered expenses based on filter type
-        if filter_type == 'category':
-            if not filter_value:
-                return JsonResponse({
-                    'success': False,
-                    'error': _('Category ID is required for category filter'),
-                }, status=ApiStatus.BAD_REQUEST)
-
-            expenses = expense_list_service.get_expenses_by_category(
-                category_id=int(filter_value),
-                user=request.user
-            )
-
-            # Get category name for title
-            try:
-                category = Category.objects.get(id=filter_value)
-                filter_title = category.name
-            except Category.DoesNotExist:
-                filter_title = _('Category not found')
-
-        elif filter_type == 'recent':
-            expenses = expense_list_service.get_recent_expenses(request.user)
-            filter_title = _('Recent')
-
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': _('Invalid filter type: %(filter_type)s') % {
-                    'filter_type': filter_type
-                },
-            }, status=ApiStatus.BAD_REQUEST)
-
-        # Calculate total amount
-        total_amount = sum(exp['amount'] for exp in expenses)
-
-        return JsonResponse({
-            'success': True,
-            'expenses': expenses,
-            'total_amount': float(total_amount),
-            'count': len(expenses),
-            'filter_info': {
-                'type': filter_type,
-                'value': filter_title,
-                'title': _('Expenses - %(filter_title)s') % {
-                    'filter_title': filter_title
-                }
-            }
-        })
-
     except Exception as e:
         return JsonResponse({
             'success': False,

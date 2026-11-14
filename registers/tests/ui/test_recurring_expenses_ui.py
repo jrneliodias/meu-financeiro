@@ -105,7 +105,7 @@ class RecurringExpensesUITest(UITestCase):
         self.page.set_viewport_size({'width': 390, 'height': 800})
         self.page.goto(self.url('/recurring-expenses/'))
         title = self.page.locator('h2.text-2xl', has_text='Despesas Recorrentes').first.bounding_box()
-        process = self.page.locator('button[onclick="showProcessRecurringModal()"]').bounding_box()
+        process = self.page.locator('#process-recurring-link').bounding_box()
         add = self.page.locator('a[href="/register/recurring-expense/"], a:has(.fa-plus)').first.bounding_box()
         self.assertGreaterEqual(process['y'], title['y'] + title['height'])
         self.assertAlmostEqual(process['y'], add['y'], delta=2)  # same row
@@ -116,5 +116,5 @@ class RecurringExpensesUITest(UITestCase):
     def test_desktop_header_buttons_stay_beside_the_title(self):
         self.page.goto(self.url('/recurring-expenses/'))
         title = self.page.locator('h2.text-2xl', has_text='Despesas Recorrentes').first.bounding_box()
-        process = self.page.locator('button[onclick="showProcessRecurringModal()"]').bounding_box()
+        process = self.page.locator('#process-recurring-link').bounding_box()
         self.assertLess(process['y'], title['y'] + title['height'])

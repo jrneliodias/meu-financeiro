@@ -10,5 +10,8 @@
     {% if expense.is_paid %}<span>Pagamento: {% if expense.paid_at %}{{ expense.paid_at|date:'d/m/Y' }}{% else %}data não registrada{% endif %}</span>{% elif expense.payment_method %}<span title="{{ expense.payment_method.name }}">{{ expense.payment_method.name }}</span>{% else %}<span>—</span>{% endif %}
   </div>
   <strong class="payment-amount">{{ expense.amount|format_brl }}</strong>
-  {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
+  <div class="flex items-center gap-1">
+    <a href="{% url 'expense_update' expense.id %}?next={{ request.get_full_path|urlencode }}" data-edit-expense aria-label="Editar {{ expense.description }}" title="Editar" class="text-blue-300 hover:text-blue-200 p-2"><i class="fa-solid fa-pen" aria-hidden="true"></i></a>
+    {% include 'reports/components/payment_checkbox.html' with expense_id=expense.id is_paid=expense.is_paid description=expense.description %}
+  </div>
 </div>

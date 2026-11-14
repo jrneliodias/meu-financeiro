@@ -10,7 +10,6 @@ urlpatterns = [
     path("expense/recent/", views.recent_expenses_ajax, name="recent_expenses_ajax"),
     path("expense/<int:pk>/details/", views.expense_details_ajax, name="expense_details_ajax"),
     path("expense/<int:pk>/autofill/", views.expense_autofill_ajax, name="expense_autofill_ajax"),
-    path("expense/list-details/", views.expense_list_details_ajax, name="expense_list_details_ajax"),
     path("expense/<int:pk>/delete/", views.delete_expense, name="delete_expense"),
     path("income", views.register_income,
          name="register_income"),

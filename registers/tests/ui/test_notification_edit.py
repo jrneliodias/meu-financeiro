@@ -24,10 +24,9 @@ class NotificationEditUITest(UITestCase):
             reccurring_expense=rec, is_paid=False)
         self.login(self.user)
 
-    def test_notification_row_has_edit_button_that_returns_to_origin(self):
+    def test_payment_row_has_edit_button_that_returns_to_origin(self):
         self.page.goto(self.url('/recurring-payments/'))
-        self.page.click('#payment-notifications-toggle')
-        link = self.page.locator('#payment-notifications-content a[data-edit-expense]').first
+        link = self.page.locator('a[data-edit-expense]').first
         link.wait_for(state='visible')
         self.assertEqual(link.get_attribute('aria-label'), 'Editar Luz')
         link.click()
