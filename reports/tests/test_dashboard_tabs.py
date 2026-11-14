@@ -47,3 +47,18 @@ class DashboardTabsTest(TestCase):
         for name in TABS:
             response = self.client.get(reverse(name), {'month': 10, 'year': 2026})
             self.assertContains(response, 'id="payment-notifications-toggle"', count=1, msg_prefix=name)
+
+    def test_home_has_both_charts(self):
+        response = self.client.get(reverse('expense_report'), {'month': 10, 'year': 2026})
+        self.assertContains(response, 'id="expenseIncomeTotalChart"')
+        self.assertContains(response, 'id="calculatedPaymentMethodExpenseChart"')
+
+    def test_categories_has_no_payment_chart(self):
+        response = self.client.get(reverse('dashboard_categories'), {'month': 10, 'year': 2026})
+        self.assertNotContains(response, 'calculatedPaymentMethodExpenseChart')
+
+    def test_fit_screen_only_on_resumo_and_gastos(self):
+        for name in TABS:
+            response = self.client.get(reverse(name), {'month': 10, 'year': 2026})
+            expected = name in ('expense_report', 'dashboard_spending')
+            self.assertEqual(bool(response.context.get('fit_screen')), expected, name)

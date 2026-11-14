@@ -64,8 +64,10 @@ def expense_report(request):
     budget.adjusted_expected = budget.total_expected + regular_total
 
     today = date.today()
+    payment_data = _expense_service(year).get_optimized_payment_method_data()
     ctx.update({
         'active_tab': 'resumo',
+        'fit_screen': True,
         'global_balance': balance_service.calculate_global_balance(),
         'fixed_expenses_summary': recurring_expense_service.get_fixed_expenses_summary(
             request.user, month, year),
@@ -77,8 +79,8 @@ def expense_report(request):
         'today_total': float(expense_repository.get_total_by_date(today)),
         'today_date': today.strftime('%Y-%m-%d'),
         'budget_summary': budget,
-        'monthly_expense_income_datasets':
-            _expense_service(year).get_optimized_payment_method_data()['combined_datasets'],
+        'monthly_expense_income_datasets': payment_data['combined_datasets'],
+        'calculated_monthy_payment_method_expense_totals': payment_data['datasets'],
     })
     return render(request, TEMPLATE_DIR + 'tabs/resumo.html', ctx)
 
@@ -89,6 +91,7 @@ def spending(request):
     ctx = _filters(request)
     ctx.update({
         'active_tab': 'gastos',
+        'fit_screen': True,
         'daily_spending_data': get_daily_spending_data(
             expense_repository, ctx['selected_year'], ctx['selected_month']),
         'expense_categories': Category.objects.filter(type='expense').order_by('name'),
@@ -98,7 +101,7 @@ def spending(request):
 
 @login_required
 def categories(request):
-    """Aba Categorias: tabela por categoria/mês e gráfico por forma de pagamento."""
+    """Aba Categorias: tabela por categoria/mês."""
     ctx = _filters(request)
     all_months = get_all_months()
     service = _expense_service(ctx['selected_year'])
@@ -112,8 +115,6 @@ def categories(request):
         },
         'formatted_totals': [
             format_brl(data['total_expense_by_month'].get(m, 0.0)) for m in all_months],
-        'calculated_monthy_payment_method_expense_totals':
-            service.get_optimized_payment_method_data()['datasets'],
     })
     return render(request, TEMPLATE_DIR + 'tabs/categorias.html', ctx)
 
