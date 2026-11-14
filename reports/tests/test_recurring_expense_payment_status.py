@@ -275,67 +275,41 @@ class RecurringExpenseListTemplateStatusTest(TestCase):
             payment_method=self.payment_method,
         )
 
-    def test_page_shows_paid_and_not_generated_badges(self):
-        # ponytail: override() only sets the active language for this thread;
-        # LocaleMiddleware re-derives the request's language from the
-        # Accept-Language header (session/cookie absent here) and overrides
-        # it back to pt-br, so the header is what actually has to change.
-        response = self.client.get(reverse('recurring_expense_list'), HTTP_ACCEPT_LANGUAGE='en')
+    def test_list_has_no_payment_status_controls(self):
+        # Regression: payment status belongs to generated expenses (modal),
+        # not to the recurring registration card/row.
+        response = self.client.get(reverse('recurring_expense_list'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Paid')
-        self.assertContains(response, 'Not generated')
+        self.assertNotContains(response, 'expense-payment-checkbox')
+        self.assertNotContains(response, 'Não gerada')
 
     def test_pending_count_is_zero_when_nothing_pending(self):
         response = self.client.get(reverse('recurring_expense_list'))
 
         self.assertEqual(response.context['pending_count'], 0)
 
-    def test_inactive_recurring_expense_with_generated_expense_shows_dash(self):
-        # An inactive recurring expense can still have a real Expense (and
-        # is_paid state) for this month if it was deactivated after the
-        # bill was generated. It must not be mislabeled "Not generated".
-        inactive_recurring = RecurringExpense.objects.create(
+    def test_summary_shows_only_active_total_and_pending(self):
+        # Regression: the Inactive / Grand Total cards were removed.
+        RecurringExpense.objects.create(
             user=self.user, description='Old Subscription', total_amount=30,
             start_date=date(2026, 1, 1), category=self.category,
             payment_method=self.payment_method, generate_debit=False,
         )
-        Expense.objects.create(
-            user=self.user, description='Old Subscription', amount=30,
-            date=date(self.current_year, self.current_month, 1),
-            category=self.category, payment_method=self.payment_method,
-            reccurring_expense=inactive_recurring, is_paid=False,
-        )
 
         response = self.client.get(reverse('recurring_expense_list'))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '—')
-        content = response.content.decode()
-        old_subscription_index = content.index('Old Subscription')
-        self.assertNotIn(
-            'Not generated',
-            content[old_subscription_index:old_subscription_index + 1500],
-        )
+        self.assertContains(response, 'Despesas Ativas')
+        self.assertContains(response, 'Pendentes Este Mês')
+        self.assertNotContains(response, 'Despesas Inativas')
+        self.assertNotContains(response, 'Total Geral')
+        self.assertNotIn('inactive_total', response.context)
+        self.assertNotIn('total', response.context)
 
-
-class RecurringExpensePaymentStatusTranslationTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='translationuser', password='12345')
-        self.category = Category.objects.create(name='Food', type='expense')
-        self.payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
-        self.client.force_login(self.user)
-
-    def test_not_generated_badge_is_translated_to_portuguese_by_default(self):
-        RecurringExpense.objects.create(
-            user=self.user, description='Gym', total_amount=80,
-            start_date=date(2026, 1, 15), category=self.category,
-            payment_method=self.payment_method,
-        )
-
+    def test_mobile_card_details_are_one_per_line(self):
         response = self.client.get(reverse('recurring_expense_list'))
 
-        self.assertContains(response, 'Não gerada')
+        self.assertNotContains(response, 'grid-cols-2 gap-x-4')
 
 
 class SetExpensePaidViewTest(RecurringExpenseTogglePaidViewTest):
@@ -387,16 +361,25 @@ class SetExpensePaidViewTest(RecurringExpenseTogglePaidViewTest):
         self.client.logout()
         self.assertEqual(self.set_paid(True).status_code, 302)
 
-    def test_checkbox_renders_persisted_state(self):
+    def test_details_endpoint_exposes_payment_state(self):
         self.set_paid(True)
-        self.expense.refresh_from_db()
-        from utils.dates import get_current_date
-        year, month = get_current_date()
-        self.expense.date = date(year, month, 5)
-        self.expense.save()
-        response = self.client.get(reverse('recurring_expense_list'))
-        self.assertContains(response, 'expense-payment-checkbox')
-        self.assertContains(response, 'checked')
+        other_month = Expense.objects.create(
+            user=self.user, description='Netflix', amount=50,
+            date=date(2020, 1, 5), reccurring_expense=self.recurring_expense,
+            is_paid=False,
+        )
+        response = self.client.get(
+            reverse('recurring_expense_details_ajax'),
+            {'id': self.recurring_expense.id}, HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        by_id = {e['id']: e for e in response.json()['expenses']}
+        self.assertTrue(by_id[self.expense.id]['is_paid'])
+        self.assertFalse(by_id[other_month.id]['is_paid'])
+        self.assertFalse(by_id[other_month.id]['is_current_month'])
+        self.assertEqual(
+            by_id[other_month.id]['payment_url'],
+            reverse('recurring_expense_set_paid', args=[other_month.id]),
+        )
 
     def test_monthly_table_shows_recurring_payment_controls_only(self):
         from django.template.loader import render_to_string

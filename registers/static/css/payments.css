@@ -61,6 +61,23 @@
   .payment-row .payment-control { padding: 0.5rem; min-width: 44px; }
   .payment-row .payment-label { display: none; }
 }
+/* Swatch variant: no visible text/checkbox. Yellow = pending, green = paid. */
+.payment-control--swatch {
+  position: relative; border: 0; padding: 0 1rem; min-width: 44px; min-height: 44px;
+  background: #eab308; color: #18181b; font-size: 1.25rem;
+}
+.payment-control--swatch:hover { background: #facc15; }
+.payment-control--swatch:has(input:checked) { background: #16a34a; color: #fff; }
+.payment-control--swatch:has(input:checked):hover { background: #22c55e; }
+.payment-control--swatch:has(input:focus-visible) { outline: 3px solid #93c5fd; outline-offset: 2px; }
+.payment-control--swatch .expense-payment-checkbox {
+  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; cursor: pointer;
+}
+.payment-control--swatch .payment-label {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.payment-control--swatch .icon-paid, .payment-control--swatch:has(input:checked) .icon-pending { display: none; }
+.payment-control--swatch:has(input:checked) .icon-paid { display: inline; }
 @media (prefers-reduced-motion: reduce) { .payment-control { transition: none; } }
 .notification-count {
   display: inline-flex; align-items: center; justify-content: center;

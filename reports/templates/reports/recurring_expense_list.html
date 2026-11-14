@@ -3,22 +3,22 @@
 
 {% block content %}
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
         <h2 class="text-2xl font-bold">{% trans "Recurring Expenses" %}</h2>
-        <div class="flex gap-3">
+        <div class="grid grid-cols-2 gap-3 md:flex">
             <button onclick="showProcessRecurringModal()"
-                    class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    class="min-h-[44px] bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                 <i class="fas fa-calendar-check mr-2"></i>{% trans "Process Expenses" %}
             </button>
             <a href="{% url 'register_recurring_expense' %}"
-               class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+               class="min-h-[44px] inline-flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                 <i class="fas fa-plus mr-2"></i>{% trans "Add New" %}
             </a>
         </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Active Total Card -->
         <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
             <div class="flex items-center justify-between">
@@ -27,28 +27,6 @@
                     <p class="text-2xl font-bold text-white mt-1">{{ active_total|format_brl }}</p>
                 </div>
                 <i class="fas fa-check-circle text-green-500 text-3xl"></i>
-            </div>
-        </div>
-
-        <!-- Inactive Total Card -->
-        <div class="bg-gray-900/20 border border-gray-500/30 rounded-lg p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm font-medium">{% trans "Inactive Expenses" %}</p>
-                    <p class="text-2xl font-bold text-white mt-1">{{ inactive_total|format_brl }}</p>
-                </div>
-                <i class="fas fa-pause-circle text-gray-500 text-3xl"></i>
-            </div>
-        </div>
-
-        <!-- Total Card -->
-        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-blue-400 text-sm font-medium">{% trans "Grand Total" %}</p>
-                    <p class="text-2xl font-bold text-white mt-1">{{ total|format_brl }}</p>
-                </div>
-                <i class="fas fa-calculator text-blue-500 text-3xl"></i>
             </div>
         </div>
 
@@ -76,7 +54,6 @@
                     <th class="text-start p-2">{% trans "Payment Method" %}</th>
                     <th class="text-center p-2">{% trans "Active" %}</th>
                     <th class="text-center p-2">{% trans "Generated" %}</th>
-                    <th class="text-center p-2">{% trans "Payment" %}</th>
                     <th class="text-end p-2">{% trans "Actions" %}</th>
                 </tr>
             </thead>
@@ -85,7 +62,7 @@
                 {% for status_group in expenses_by_status %}
                     {# Section header #}
                     <tr class="{% if status_group.grouper %}bg-green-900/20 border-t-2 border-green-500{% else %}bg-gray-900/20 border-t-2 border-gray-500{% endif %}">
-                        <td colspan="9" class="p-3 font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
+                        <td colspan="8" class="p-3 font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
                             <i class="fas {% if status_group.grouper %}fa-check-circle{% else %}fa-pause-circle{% endif %} mr-2"></i>
                             {% if status_group.grouper %}{% trans "Active Recurring Expenses" %}{% else %}{% trans "Inactive Recurring Expenses" %}{% endif %}
                         </td>
@@ -100,10 +77,10 @@
                         <td>{{ recurring_expense.category.name|default:"N/A" }}</td>
                         <td>{{ recurring_expense.payment_method.name|default:"N/A" }}</td>
                         <td class="text-center">
-                            <button class="toggle-btn cursor-pointer"
+                            <button class="toggle-btn cursor-pointer text-2xl"
                                     data-id="{{ recurring_expense.id }}"
                                     data-active="{{ recurring_expense.generate_debit }}">
-                                <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }} text-2xl
+                                <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }}
                                           {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
                             </button>
                         </td>
@@ -113,17 +90,6 @@
                                 <i class="fas fa-list mr-1"></i>
                                 {% blocktrans count count=recurring_expense.expense_count|default:0 %}{{ count }} expense{% plural %}{{ count }} expenses{% endblocktrans %}
                             </button>
-                        </td>
-                        <td class="text-center">
-                            {% if recurring_expense.current_month_status == 'not_generated' %}
-                                {% if recurring_expense.generate_debit %}
-                                    <span class="text-gray-500 text-sm">{% trans "Not generated" %}</span>
-                                {% else %}
-                                    <span class="text-gray-500 text-sm">—</span>
-                                {% endif %}
-                            {% else %}
-                                {% include "reports/components/payment_checkbox.html" with expense_id=recurring_expense.current_month_expense_id is_paid=recurring_expense.current_month_is_paid description=recurring_expense.description %}
-                            {% endif %}
                         </td>
                         <td class="text-end space-x-2">
                             <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
@@ -142,7 +108,7 @@
 
                 {% if not recurring_expenses %}
                 <tr>
-                    <td colspan="9" class="text-center p-4">
+                    <td colspan="8" class="text-center p-4">
                         {% trans "No recurring expenses found." %}
                     </td>
                 </tr>
@@ -174,7 +140,7 @@
                 </div>
 
                 <!-- Details -->
-                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm border-t border-zinc-600 pt-3">
+                <div class="grid grid-cols-1 gap-y-2 text-sm border-t border-zinc-600 pt-3">
                     <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
                         <span class="text-gray-400">{% trans "Date:" %}</span>
                         <span>{{ recurring_expense.start_date }}</span>
@@ -189,40 +155,31 @@
                     </div>
                     <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
                         <span class="text-gray-400">{% trans "Active:" %}</span>
-                        <button class="toggle-btn cursor-pointer"
+                        <button class="toggle-btn cursor-pointer inline-flex items-center justify-start min-h-[44px] min-w-[64px] text-4xl"
                                 data-id="{{ recurring_expense.id }}"
-                                data-active="{{ recurring_expense.generate_debit }}">
+                                data-active="{{ recurring_expense.generate_debit }}"
+                                aria-label="{% trans 'Active:' %} {{ recurring_expense.description }}">
                             <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }}
                                       {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
                         </button>
-                    </div>
-                    <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
-                        <span class="text-gray-400">{% trans "Payment:" %}</span>
-                        {% if recurring_expense.current_month_status == 'not_generated' %}
-                            {% if recurring_expense.generate_debit %}
-                                <span class="text-gray-500 text-sm">{% trans "Not generated" %}</span>
-                            {% else %}
-                                <span class="text-gray-500 text-sm">—</span>
-                            {% endif %}
-                        {% else %}
-                            {% include "reports/components/payment_checkbox.html" with expense_id=recurring_expense.current_month_expense_id is_paid=recurring_expense.current_month_is_paid description=recurring_expense.description %}
-                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex justify-between items-center border-t border-zinc-600 pt-3">
-                    <button class="view-expenses-btn text-blue-400 hover:text-blue-300"
+                    <button class="view-expenses-btn text-blue-400 hover:text-blue-300 inline-flex items-center min-h-[44px]"
                             data-id="{{ recurring_expense.id }}">
                         <i class="fas fa-list mr-1"></i>
                         {% blocktrans count count=recurring_expense.expense_count|default:0 %}{{ count }} expense{% plural %}{{ count }} expenses{% endblocktrans %}
                     </button>
-                    <div class="space-x-3">
+                    <div class="flex items-center">
                         <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
-                           class="text-blue-400 hover:text-blue-300">
+                           aria-label="{% trans 'Edit' %}"
+                           class="text-blue-400 hover:text-blue-300 inline-flex items-center justify-center min-h-[44px] min-w-[44px]">
                             <i class="fa-solid fa-edit"></i>
                         </a>
-                        <button class="delete-btn text-red-400 hover:text-red-300 cursor-pointer"
+                        <button class="delete-btn text-red-400 hover:text-red-300 cursor-pointer inline-flex items-center justify-center min-h-[44px] min-w-[44px]"
+                                aria-label="{% trans 'Delete' %}"
                                 data-id="{{ recurring_expense.id }}"
                                 data-description="{{ recurring_expense.description }}">
                             <i class="fa-solid fa-trash"></i>

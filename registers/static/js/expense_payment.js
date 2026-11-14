@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Invalid payment response');
                 }
                 const pendingCount = document.querySelector('[data-pending-count]');
-                if (pendingCount && previousState !== data.is_paid) {
+                if (pendingCount && control.dataset.skipPendingCount === undefined && previousState !== data.is_paid) {
                     pendingCount.textContent = Number(pendingCount.textContent) + (data.is_paid ? -1 : 1);
                 }
                 peers.forEach(peer => {

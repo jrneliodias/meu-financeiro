@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Update icon
                     const icon = this.querySelector('i');
                     const newState = data.generate_debit;
-                    icon.className = `fas fa-toggle-${newState ? 'on' : 'off'} text-2xl ${newState ? 'text-green-500' : 'text-gray-500'}`;
+                    icon.className = `fas fa-toggle-${newState ? 'on' : 'off'} ${newState ? 'text-green-500' : 'text-gray-500'}`;
                     this.setAttribute('data-active', newState ? 'True' : 'False');
 
                     // Display message (you can implement toast notifications)
@@ -116,31 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('recurringModalTotal').textContent =
                     formatBRL(data.total_generated);
 
-                // Update expenses list
-                const expensesList = document.getElementById('recurringExpensesList');
-                expensesList.innerHTML = '';
-
-                if (data.expenses.length === 0) {
-                    expensesList.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="text-center p-4 text-gray-400">
-                                No expenses generated yet.
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    data.expenses.forEach(expense => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td class="px-4 py-3">${formatDate(expense.date)}</td>
-                            <td class="px-4 py-3">${expense.description}</td>
-                            <td class="px-4 py-3">${expense.category}</td>
-                            <td class="px-4 py-3">${expense.payment_method}</td>
-                            <td class="px-4 py-3 text-right">${formatBRL(expense.amount)}</td>
-                        `;
-                        expensesList.appendChild(row);
-                    });
-                }
+                renderExpenses(data.expenses);
             }
         })
         .catch(error => {
@@ -150,6 +126,58 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('recurringModalErrorMessage').textContent =
                 'Failed to load expense details.';
         });
+    }
+
+    function escapeHTML(value) {
+        // Also encodes quotes: safe in text and in attribute values.
+        return String(value ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+    }
+
+    function paymentControl(expense, extraClass = '') {
+        const paid = expense.is_paid;
+        return `<label class="payment-control payment-control--swatch ${extraClass}">
+            <input type="checkbox" class="expense-payment-checkbox"
+                   data-expense-id="${expense.id}"
+                   data-url="${escapeHTML(expense.payment_url)}"
+                   ${expense.is_current_month ? '' : 'data-skip-pending-count'}
+                   data-paid-label="Pago" data-pending-label="Pendente"
+                   data-saving-label="Salvando…"
+                   data-error-label="Não foi possível salvar o pagamento. Tente novamente."
+                   aria-label="Pagamento de ${escapeHTML(expense.description)}" ${paid ? 'checked' : ''}>
+            <i class="fas fa-clock icon-pending" aria-hidden="true"></i>
+            <i class="fas fa-check icon-paid" aria-hidden="true"></i>
+            <span class="payment-label">${paid ? 'Pago' : 'Pendente'}</span>
+        </label>`;
+    }
+
+    // Same data twice: table rows (md+) and one card per expense (mobile).
+    function renderExpenses(expenses) {
+        const rows = document.getElementById('recurringExpensesList');
+        const cards = document.getElementById('recurringExpensesCards');
+        if (expenses.length === 0) {
+            const empty = 'No expenses generated yet.';
+            rows.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-gray-400">${empty}</td></tr>`;
+            cards.innerHTML = `<p class="text-center p-4 text-gray-400">${empty}</p>`;
+            return;
+        }
+        rows.innerHTML = expenses.map(e => `<tr>
+            <td class="px-4 py-3">${formatDate(e.date)}</td>
+            <td class="px-4 py-3">${escapeHTML(e.description)}</td>
+            <td class="px-4 py-3">${escapeHTML(e.category)}</td>
+            <td class="px-4 py-3">${escapeHTML(e.payment_method)}</td>
+            <td class="px-4 py-3 text-right">${formatBRL(e.amount)}</td>
+            <td class="px-4 py-3 text-center">${paymentControl(e)}</td>
+        </tr>`).join('');
+        cards.innerHTML = expenses.map(e => `<div class="p-4 space-y-2 text-sm">
+            <div class="flex justify-between font-bold">
+                <span>${formatDate(e.date)}</span><span>${formatBRL(e.amount)}</span>
+            </div>
+            <div class="text-gray-300">${escapeHTML(e.description)}</div>
+            <div class="text-gray-400">${escapeHTML(e.category)} · ${escapeHTML(e.payment_method)}</div>
+            <div class="pt-1">${paymentControl(e, 'w-full')}</div>
+        </div>`).join('');
     }
 
     // Modal close buttons
@@ -184,8 +212,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('pt-BR');
+        // ISO date parsed by hand: new Date('YYYY-MM-DD') is UTC and shows the previous day in Brazil
+        const [y, m, d] = dateString.split('-');
+        return `${d}/${m}/${y}`;
     }
 
     // Process Recurring Expenses Modal Functions

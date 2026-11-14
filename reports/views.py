@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.shortcuts import render
 from collections import defaultdict
 import calendar
@@ -917,33 +918,16 @@ def recurring_expense_list(request):
 
     # Calculate totals
     active_total = recurring_expense_service.repository.get_total_recurring_expenses_with_debit(request.user)
-    inactive_total = recurring_expense_service.repository.get_total_inactive_recurring_expenses(request.user)
-    total = active_total + inactive_total
 
     current_year, current_month = get_current_date()
     month_status = recurring_expense_service.repository.get_month_expenses_with_status(
         request.user, current_month, current_year
     )
-    status_by_recurring_id = {entry['recurring_expense'].id: entry for entry in month_status}
-
-    for recurring_expense in recurring_expenses:
-        status_entry = status_by_recurring_id.get(recurring_expense.id)
-        recurring_expense.current_month_status = status_entry['status'] if status_entry else 'not_generated'
-        recurring_expense.current_month_is_paid = recurring_expense.current_month_status == 'paid'
-        recurring_expense.current_month_expense_id = (
-            status_entry['expense'].id if status_entry and status_entry['expense'] else None
-        )
-
-    pending_count = sum(
-        1 for recurring_expense in recurring_expenses
-        if recurring_expense.current_month_status == 'pending'
-    )
+    pending_count = sum(1 for entry in month_status if entry['status'] == 'pending')
 
     context = {
         'recurring_expenses': recurring_expenses,
         'active_total': active_total,
-        'inactive_total': inactive_total,
-        'total': total,
         'all_months': get_all_months_tuples(),
         'pending_count': pending_count,
     }
@@ -1101,7 +1085,8 @@ def recurring_expense_details_ajax(request):
         if data['recurring_expense'].user != request.user:
             return JsonResponse({'error': _('Unauthorized')}, status=403)
 
-        # Format expenses for JSON response
+        from utils.dates import get_current_date
+        current_year, current_month = get_current_date()
         expenses_list = []
         for expense in data['expenses']:
             expenses_list.append({
@@ -1109,6 +1094,9 @@ def recurring_expense_details_ajax(request):
                 'date': expense.date.isoformat(),
                 'description': expense.description,
                 'amount': float(expense.amount),
+                'is_paid': expense.is_paid,
+                'payment_url': reverse('recurring_expense_set_paid', args=[expense.id]),
+                'is_current_month': (expense.date.year, expense.date.month) == (current_year, current_month),
                 'category': expense.category.name if expense.category else _('N/A'),
                 'payment_method': expense.payment_method.name if expense.payment_method else _('N/A'),
             })
