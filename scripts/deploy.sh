@@ -31,7 +31,7 @@ docker compose run --rm web sh -c "python manage.py makemigrations --noinput && 
 
 # Coleta static files
 echo -e "${YELLOW}==> Coletando arquivos estaticos...${NC}"
-docker compose run --rm web python manage.py collectstatic --noinput
+docker compose run --rm web python manage.py collectstatic --noinput --clear
 
 # Reinicia containers
 echo -e "${YELLOW}==> Reiniciando containers...${NC}"

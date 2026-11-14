@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import dj_database_url
 from django.utils.translation import gettext_lazy as _
 
@@ -148,6 +149,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Hashed filenames (app.<hash>.js): nginx serves /static/ as `immutable` for 30 days,
+# so a changed file MUST get a new URL or phones keep running the old JS.
+# Tests run without collectstatic, so they keep the plain storage.
+if "test" not in sys.argv:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
 
 
 # Default primary key field type
