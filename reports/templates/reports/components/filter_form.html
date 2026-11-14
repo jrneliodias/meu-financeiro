@@ -3,7 +3,7 @@
   <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
     <h1 class="text-2xl md:text-3xl font-bold my-2 md:my-3">{% trans "Dashboard" %}</h1>
 <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4">
-    {% if active_tab == "resumo" %}{% include "reports/components/payment_notifications_toggle.html" %}{% endif %}
+    {% include "reports/components/payment_notifications_toggle.html" %}
 <form method="get"
         class="flex bg-zinc-800/40 p-3 md:p-4 rounded-lg space-x-2 md:space-x-4 w-full sm:w-fit">
     <select name="month"
