@@ -1,0 +1,82 @@
+{% extends "core/base.html" %}
+{% load currency_filters i18n %}
+
+{% block content %}
+<div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-4">
+    <a href="{% url 'recurring_expense_list' %}"
+       class="inline-flex items-center min-h-[44px] text-blue-400 hover:text-blue-300">
+        <i class="fas fa-arrow-left mr-2"></i>{% trans "Back" %}
+    </a>
+
+    <h2 class="text-2xl font-bold flex items-center">
+        <i class="fas fa-repeat mr-3 text-blue-400"></i>{{ recurring_expense.description }}
+    </h2>
+
+    <!-- Compact summary: keeps the list in the first screen on mobile -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div class="bg-zinc-700 rounded-lg p-3 text-center">
+            <h3 class="text-sm text-gray-400">{% trans "Monthly Amount" %}</h3>
+            <p class="text-xl font-bold text-blue-400">{{ recurring_expense.total_amount|format_brl }}</p>
+        </div>
+        <div class="bg-zinc-700 rounded-lg p-3 text-center">
+            <h3 class="text-sm text-gray-400">{% trans "Generated Expenses" %}</h3>
+            <p class="text-xl font-bold text-green-400">{{ expense_count }}</p>
+        </div>
+        <div class="bg-zinc-700 rounded-lg p-3 text-center col-span-2 md:col-span-1">
+            <h3 class="text-sm text-gray-400">{% trans "Total Generated" %}</h3>
+            <p class="text-xl font-bold text-yellow-400">{{ total_generated|format_brl }}</p>
+        </div>
+    </div>
+
+    {% if expenses %}
+    <!-- Mobile: one card per expense -->
+    <div class="md:hidden bg-zinc-700 rounded-lg divide-y divide-zinc-600">
+        {% for expense in expenses %}
+        <div class="p-4 space-y-2 text-sm">
+            <div class="flex justify-between font-bold">
+                <span>{{ expense.date|date:"d/m/Y" }}</span>
+                <span>{{ expense.amount|format_brl }}</span>
+            </div>
+            <div class="text-gray-300">{{ expense.description }}</div>
+            <div class="text-gray-400">{{ expense.category.name|default:"N/A" }} · {{ expense.payment_method.name|default:"N/A" }}</div>
+            <div class="pt-1">
+                {% include "reports/components/payment_checkbox.html" with expense_id=expense.id is_paid=expense.is_paid description=expense.description swatch=True extra_class="w-full" %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop: table -->
+    <div class="hidden md:block bg-zinc-700 rounded-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-zinc-600">
+                <tr class="text-left text-sm text-gray-300">
+                    <th class="px-4 py-3 font-medium">{% trans "Date" %}</th>
+                    <th class="px-4 py-3 font-medium">{% trans "Description" %}</th>
+                    <th class="px-4 py-3 font-medium">{% trans "Category" %}</th>
+                    <th class="px-4 py-3 font-medium">{% trans "Payment Method" %}</th>
+                    <th class="px-4 py-3 font-medium text-right">{% trans "Amount" %}</th>
+                    <th class="px-4 py-3 font-medium text-center">{% trans "Payment" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-600">
+                {% for expense in expenses %}
+                <tr>
+                    <td class="px-4 py-3">{{ expense.date|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3">{{ expense.description }}</td>
+                    <td class="px-4 py-3">{{ expense.category.name|default:"N/A" }}</td>
+                    <td class="px-4 py-3">{{ expense.payment_method.name|default:"N/A" }}</td>
+                    <td class="px-4 py-3 text-right">{{ expense.amount|format_brl }}</td>
+                    <td class="px-4 py-3 text-center">
+                        {% include "reports/components/payment_checkbox.html" with expense_id=expense.id is_paid=expense.is_paid description=expense.description swatch=True %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-center p-6 bg-zinc-700/30 rounded-lg text-gray-400">{% trans "No expenses generated yet." %}</p>
+    {% endif %}
+</div>
+{% endblock content %}

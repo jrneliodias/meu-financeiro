@@ -2398,3 +2398,6 @@ msgstr "Só o cadastro"
 
 msgid "Recurring expense and this month's expense updated successfully."
 msgstr "Despesa recorrente e despesa do mês atualizadas com sucesso."
+
+msgid "No expenses generated yet."
+msgstr "Nenhuma despesa gerada ainda."

@@ -35,15 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // View Expenses Buttons
-    const viewButtons = document.querySelectorAll('.view-expenses-btn');
-    viewButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            showRecurringExpenseModal(id);
-        });
-    });
-
     // Delete Buttons
     const deleteButtons = document.querySelectorAll('.delete-btn');
     deleteButtons.forEach(button => {
@@ -77,117 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Modal Functions
-    function showRecurringExpenseModal(id) {
-        const modal = document.getElementById('recurringExpenseModal');
-        const loading = document.getElementById('recurringModalLoading');
-        const error = document.getElementById('recurringModalError');
-        const content = document.getElementById('recurringModalContent');
-
-        // Show modal with loading state
-        modal.classList.remove('hidden');
-        loading.classList.remove('hidden');
-        error.classList.add('hidden');
-        content.classList.add('hidden');
-
-        // Fetch data via AJAX
-        fetch(`/recurring-expense-details/?id=${id}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            loading.classList.add('hidden');
-
-            if (data.error) {
-                error.classList.remove('hidden');
-                document.getElementById('recurringModalErrorMessage').textContent = data.error;
-            } else {
-                content.classList.remove('hidden');
-
-                // Update summary
-                document.getElementById('recurringModalTitle').textContent =
-                    `${data.recurring_expense.description}`;
-                document.getElementById('recurringModalAmount').textContent =
-                    formatBRL(data.recurring_expense.total_amount);
-                document.getElementById('recurringModalCount').textContent =
-                    data.expense_count;
-                document.getElementById('recurringModalTotal').textContent =
-                    formatBRL(data.total_generated);
-
-                renderExpenses(data.expenses);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            loading.classList.add('hidden');
-            error.classList.remove('hidden');
-            document.getElementById('recurringModalErrorMessage').textContent =
-                'Failed to load expense details.';
-        });
-    }
-
-    function escapeHTML(value) {
-        // Also encodes quotes: safe in text and in attribute values.
-        return String(value ?? '').replace(/[&<>"']/g, c => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-        }[c]));
-    }
-
-    function paymentControl(expense, extraClass = '') {
-        const paid = expense.is_paid;
-        return `<label class="payment-control payment-control--swatch ${extraClass}">
-            <input type="checkbox" class="expense-payment-checkbox"
-                   data-expense-id="${expense.id}"
-                   data-url="${escapeHTML(expense.payment_url)}"
-                   ${expense.is_current_month ? '' : 'data-skip-pending-count'}
-                   data-paid-label="Pago" data-pending-label="Pendente"
-                   data-saving-label="Salvando…"
-                   data-error-label="Não foi possível salvar o pagamento. Tente novamente."
-                   aria-label="Pagamento de ${escapeHTML(expense.description)}" ${paid ? 'checked' : ''}>
-            <i class="fas fa-clock icon-pending" aria-hidden="true"></i>
-            <i class="fas fa-check icon-paid" aria-hidden="true"></i>
-            <span class="payment-label">${paid ? 'Pago' : 'Pendente'}</span>
-        </label>`;
-    }
-
-    // Same data twice: table rows (md+) and one card per expense (mobile).
-    function renderExpenses(expenses) {
-        const rows = document.getElementById('recurringExpensesList');
-        const cards = document.getElementById('recurringExpensesCards');
-        if (expenses.length === 0) {
-            const empty = 'No expenses generated yet.';
-            rows.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-gray-400">${empty}</td></tr>`;
-            cards.innerHTML = `<p class="text-center p-4 text-gray-400">${empty}</p>`;
-            return;
-        }
-        rows.innerHTML = expenses.map(e => `<tr>
-            <td class="px-4 py-3">${formatDate(e.date)}</td>
-            <td class="px-4 py-3">${escapeHTML(e.description)}</td>
-            <td class="px-4 py-3">${escapeHTML(e.category)}</td>
-            <td class="px-4 py-3">${escapeHTML(e.payment_method)}</td>
-            <td class="px-4 py-3 text-right">${formatBRL(e.amount)}</td>
-            <td class="px-4 py-3 text-center">${paymentControl(e)}</td>
-        </tr>`).join('');
-        cards.innerHTML = expenses.map(e => `<div class="p-4 space-y-2 text-sm">
-            <div class="flex justify-between font-bold">
-                <span>${formatDate(e.date)}</span><span>${formatBRL(e.amount)}</span>
-            </div>
-            <div class="text-gray-300">${escapeHTML(e.description)}</div>
-            <div class="text-gray-400">${escapeHTML(e.category)} · ${escapeHTML(e.payment_method)}</div>
-            <div class="pt-1">${paymentControl(e, 'w-full')}</div>
-        </div>`).join('');
-    }
-
-    // Modal close buttons
-    document.getElementById('recurringModalCloseBtn').addEventListener('click', closeModal);
-    document.getElementById('recurringModalCloseFooterBtn').addEventListener('click', closeModal);
-
-    function closeModal() {
-        document.getElementById('recurringExpenseModal').classList.add('hidden');
-    }
-
     // Funções utilitárias
     function getCookie(name) {
         let cookieValue = null;
@@ -202,19 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         return cookieValue;
-    }
-
-    function formatBRL(value) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
-    }
-
-    function formatDate(dateString) {
-        // ISO date parsed by hand: new Date('YYYY-MM-DD') is UTC and shows the previous day in Brazil
-        const [y, m, d] = dateString.split('-');
-        return `${d}/${m}/${y}`;
     }
 
     // Process Recurring Expenses Modal Functions

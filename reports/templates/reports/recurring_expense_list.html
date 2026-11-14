@@ -85,11 +85,10 @@
                             </button>
                         </td>
                         <td class="text-center">
-                            <button class="view-expenses-btn text-blue-400 hover:text-blue-300 cursor-pointer"
-                                    data-id="{{ recurring_expense.id }}">
+                            <a href="{% url 'recurring_expense_expenses' recurring_expense.id %}" class="view-expenses-btn text-blue-400 hover:text-blue-300 cursor-pointer">
                                 <i class="fas fa-list mr-1"></i>
                                 {% blocktrans count count=recurring_expense.expense_count|default:0 %}{{ count }} expense{% plural %}{{ count }} expenses{% endblocktrans %}
-                            </button>
+                            </a>
                         </td>
                         <td class="text-end space-x-2">
                             <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
@@ -167,11 +166,10 @@
 
                 <!-- Actions -->
                 <div class="flex justify-between items-center border-t border-zinc-600 pt-3">
-                    <button class="view-expenses-btn text-blue-400 hover:text-blue-300 inline-flex items-center min-h-[44px]"
-                            data-id="{{ recurring_expense.id }}">
+                    <a href="{% url 'recurring_expense_expenses' recurring_expense.id %}" class="view-expenses-btn text-blue-400 hover:text-blue-300 inline-flex items-center min-h-[44px]">
                         <i class="fas fa-list mr-1"></i>
                         {% blocktrans count count=recurring_expense.expense_count|default:0 %}{{ count }} expense{% plural %}{{ count }} expenses{% endblocktrans %}
-                    </button>
+                    </a>
                     <div class="flex items-center">
                         <a href="{% url 'recurring_expense_update' recurring_expense.id %}"
                            aria-label="{% trans 'Edit' %}"
@@ -197,8 +195,7 @@
     </div>
 </div>
 
-<!-- Incluir Modals -->
-{% include "reports/components/recurring_expense_modal.html" %}
+<!-- Modal -->
 {% include "reports/components/process_recurring_modal.html" %}
 
 <!-- Incluir JavaScript -->

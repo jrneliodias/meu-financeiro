@@ -9,8 +9,8 @@ from registers.models import Category, Expense, PaymentMethod, RecurringExpense
 from .base import UITestCase
 
 
-class RecurringExpenseModalUITest(UITestCase):
-    """Generated-expenses dialog: table on desktop, one card each on mobile."""
+class RecurringExpensesUITest(UITestCase):
+    """List page + generated-expenses page (cards on mobile, table on desktop)."""
 
     def setUp(self):
         super().setUp()
@@ -30,10 +30,8 @@ class RecurringExpenseModalUITest(UITestCase):
             reccurring_expense=self.rec, is_paid=False)
         self.login(self.user)
 
-    def open_modal(self):
-        self.page.goto(self.url('/recurring-expenses/'))
-        self.page.locator('.view-expenses-btn:visible').first.click()
-        self.page.locator('#recurringModalContent').wait_for(state='visible')
+    def expenses_url(self):
+        return self.url(f'/recurring-expense/{self.rec.pk}/expenses/')
 
     def test_list_has_no_payment_status_or_extra_summary_cards(self):
         self.page.goto(self.url('/recurring-expenses/'))
@@ -42,73 +40,55 @@ class RecurringExpenseModalUITest(UITestCase):
         self.assertNotIn('Despesas Inativas', body)
         self.assertNotIn('Total Geral', body)
 
-    def test_desktop_modal_shows_table_with_payment_toggle(self):
-        self.open_modal()
-        self.assertTrue(self.page.locator('#recurringExpensesList').is_visible())
-        self.assertFalse(self.page.locator('#recurringExpensesCards').is_visible())
-        row = self.page.locator('#recurringExpensesList tr', has_text='25/09/2025')
-        self.assertEqual(row.count(), 1)  # not shifted to 24/09 by UTC parsing
+    def test_expenses_link_opens_the_page(self):
+        self.page.set_viewport_size({'width': 390, 'height': 800})
+        self.page.goto(self.url('/recurring-expenses/'))
+        self.page.locator('.md\\:hidden .view-expenses-btn').first.click()
+        self.page.wait_for_url(lambda u: u.endswith(f'/recurring-expense/{self.rec.pk}/expenses/'))
+        self.assertEqual(self.page.locator('#recurringExpenseModal').count(), 0)
+
+    def test_desktop_shows_table_with_payment_toggle(self):
+        self.page.goto(self.expenses_url())
+        self.assertTrue(self.page.locator('table').is_visible())
+        row = self.page.locator('table tbody tr', has_text='25/09/2025')
+        self.assertEqual(row.count(), 1)  # not shifted to 24/09
         row.locator('.expense-payment-checkbox').check()
         self.page.wait_for_function(
-            "document.querySelector('#recurringExpensesList .payment-label').textContent !== 'Salvando…'")
+            "[...document.querySelectorAll('table .payment-label')].some(l => l.textContent === 'Pago')")
         self.old.refresh_from_db()
         self.assertTrue(self.old.is_paid)
 
-    def test_mobile_modal_shows_one_card_per_expense_and_toggle_saves(self):
-        self.page.set_viewport_size({'width': 390, 'height': 800})
-        self.open_modal()
-        self.assertFalse(self.page.locator('#recurringExpensesList').is_visible())
-        cards = self.page.locator('#recurringExpensesCards > div')
+    def test_mobile_shows_one_card_per_expense_in_first_screen(self):
+        # Regression: the dialog buried the list below huge summary cards.
+        self.page.set_viewport_size({'width': 390, 'height': 844})
+        self.page.goto(self.expenses_url())
+        self.assertFalse(self.page.locator('table').is_visible())
+        cards = self.page.locator('.md\\:hidden > div')
         self.assertEqual(cards.count(), 2)
-        # no horizontal scroll inside the modal
+        self.assertLess(cards.first.bounding_box()['y'], 600)  # visible without scrolling
         self.assertTrue(self.page.evaluate(
-            "(() => { const c = document.getElementById('recurringExpenseContent');"
-            " return c.scrollWidth <= c.clientWidth; })()"))
+            "document.documentElement.scrollWidth <= document.documentElement.clientWidth"))
         card = cards.filter(has_text='25/09/2025')
         card.locator('.expense-payment-checkbox').check()
         self.page.wait_for_function(
-            "[...document.querySelectorAll('#recurringExpensesCards .payment-label')]"
-            ".some(l => l.textContent === 'Pago')")
+            "[...document.querySelectorAll('.md\\\\:hidden .payment-label')].some(l => l.textContent === 'Pago')")
         self.old.refresh_from_db()
         self.assertTrue(self.old.is_paid)
-
-    def test_old_month_toggle_does_not_change_pending_counter(self):
-        self.open_modal()
-        before = self.page.inner_text('[data-pending-count]')
-        row = self.page.locator('#recurringExpensesList tr', has_text='25/09/2025')
-        row.locator('.expense-payment-checkbox').check()
-        self.page.wait_for_function(
-            "document.querySelector('#recurringExpensesList .payment-label').textContent !== 'Salvando…'")
-        self.assertEqual(self.page.inner_text('[data-pending-count]'), before)
-
-    def test_description_with_quotes_and_markup_is_not_injected(self):
-        # Regression: escaper must encode quotes (attribute context) and tags.
-        self.old.description = 'x" onfocus="window.pwned=1" autofocus y=" <img src=x onerror=window.pwned=1>'
-        self.old.save()
-        self.open_modal()
-        self.assertIsNone(self.page.evaluate('window.pwned'))
-        self.assertEqual(self.page.locator('#recurringExpensesList img').count(), 0)
-        label = self.page.locator('#recurringExpensesList tr', has_text='25/09/2025').locator('.expense-payment-checkbox')
-        self.assertEqual(label.get_attribute('onfocus'), None)
+        self.assertGreaterEqual(card.locator('.payment-control--swatch').bounding_box()['height'], 44)
 
     def test_payment_control_has_no_visible_text_and_is_yellow_or_green(self):
-        # Pending = yellow, paid = green; text stays only for screen readers.
-        self.open_modal()
-        row = self.page.locator('#recurringExpensesList tr', has_text='25/09/2025')
+        self.page.goto(self.expenses_url())
+        row = self.page.locator('table tbody tr', has_text='25/09/2025')
         control = row.locator('.payment-control--swatch')
         bg = lambda: control.evaluate('e => getComputedStyle(e).backgroundColor')
         self.assertEqual(bg(), 'rgb(234, 179, 8)')  # yellow: pending
-        label_box = control.locator('.payment-label').bounding_box()
-        self.assertLessEqual(label_box['width'], 1)  # visually hidden
+        self.assertLessEqual(control.locator('.payment-label').bounding_box()['width'], 1)
         row.locator('.expense-payment-checkbox').check()
+        self.page.mouse.move(0, 0)  # leave hover; wait out the colour transition
         self.page.wait_for_function(
-            "document.querySelector('#recurringExpensesList tr:nth-child(2) .payment-label').textContent === 'Pago'")
-        self.page.mouse.move(0, 0)  # leave hover; wait out the 150ms colour transition
-        self.page.wait_for_function(
-            "getComputedStyle(document.querySelector('#recurringExpensesList tr:nth-child(2) .payment-control--swatch'))"
-            ".backgroundColor === 'rgb(22, 163, 74)'")
+            "[...document.querySelectorAll('table .payment-control--swatch')]"
+            ".some(e => getComputedStyle(e).backgroundColor === 'rgb(22, 163, 74)')")
         self.assertEqual(bg(), 'rgb(22, 163, 74)')  # green: paid
-        self.assertEqual(control.locator('.payment-label').text_content(), 'Pago')
 
     def test_mobile_touch_targets_are_at_least_44px(self):
         # Regression: Active toggle / edit / delete / payment were too small to tap.
@@ -120,13 +100,6 @@ class RecurringExpenseModalUITest(UITestCase):
             box = self.page.locator(selector).first.bounding_box()
             self.assertGreaterEqual(box['height'], 44, selector)
             self.assertGreaterEqual(box['width'], 44, selector)
-        self.page.locator('.view-expenses-btn:visible').first.click()
-        self.page.locator('#recurringModalContent').wait_for(state='visible')
-        for selector in ['#recurringExpensesCards .payment-control--swatch', '#recurringModalCloseBtn']:
-            box = self.page.locator(selector).first.bounding_box()
-            self.assertGreaterEqual(box['height'], 44, selector)
-            self.assertGreaterEqual(box['width'], 44, selector)
-
     def test_mobile_header_buttons_are_on_their_own_row_below_the_title(self):
         # Regression: title and action buttons were squeezed on one line.
         self.page.set_viewport_size({'width': 390, 'height': 800})

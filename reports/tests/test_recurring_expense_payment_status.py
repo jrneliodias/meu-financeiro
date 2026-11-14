@@ -361,25 +361,52 @@ class SetExpensePaidViewTest(RecurringExpenseTogglePaidViewTest):
         self.client.logout()
         self.assertEqual(self.set_paid(True).status_code, 302)
 
-    def test_details_endpoint_exposes_payment_state(self):
+    def expenses_page(self, recurring=None):
+        return self.client.get(reverse(
+            'recurring_expense_expenses', args=[(recurring or self.recurring_expense).id]))
+
+    def test_expenses_page_shows_payment_state_per_expense(self):
         self.set_paid(True)
-        other_month = Expense.objects.create(
+        other = Expense.objects.create(
             user=self.user, description='Netflix', amount=50,
             date=date(2020, 1, 5), reccurring_expense=self.recurring_expense,
             is_paid=False,
         )
-        response = self.client.get(
-            reverse('recurring_expense_details_ajax'),
-            {'id': self.recurring_expense.id}, HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        response = self.expenses_page()
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        # two renderings (mobile cards + desktop table) of each expense
+        self.assertEqual(html.count('data-expense-id="%s"' % self.expense.id), 2)
+        self.assertEqual(html.count('data-expense-id="%s"' % other.id), 2)
+        self.assertEqual(html.count('checked'), 2)  # only the paid one
+        self.assertContains(response, 'payment-control--swatch', count=4)
+        self.assertContains(response, reverse('recurring_expense_set_paid', args=[other.id]), count=2)
+
+    def test_expenses_page_is_owner_only_and_requires_login(self):
+        self.client.force_login(self.other_user)
+        self.assertEqual(self.expenses_page().status_code, 404)
+        self.client.logout()
+        self.assertEqual(self.expenses_page().status_code, 302)
+
+    def test_expenses_page_escapes_description(self):
+        self.expense.description = '"><img src=x onerror=alert(1)>'
+        self.expense.save()
+        response = self.expenses_page()
+        self.assertNotContains(response, '<img src=x')
+        self.assertContains(response, '&lt;img src=x')
+
+    def test_expenses_page_shows_empty_state(self):
+        empty = RecurringExpense.objects.create(
+            user=self.user, description='Gym', total_amount=80, start_date=date(2026, 1, 15),
         )
-        by_id = {e['id']: e for e in response.json()['expenses']}
-        self.assertTrue(by_id[self.expense.id]['is_paid'])
-        self.assertFalse(by_id[other_month.id]['is_paid'])
-        self.assertFalse(by_id[other_month.id]['is_current_month'])
-        self.assertEqual(
-            by_id[other_month.id]['payment_url'],
-            reverse('recurring_expense_set_paid', args=[other_month.id]),
-        )
+        self.assertContains(self.expenses_page(empty), 'Nenhuma despesa gerada ainda.')
+
+    def test_list_links_to_expenses_page_without_modal(self):
+        # Regression: the cramped modal was replaced by a page.
+        response = self.client.get(reverse('recurring_expense_list'))
+        self.assertContains(
+            response, reverse('recurring_expense_expenses', args=[self.recurring_expense.id]))
+        self.assertNotContains(response, 'recurringExpenseModal')
 
     def test_monthly_table_shows_recurring_payment_controls_only(self):
         from django.template.loader import render_to_string
