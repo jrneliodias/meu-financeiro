@@ -47,21 +47,27 @@ def _expense_service(year):
     return ExpenseService(expense_repository, income_repository, year=year)
 
 
+def _budget(user, month, year):
+    """Parcelas do mês, gasto avulso e orçamento mensal (usados no Resumo e na aba Gastos)."""
+    installment_summary = installment_calculator.get_monthly_installment_summary(
+        month=month, year=year, user=user)
+    regular_total = expense_repository.get_monthly_regular_expenses_total(
+        month=month, year=year, user=user)
+    budget = budget_estimate_service.get_monthly_budget_summary(
+        user, month, year,
+        monthly_installment_total=installment_summary['total_amount'])
+    budget.total_regular = regular_total
+    budget.adjusted_expected = budget.total_expected + regular_total
+    return installment_summary, regular_total, budget
+
+
 @login_required
 def expense_report(request):
     """Aba Resumo (home): saldo, cards, orçamento e gráfico receita x despesa."""
     ctx = _filters(request)
     month, year = ctx['selected_month'], ctx['selected_year']
 
-    installment_summary = installment_calculator.get_monthly_installment_summary(
-        month=month, year=year, user=request.user)
-    regular_total = expense_repository.get_monthly_regular_expenses_total(
-        month=month, year=year, user=request.user)
-    budget = budget_estimate_service.get_monthly_budget_summary(
-        request.user, month, year,
-        monthly_installment_total=installment_summary['total_amount'])
-    budget.total_regular = regular_total
-    budget.adjusted_expected = budget.total_expected + regular_total
+    installment_summary, regular_total, budget = _budget(request.user, month, year)
 
     today = date.today()
     payment_data = _expense_service(year).get_optimized_payment_method_data()
@@ -92,6 +98,7 @@ def spending(request):
     ctx.update({
         'active_tab': 'gastos',
         'fit_screen': True,
+        'budget_summary': _budget(request.user, ctx['selected_month'], ctx['selected_year'])[2],
         'daily_spending_data': get_daily_spending_data(
             expense_repository, ctx['selected_year'], ctx['selected_month']),
         'expense_categories': Category.objects.filter(type='expense').order_by('name'),

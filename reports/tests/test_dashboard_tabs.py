@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from registers.models import Category, Expense, PaymentMethod
+from registers.models import Category, CategoryBudgetEstimate, Expense, PaymentMethod
 
 TABS = ['expense_report', 'dashboard_spending', 'dashboard_categories',
         'dashboard_installments', 'dashboard_expenses']
@@ -62,3 +62,16 @@ class DashboardTabsTest(TestCase):
             response = self.client.get(reverse(name), {'month': 10, 'year': 2026})
             expected = name in ('expense_report', 'dashboard_spending')
             self.assertEqual(bool(response.context.get('fit_screen')), expected, name)
+
+    def test_monthly_estimate_card_lives_on_gastos_not_resumo(self):
+        CategoryBudgetEstimate.objects.create(
+            user=self.user, category=Category.objects.get(name='Mercado'),
+            amount=Decimal('500.00'), month=10, year=2026)
+        card = 'reports/components/budget_estimate_card.html'
+        gastos = self.client.get(reverse('dashboard_spending'), {'month': 10, 'year': 2026})
+        resumo = self.client.get(reverse('expense_report'), {'month': 10, 'year': 2026})
+        self.assertTemplateUsed(gastos, card)
+        self.assertTemplateNotUsed(resumo, card)
+        # os cards de total esperado/estimado continuam no resumo
+        self.assertTemplateUsed(resumo, 'reports/components/estimated_expenses_card.html')
+        self.assertEqual(gastos.context['budget_summary'].total_estimated, Decimal('500.00'))
