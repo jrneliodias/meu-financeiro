@@ -2401,3 +2401,6 @@ msgstr "Despesa recorrente e despesa do mês atualizadas com sucesso."
 
 msgid "No expenses generated yet."
 msgstr "Nenhuma despesa gerada ainda."
+
+msgid "Collapse menu"
+msgstr "Recolher menu"
