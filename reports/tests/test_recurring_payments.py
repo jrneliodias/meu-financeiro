@@ -147,10 +147,7 @@ class RecurringPaymentsTest(TestCase):
         data = response.json()
         self.assertEqual(data['pending_count'], 2)
         self.assertEqual(data['overdue_count'], 1)
-        self.assertIn('Próxima a pagar:', data['html'])
-        self.assertIn(upcoming.description, data['html'])
-        self.assertIn('Pago em: 09/10/2026', data['html'])
-        self.assertNotIn('Conta privada', data['html'])
+        self.assertNotIn('html', data)
         self.assertEqual(response['Cache-Control'], 'no-store')
 
     def test_notification_payment_updates_summary_and_excludes_inactive(self):
@@ -164,7 +161,7 @@ class RecurringPaymentsTest(TestCase):
             self.schedule.generate_debit = False
             self.schedule.save()
             response = self.client.get(reverse('payment_notifications'))
-            self.assertNotIn('Internet', response.json()['html'])
+            self.assertEqual(response.json()['pending_count'], 0)
 
     def test_notifications_require_login_and_get(self):
         url = reverse('payment_notifications')
@@ -172,8 +169,8 @@ class RecurringPaymentsTest(TestCase):
         self.client.logout()
         self.assertEqual(self.client.get(url).status_code, 302)
 
-    def test_main_menu_has_notification_dialog_and_one_payment_script(self):
+    def test_main_menu_has_notification_link_and_one_payment_script(self):
         response = self.client.get(reverse('recurring_payments'), {'month': 10, 'year': 2026})
         self.assertContains(response, 'id="payment-notifications-toggle"')
-        self.assertContains(response, '<dialog id="payment-notifications"')
+        self.assertNotContains(response, '<dialog id="payment-notifications"')
         self.assertContains(response, 'js/expense_payment.js', count=1)

@@ -17,8 +17,7 @@ from utils.dates import get_all_months_tuples
 @login_required
 @require_http_methods(["GET"])
 def payment_notifications(request):
-    """Current-month notification summary scoped to the authenticated user."""
-    from django.template.loader import render_to_string
+    """Contagens de pendentes/atrasadas do mês (usadas pelo selo do sino)."""
     from reports.services.recurring_payment_service import RecurringPaymentService
 
     today = localdate()
@@ -28,9 +27,6 @@ def payment_notifications(request):
     response = JsonResponse({
         'pending_count': overview['pending_count'],
         'overdue_count': len(overview['overdue_expenses']),
-        'html': render_to_string('reports/components/payment_notifications_content.html', {
-            **overview, 'today': today,
-        }, request=request),
     })
     response['Cache-Control'] = 'no-store'
     return response
@@ -236,27 +232,19 @@ def recurring_expense_expenses(request, pk):
 
 
 @login_required
-@require_http_methods(["POST"])
-def process_recurring_expenses_ajax(request):
-    """
-    AJAX endpoint to process recurring expenses for a selected month/year.
-    """
-    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'success': False, 'error': _('Invalid request')}, status=400)
-
-    try:
-        month = int(request.POST.get('month'))
-        year = int(request.POST.get('year'))
-    except (TypeError, ValueError):
-        return JsonResponse({
-            'success': False,
-            'error': _('Invalid month and year')
-        }, status=400)
-
-    # Process expenses using service
-    recurring_expense_service = RecurringExpenseService()
-    result = recurring_expense_service.process_recurring_expenses_for_month(
-        request.user, month, year
-    )
-
-    return JsonResponse(result)
+@require_http_methods(["GET", "POST"])
+def recurring_expense_process(request):
+    """Página para gerar as despesas recorrentes de um mês (substitui o modal)."""
+    today = localdate()
+    context = {'month': today.month, 'year': today.year, 'all_months': get_all_months_tuples()}
+    if request.method == 'POST':
+        try:
+            month, year = int(request.POST['month']), int(request.POST['year'])
+            if not (1 <= month <= 12 and 2000 <= year <= 2100):
+                raise ValueError
+        except (KeyError, ValueError):
+            context['error'] = _('Invalid month and year')
+            return render(request, 'reports/recurring_expense_process.html', context, status=400)
+        context.update(month=month, year=year, result=RecurringExpenseService()
+                       .process_recurring_expenses_for_month(request.user, month, year))
+    return render(request, 'reports/recurring_expense_process.html', context)

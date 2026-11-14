@@ -2,10 +2,12 @@
 
 Cada aba calcula só o que mostra. O filtro de mês/ano vem de `_filters`.
 """
+import calendar
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from registers.models import Category
 from reports.services import ExpenseService
@@ -92,6 +94,19 @@ def expense_report(request):
 
 
 @login_required
+def budget_breakdown(request):
+    """Detalhamento do "Total esperado" (substitui o modal do card)."""
+    ctx = _filters(request)
+    back = request.GET.get('back', '')
+    ctx.update({
+        'budget_summary': _budget(request.user, ctx['selected_month'], ctx['selected_year'])[2],
+        'month_label': f"{calendar.month_name[ctx['selected_month']]} {ctx['selected_year']}",
+        'back_url': back if url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}) else '',
+    })
+    return render(request, TEMPLATE_DIR + 'budget_breakdown.html', ctx)
+
+
+@login_required
 def spending(request):
     """Aba Gastos: gráfico de gasto diário."""
     ctx = _filters(request)
@@ -116,6 +131,7 @@ def categories(request):
     ctx.update({
         'active_tab': 'categorias',
         'all_months': all_months,
+        'category_ids': dict(Category.objects.filter(type='expense').values_list('name', 'id')),
         'formatted_expenses_by_category': {
             category: [format_brl(totals.get(m, 0.0)) for m in all_months]
             for category, totals in data['expenses_by_category_by_month'].items()

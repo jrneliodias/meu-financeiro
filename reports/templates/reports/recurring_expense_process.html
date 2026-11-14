@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block content %}
+<article class="space-y-4 max-w-xl">
+  <header class="flex items-center gap-3">
+    <a href="{% url 'recurring_expense_list' %}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-zinc-800/60 hover:bg-zinc-700" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i></a>
+    <div>
+      <h1 class="text-2xl font-bold"><i class="fas fa-calendar-check mr-2"></i>{% trans "Process Recurring Expenses" %}</h1>
+      <p class="text-sm text-zinc-400">{% trans "Select the month and year to generate active recurring expenses." %}</p>
+    </div>
+  </header>
+
+  {% if error %}<p role="alert" class="p-4 rounded-lg bg-red-900/20 border border-red-500 text-red-400"><strong>Erro:</strong> {{ error }}</p>{% endif %}
+  {% if result %}
+    {% if result.success %}
+    <div role="status" id="process-result" class="p-4 rounded-lg bg-green-900/20 border border-green-500 text-green-400">
+      <strong>Sucesso!</strong><br>{{ result.created_count }} despesa(s) criada(s)<br>{{ result.skipped_count }} já existente(s)
+      {% if result.errors %}<br><br><strong>Avisos:</strong>{% for e in result.errors %}<br>{{ e }}{% endfor %}{% endif %}
+    </div>
+    {% else %}
+    <p role="alert" class="p-4 rounded-lg bg-red-900/20 border border-red-500 text-red-400"><strong>Erro:</strong> {{ result.error|default:"Erro ao processar despesas" }}</p>
+    {% endif %}
+  {% endif %}
+
+  <form method="post" class="bg-zinc-800/40 rounded-lg p-4 space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="processMonth" class="block text-gray-300 mb-2">{% trans "Month" %}</label>
+      <select id="processMonth" name="month" class="w-full bg-zinc-700 text-white border border-zinc-600 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        {% for month_num, month_name in all_months %}<option value="{{ month_num }}" {% if month_num == month %}selected{% endif %}>{{ month_name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="processYear" class="block text-gray-300 mb-2">{% trans "Year" %}</label>
+      <input type="number" id="processYear" name="year" min="2000" max="2100" value="{{ year }}" required
+             class="w-full bg-zinc-700 text-white border border-zinc-600 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div class="flex justify-end gap-3">
+      <a href="{% url 'recurring_expense_list' %}" class="px-4 py-2 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600">{% trans "Cancel" %}</a>
+      <button type="submit" id="processBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-check mr-2"></i>{% trans "Process" %}</button>
+    </div>
+  </form>
+</article>
+{% endblock content %}

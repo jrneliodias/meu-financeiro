@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% load currency_filters i18n %}
+{% block content %}
+<article class="space-y-4 max-w-xl">
+  <header class="flex items-center gap-3">
+    <a href="{% if back_url %}{{ back_url }}{% else %}{% url 'expense_report' %}?month={{ selected_month }}&year={{ selected_year }}{% endif %}"
+       class="w-10 h-10 flex items-center justify-center rounded-lg bg-zinc-800/60 hover:bg-zinc-700" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i></a>
+    <div>
+      <h1 class="text-2xl font-bold">{% trans 'Expected Total Breakdown' %}</h1>
+      <p class="text-sm text-zinc-400">{{ month_label }}</p>
+    </div>
+  </header>
+  <section class="bg-zinc-800/40 rounded-lg p-4 flex flex-col gap-3">
+    <div class="flex justify-between items-center"><span class="text-zinc-400">{% trans 'Fixed' %}</span>
+      <span class="text-orange-400 font-semibold">{{ budget_summary.total_fixed|format_brl }}</span></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-400">{% trans 'Installments' %}</span>
+      <span class="text-purple-400 font-semibold">{{ budget_summary.total_installments|format_brl }}</span></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-400">{% trans 'Estimated' %}</span>
+      <span class="text-yellow-400 font-semibold">{{ budget_summary.total_estimated|format_brl }}</span></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-400">{% trans 'Daily Expenses' %}</span>
+      <span class="text-cyan-400 font-semibold">{{ budget_summary.total_regular|format_brl }}</span></div>
+    <div class="border-t border-zinc-700 pt-3 flex justify-between items-center">
+      <span class="font-medium">{% trans 'Total' %}</span>
+      <span class="text-blue-400 font-bold text-lg">{{ budget_summary.adjusted_expected|format_brl }}</span></div>
+  </section>
+</article>
+{% endblock content %}

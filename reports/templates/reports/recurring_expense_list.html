@@ -6,10 +6,10 @@
     <div class="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
         <h2 class="text-2xl font-bold">{% trans "Recurring Expenses" %}</h2>
         <div class="grid grid-cols-2 gap-3 md:flex">
-            <button onclick="showProcessRecurringModal()"
-                    class="min-h-[44px] bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            <a href="{% url 'recurring_expense_process' %}" id="process-recurring-link"
+               class="min-h-[44px] inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                 <i class="fas fa-calendar-check mr-2"></i>{% trans "Process Expenses" %}
-            </button>
+            </a>
             <a href="{% url 'register_recurring_expense' %}"
                class="min-h-[44px] inline-flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                 <i class="fas fa-plus mr-2"></i>{% trans "Add New" %}
@@ -195,8 +195,6 @@
     </div>
 </div>
 
-<!-- Modal -->
-{% include "reports/components/process_recurring_modal.html" %}
 
 <!-- Incluir JavaScript -->
 <script src="{% static 'js/recurring_expense_list.js' %}"></script>

@@ -2,6 +2,3 @@
 document.addEventListener('expense-payment-saved', event => {
     if (!event.detail?.fromNotifications) window.location.reload();
 });
-document.addEventListener('payment-notifications-closed', event => {
-    if (event.detail?.changed) window.location.reload();
-});

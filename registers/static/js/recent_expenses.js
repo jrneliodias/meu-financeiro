@@ -189,13 +189,11 @@ const RecentExpenses = {
                 this.autofillForm(id);
                 break;
             case 'details':
-                // Find the expense to get its category_id
+                // Abre a lista de despesas da categoria (página própria, sem modal)
                 const expense = this.expenses.find(exp => exp.id == id);
-                if (expense && expense.category_id && window.expenseListModal) {
-                    // Open new modal with category filter
-                    window.expenseListModal.open('category', expense.category_id, id);
-                } else {
-                    console.error('Could not open expense list modal - expense or category not found');
+                if (expense && expense.category_id) {
+                    const back = encodeURIComponent(location.pathname + location.search);
+                    location.href = `/despesas/lista/?category_id=${expense.category_id}&back=${back}`;
                 }
                 break;
             case 'delete':
