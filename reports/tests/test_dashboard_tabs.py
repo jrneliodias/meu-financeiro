@@ -42,3 +42,8 @@ class DashboardTabsTest(TestCase):
         for key in ('daily_spending_data', 'installments_progress', 'monthly_expenses_queryset',
                     'formatted_expenses_by_category'):
             self.assertNotIn(key, response.context)
+
+    def test_notification_bell_once_on_every_tab(self):
+        for name in TABS:
+            response = self.client.get(reverse(name), {'month': 10, 'year': 2026})
+            self.assertContains(response, 'id="payment-notifications-toggle"', count=1, msg_prefix=name)
