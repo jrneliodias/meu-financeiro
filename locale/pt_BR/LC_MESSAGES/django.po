@@ -2404,3 +2404,6 @@ msgstr "Nenhuma despesa gerada ainda."
 
 msgid "Collapse menu"
 msgstr "Recolher menu"
+
+msgid "See today expenses"
+msgstr "Ver despesas de hoje"

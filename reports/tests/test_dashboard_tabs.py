@@ -75,3 +75,13 @@ class DashboardTabsTest(TestCase):
         # os cards de total esperado/estimado continuam no resumo
         self.assertTemplateUsed(resumo, 'reports/components/estimated_expenses_card.html')
         self.assertEqual(gastos.context['budget_summary'].total_estimated, Decimal('500.00'))
+
+    def test_spent_today_card_links_to_todays_expense_list(self):
+        from datetime import date as d
+        html = self.client.get(reverse('expense_report'), {'month': 10, 'year': 2026}).content.decode()
+        self.assertIn(f"{reverse('expense_list_page')}?date={d.today().isoformat()}", html)
+
+    def test_link_cards_have_a_subtle_chevron_hint(self):
+        html = self.client.get(reverse('expense_report'), {'month': 10, 'year': 2026}).content.decode()
+        # gasto hoje, parcelas do mês e total esperado
+        self.assertEqual(html.count('fa-chevron-right absolute'), 3)
