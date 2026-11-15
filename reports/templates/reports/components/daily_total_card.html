@@ -1,6 +1,8 @@
 {% load currency_filters i18n %}
-<a href="{% url 'dashboard_spending' %}?month={{ selected_month }}&year={{ selected_year }}"
-   class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg hover:bg-zinc-700/40 transition-colors duration-150">
+<a href="{% url 'expense_list_page' %}?date={{ today_date }}&back={{ request.get_full_path|urlencode }}"
+   title="{% trans 'See today expenses' %}"
+   class="group relative bg-zinc-800/40 p-3 md:p-4 py-2 pr-6 rounded-lg hover:bg-zinc-700/40 transition-colors duration-150">
+  <i class="fa-solid fa-chevron-right absolute top-2 right-2 text-[10px] text-zinc-500 group-hover:text-zinc-200 transition-colors" aria-hidden="true"></i>
   <div class="flex flex-col items-start">
     <p class="text-white text-xs md:text-sm">{% trans "Spent Today:" %}</p>
     <span id="dailyTotalDisplay" class="text-blue-400 text-xl md:text-2xl font-bold">
