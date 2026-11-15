@@ -17,7 +17,8 @@ from utils.dates import get_all_months_tuples
 @login_required
 @require_http_methods(["GET"])
 def payment_notifications(request):
-    """Contagens de pendentes/atrasadas do mês (usadas pelo selo do sino)."""
+    """Resumo do mês para o pop-up do sino (contagens + HTML), só do usuário logado."""
+    from django.template.loader import render_to_string
     from reports.services.recurring_payment_service import RecurringPaymentService
 
     today = localdate()
@@ -27,6 +28,9 @@ def payment_notifications(request):
     response = JsonResponse({
         'pending_count': overview['pending_count'],
         'overdue_count': len(overview['overdue_expenses']),
+        'html': render_to_string('reports/components/payment_notifications_content.html', {
+            **overview, 'today': today,
+        }, request=request),
     })
     response['Cache-Control'] = 'no-store'
     return response

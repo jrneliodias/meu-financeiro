@@ -70,14 +70,14 @@
       <span class="text-sm nav-label">{% trans "Recurring Expenses" %}</span>
     </a>
     {% if request.resolver_match.url_name != 'expense_report' and 'dashboard_' not in request.resolver_match.url_name %}
-    <a href="{% url 'recurring_payments' %}" id="payment-notifications-toggle"
-      data-url="{% url 'payment_notifications' %}"
+    <button type="button" id="payment-notifications-toggle"
+      data-url="{% url 'payment_notifications' %}" aria-haspopup="dialog" aria-controls="payment-notifications"
       title="Notificações de pagamentos" aria-label="Notificações de pagamentos"
       class="relative font-semibold flex items-center justify-start gap-2 hover:bg-zinc-700 px-4 py-3 lg:py-2 rounded-lg">
       <i class="fa-solid fa-bell" aria-hidden="true"></i>
       <span class="text-sm nav-label">Notificações</span>
       <span id="payment-notifications-count" class="notification-count" hidden></span>
-    </a>
+    </button>
     {% endif %}
     <a href="{% url 'recurring_payments' %}" title="Pagamentos do mês"
       class="font-semibold flex items-center justify-start gap-2 hover:bg-zinc-700 px-4 py-3 lg:py-2 rounded-lg {% if request.resolver_match.url_name == 'recurring_payments' %}bg-blue-800{% endif %}">
@@ -129,6 +129,7 @@
   <main class="p-2 lg:p-6 text-white min-w-0">
     {% block content %} {% endblock content %}
   </main>
+{% include 'reports/components/payment_notifications_dialog.html' %}
 <script>
   (() => {
     const sidebar = document.getElementById('sidebar');

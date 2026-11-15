@@ -53,10 +53,10 @@ Dashboard em 5 abas, cada uma calcula só o que mostra (`dashboard.py`):
 - `/` resumo (`expense_report`), `/gastos/`, `/categorias/`, `/parcelas/`, `/despesas/`
 - Templates em `reports/templates/reports/tabs/` (herdam `_layout.html`; `_nav.html` é a barra de abas)
 - `ajax.py` (gasto diário), `recurring.py` (recorrentes/pagamentos/processar), `expense_update.py`, `expense_list.py` (lista genérica), `_common.py` (singletons e helpers)
-- **Modais só para confirmação** (excluir, sincronizar). Listas/edição são páginas: `/despesas/lista/` (`?date=` | `?category_id=[&month=&year=]` | `?installments=1&month=&year=`, com `&back=`), `/orcamento/detalhamento/`, `/recurring-expenses/processar/`; o sino abre `/recurring-payments/`
+- **Modais só para confirmação** (excluir, sincronizar). Listas/edição são páginas: `/despesas/lista/` (`?date=` | `?category_id=[&month=&year=]` | `?installments=1&month=&year=`, com `&back=`), `/orcamento/detalhamento/`, `/recurring-expenses/processar/`; o sino abre o pop-up de pagamentos do mês (com link para `/recurring-payments/`)
 - Modais só para confirmação (excluir, sincronizar). Listas/edições são páginas:
   `/despesas/lista/` (`expense_list.py`: `?date=` | `?category_id=[&month=&year=]` | `?installments=1&month=&year=`, `back=` volta à origem),
-  `/orcamento/detalhamento/`, `/recurring-expenses/processar/`, e o sino aponta para `/recurring-payments/`
+  `/orcamento/detalhamento/`, `/recurring-expenses/processar/`, e o sino é um pop-up (`payment_notifications_dialog.html`) com link para `/recurring-payments/`
 - JS grande vive em `registers/static/js/` (`daily_spending_chart.js`, `category_table.js`); o template só injeta config
 
 #### registers/components
