@@ -24,6 +24,17 @@ class NotificationEditUITest(UITestCase):
             reccurring_expense=rec, is_paid=False)
         self.login(self.user)
 
+    def test_notification_popup_edit_returns_to_origin(self):
+        self.page.goto(self.url('/recurring-expenses/'))
+        self.page.click('#payment-notifications-toggle')
+        link = self.page.locator('#payment-notifications-content a[data-edit-expense]').first
+        link.wait_for(state='visible')
+        link.click()
+        self.page.wait_for_url(lambda u: f'/expense/{self.exp.pk}/update/' in u)
+        self.page.click('form button[type=submit]')
+        self.page.wait_for_url(lambda u: '/update/' not in u)
+        self.assertIn('/recurring-expenses/', self.page.url)
+
     def test_payment_row_has_edit_button_that_returns_to_origin(self):
         self.page.goto(self.url('/recurring-payments/'))
         link = self.page.locator('a[data-edit-expense]').first

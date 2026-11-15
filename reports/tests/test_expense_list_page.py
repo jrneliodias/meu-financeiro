@@ -94,10 +94,9 @@ class ExpenseListPageTest(TestCase):
 
 
 class NoListModalsRegressionTest(TestCase):
-    """Modais ficam só para confirmação: nenhuma página pode trazer os modais de lista antigos."""
+    """Modais ficam só para confirmação (exceção: o pop-up do sino); nenhuma página traz os modais de lista antigos."""
     OLD_MODALS = ['expenseDetailsModal', 'categoryExpenseModal', 'installmentExpensesModal',
-                  'budgetBreakdownModal', 'processRecurringModal', 'id="payment-notifications"',
-                  'payment-notifications-content']
+                  'budgetBreakdownModal', 'processRecurringModal']
 
     def setUp(self):
         self.user = User.objects.create_user(username='r', password='p')
@@ -112,9 +111,11 @@ class NoListModalsRegressionTest(TestCase):
             for marker in self.OLD_MODALS:
                 self.assertNotIn(marker, html, f'{name} ainda contém {marker}')
 
-    def test_bell_is_a_link_to_monthly_payments(self):
+    def test_bell_opens_popup_that_links_to_monthly_payments(self):
         html = self.client.get(reverse('expense_report')).content.decode()
-        self.assertIn(f'href="{reverse("recurring_payments")}" id="payment-notifications-toggle"', html)
+        self.assertIn('aria-controls="payment-notifications"', html)
+        self.assertIn('<dialog id="payment-notifications"', html)
+        self.assertIn(f'href="{reverse("recurring_payments")}"', html)
 
     def test_budget_breakdown_page_shows_totals(self):
         response = self.client.get(reverse('budget_breakdown'), {'month': 10, 'year': 2026})
