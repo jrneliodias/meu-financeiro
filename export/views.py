@@ -2,74 +2,50 @@ import csv
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 
-from reports.repository import ExpenseRepository
-from utils.dates import get_all_months_tuples, get_current_date
+from registers.models import Expense
+from utils.dates import parse_month_year
 
-expense_repository = ExpenseRepository()
+
+def _csv_response(expenses, year, month, decimal_sep):
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = f'attachment; filename="despesas-{year}-{month:02d}.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Data', 'Descrição', 'Valor', 'Categoria', 'Método de Pagamento', 'Tipo', 'Criado em'])
+    for e in expenses:
+        writer.writerow([
+            e.id, e.date, e.description, f"{e.amount:.2f}".replace('.', decimal_sep),
+            e.category.name if e.category else 'N/A',
+            e.payment_method.name if e.payment_method else 'N/A',
+            e.kind_label, e.created_at,
+        ])
+    return response
 
 
 @login_required
 def expense_export(request):
-    years = expense_repository.get_distinct_years_in_tuples()
-    months = get_all_months_tuples()
-
-    current_year, current_month = get_current_date()
-    selected_month = int(request.GET.get('month', current_month))
-    selected_year = int(request.GET.get('year', current_year))
+    try:
+        year, month = parse_month_year(request.GET)
+    except ValueError:
+        return HttpResponseBadRequest('Mês/ano inválido')
+    decimal_sep = request.GET.get('decimal_sep') if request.GET.get('decimal_sep') in ('.', ',') else '.'
     form_submitted = 'month' in request.GET
-
+    mine = Expense.objects.filter(user=request.user)
     expenses = []
-    total = Decimal('0.00')
-
-    decimal_sep = request.GET.get('decimal_sep', '.')
-    if decimal_sep not in ('.', ','):
-        decimal_sep = '.'
-
     if form_submitted:
-        expenses = list(
-            expense_repository.get_optimized_monthly_expenses_with_relations(
-                selected_year, selected_month
-            ).filter(user=request.user)
-        )
-        total = sum(e.amount for e in expenses)
-
+        expenses = list(mine.in_month(year, month)
+                        .select_related('category', 'payment_method').order_by('date', '-amount'))
         if 'download' in request.GET:
-            filename = f"despesas-{selected_year}-{int(selected_month):02d}.csv"
-            response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            writer = csv.writer(response)
-            writer.writerow(['ID', 'Data', 'Descrição', 'Valor', 'Categoria',
-                             'Método de Pagamento', 'Tipo', 'Criado em'])
-            for e in expenses:
-                if e.installment_plan_id:
-                    kind = 'Parcela'
-                elif e.reccurring_expense_id:
-                    kind = 'Recorrente'
-                else:
-                    kind = 'Avulsa'
-                amount = f"{e.amount:.2f}".replace('.', decimal_sep)
-                writer.writerow([
-                    e.id,
-                    e.date,
-                    e.description,
-                    amount,
-                    e.category.name if e.category else 'N/A',
-                    e.payment_method.name if e.payment_method else 'N/A',
-                    kind,
-                    e.created_at,
-                ])
-            return response
+            return _csv_response(expenses, year, month, decimal_sep)
 
     return render(request, 'export/expense_export.html', {
         'expenses': expenses,
-        'total': total,
-        'years': years,
-        'months': months,
-        'selected_month': selected_month,
-        'selected_year': selected_year,
+        'total': sum((e.amount for e in expenses), Decimal('0.00')),
+        'years': [d.year for d in mine.dates('date', 'year')],
+        'selected_month': month,
+        'selected_year': year,
         'form_submitted': form_submitted,
         'decimal_sep': decimal_sep,
     })

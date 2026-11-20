@@ -1,5 +1,4 @@
 {% load i18n %}
-{% csrf_token %}
 <label class="payment-control{% if swatch %} payment-control--swatch{% endif %} {{ extra_class }}">
   <input type="checkbox" class="expense-payment-checkbox" data-expense-id="{{ expense_id }}"
          data-url="{% url 'recurring_expense_set_paid' expense_id %}"

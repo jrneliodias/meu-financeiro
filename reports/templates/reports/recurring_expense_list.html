@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load currency_filters i18n static %}
+{% load formatting i18n static %}
 
 {% block content %}
 <div class="bg-zinc-800/50 rounded-lg p-3 w-full space-y-6">
@@ -17,9 +17,7 @@
         </div>
     </div>
 
-    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Active Total Card -->
         <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
             <div class="flex items-center justify-between">
                 <div>
@@ -30,7 +28,6 @@
             </div>
         </div>
 
-        <!-- Pending This Month Card -->
         <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
             <div class="flex items-center justify-between">
                 <div>
@@ -42,9 +39,8 @@
         </div>
     </div>
 
-    <!-- Desktop Table (hidden on mobile) -->
     <div class="hidden md:block">
-        <table border="1" class="w-full p-2">
+        <table class="w-full p-2">
             <thead class="border-b border-zinc-700">
                 <tr>
                     <th class="text-start p-2">{% trans "Description" %}</th>
@@ -60,7 +56,6 @@
             <tbody>
                 {% regroup recurring_expenses by generate_debit as expenses_by_status %}
                 {% for status_group in expenses_by_status %}
-                    {# Section header #}
                     <tr class="{% if status_group.grouper %}bg-green-900/20 border-t-2 border-green-500{% else %}bg-gray-900/20 border-t-2 border-gray-500{% endif %}">
                         <td colspan="8" class="p-3 font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
                             <i class="fas {% if status_group.grouper %}fa-check-circle{% else %}fa-pause-circle{% endif %} mr-2"></i>
@@ -68,18 +63,16 @@
                         </td>
                     </tr>
 
-                    {# Expenses in this group #}
                     {% for recurring_expense in status_group.list %}
                     <tr class="*:p-2 border-b border-zinc-700 {% if not recurring_expense.generate_debit %}opacity-50 bg-gray-900/10{% endif %}">
                         <td>{{ recurring_expense.description }}</td>
-                        <td>{{ recurring_expense.total_amount|format_brl }}</td>
+                        <td>{{ recurring_expense.charged_amount|format_brl }}</td>
                         <td>{{ recurring_expense.start_date }}</td>
                         <td>{{ recurring_expense.category.name|default:"N/A" }}</td>
                         <td>{{ recurring_expense.payment_method.name|default:"N/A" }}</td>
                         <td class="text-center">
                             <button class="toggle-btn cursor-pointer text-2xl"
-                                    data-id="{{ recurring_expense.id }}"
-                                    data-active="{{ recurring_expense.generate_debit }}">
+                                    data-post-url="{% url 'recurring_expense_toggle' recurring_expense.id %}">
                                 <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }}
                                           {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
                             </button>
@@ -96,8 +89,8 @@
                                 <i class="fa-solid fa-edit"></i>
                             </a>
                             <button class="delete-btn text-red-600 hover:text-red-800 cursor-pointer"
-                                    data-id="{{ recurring_expense.id }}"
-                                    data-description="{{ recurring_expense.description }}">
+                                    data-post-url="{% url 'recurring_expense_delete' recurring_expense.id %}"
+                                    data-confirm="{% trans 'Delete' %} “{{ recurring_expense.description }}”?">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
@@ -116,12 +109,10 @@
         </table>
     </div>
 
-    <!-- Mobile Cards (visible on mobile) -->
     <div class="md:hidden grid grid-cols-1 gap-4">
         {% if recurring_expenses %}
             {% regroup recurring_expenses by generate_debit as expenses_by_status_mobile %}
             {% for status_group in expenses_by_status_mobile %}
-                {# Section header #}
                 <div class="{% if status_group.grouper %}bg-green-900/20 border border-green-500/30{% else %}bg-gray-900/20 border border-gray-500/30{% endif %} rounded-lg p-3">
                     <p class="font-bold {% if status_group.grouper %}text-green-400{% else %}text-gray-400{% endif %}">
                         <i class="fas {% if status_group.grouper %}fa-check-circle{% else %}fa-pause-circle{% endif %} mr-2"></i>
@@ -129,16 +120,13 @@
                     </p>
                 </div>
 
-                {# Cards in this group #}
                 {% for recurring_expense in status_group.list %}
             <div class="bg-zinc-700/30 rounded-lg p-4 grid grid-cols-1 gap-3 relative {% if not recurring_expense.generate_debit %}opacity-50{% endif %}">
-                <!-- Header -->
                 <div class="grid grid-cols-[1fr_auto] items-start gap-2">
                     <h3 class="font-bold text-lg">{{ recurring_expense.description }}</h3>
-                    <span class="font-bold text-lg">{{ recurring_expense.total_amount|format_brl }}</span>
+                    <span class="font-bold text-lg">{{ recurring_expense.charged_amount|format_brl }}</span>
                 </div>
 
-                <!-- Details -->
                 <div class="grid grid-cols-1 gap-y-2 text-sm border-t border-zinc-600 pt-3">
                     <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
                         <span class="text-gray-400">{% trans "Date:" %}</span>
@@ -155,8 +143,7 @@
                     <div class="grid grid-cols-[auto_1fr] gap-2 items-center">
                         <span class="text-gray-400">{% trans "Active:" %}</span>
                         <button class="toggle-btn cursor-pointer inline-flex items-center justify-start min-h-[44px] min-w-[64px] text-4xl"
-                                data-id="{{ recurring_expense.id }}"
-                                data-active="{{ recurring_expense.generate_debit }}"
+                                data-post-url="{% url 'recurring_expense_toggle' recurring_expense.id %}"
                                 aria-label="{% trans 'Active:' %} {{ recurring_expense.description }}">
                             <i class="fas fa-toggle-{{ recurring_expense.generate_debit|yesno:'on,off' }}
                                       {{ recurring_expense.generate_debit|yesno:'text-green-500,text-gray-500' }}"></i>
@@ -164,7 +151,6 @@
                     </div>
                 </div>
 
-                <!-- Actions -->
                 <div class="flex justify-between items-center border-t border-zinc-600 pt-3">
                     <a href="{% url 'recurring_expense_expenses' recurring_expense.id %}" class="view-expenses-btn text-blue-400 hover:text-blue-300 inline-flex items-center min-h-[44px]">
                         <i class="fas fa-list mr-1"></i>
@@ -178,8 +164,8 @@
                         </a>
                         <button class="delete-btn text-red-400 hover:text-red-300 cursor-pointer inline-flex items-center justify-center min-h-[44px] min-w-[44px]"
                                 aria-label="{% trans 'Delete' %}"
-                                data-id="{{ recurring_expense.id }}"
-                                data-description="{{ recurring_expense.description }}">
+                                data-post-url="{% url 'recurring_expense_delete' recurring_expense.id %}"
+                                data-confirm="{% trans 'Delete' %} “{{ recurring_expense.description }}”?">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -196,6 +182,5 @@
 </div>
 
 
-<!-- Incluir JavaScript -->
 <script src="{% static 'js/recurring_expense_list.js' %}"></script>
 {% endblock content %}

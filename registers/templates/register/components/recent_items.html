@@ -1,0 +1,53 @@
+{% load i18n l10n formatting links %}
+{# The latest expenses/incomes under a register form; "Use" copies one into the form (js/recent_items.js). #}
+{# Params: items, title, empty_message, delete_url_name, confirm_message, delete_error; expense_actions adds Edit and the category list. #}
+<section class="mt-8 bg-zinc-800/40 p-1 sm:p-6 rounded-lg shadow-lg overflow-hidden" data-recent-items
+         data-delete-error="{{ delete_error }}">
+  <h2 class="text-lg sm:text-xl font-semibold text-gray-300 mb-4"><i class="fas fa-history mr-2"></i>{{ title }}</h2>
+  <div class="flex flex-col gap-3">
+    {% for item in items %}
+    <div class="bg-zinc-700/30 rounded-lg p-4 flex flex-col gap-2" data-recent-item
+         data-description="{{ item.description }}" data-amount="{{ item.amount|unlocalize }}"
+         data-date="{{ item.date|date:'Y-m-d' }}" data-category-id="{{ item.category_id|default:'' }}"
+         data-category-name="{{ item.category.name|default:'' }}" data-payment-method-id="{{ item.payment_method_id|default:'' }}">
+      <div class="flex items-start justify-between gap-2">
+        <p class="text-white font-semibold text-base">{{ item.description }}</p>
+        <button type="button" popovertarget="recent-menu-{{ item.pk }}" aria-label="{% trans 'Actions' %}"
+                class="-mr-2 -mt-1 w-9 h-9 shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-zinc-600 transition-colors">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </div>
+      <p class="text-green-400 font-bold text-xl">{{ item.amount|format_brl }}</p>
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-gray-400">{{ item.date|date:'d/m/Y' }}</span>
+        {% if item.category %}<span class="px-2 py-0.5 rounded-full bg-zinc-600/60 text-gray-200 text-xs">{{ item.category.name }}</span>{% endif %}
+      </div>
+      <div id="recent-menu-{{ item.pk }}" popover data-menu
+           class="fixed inset-auto m-0 min-w-[180px] p-1 rounded-lg bg-zinc-800 border border-zinc-600 shadow-xl text-sm text-white">
+        <button type="button" data-action="use" class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700">
+          <i class="fas fa-copy w-4 text-blue-400"></i>{% trans "Use" %}
+        </button>
+        {% if expense_actions %}
+          {% if item.category_id %}
+          {% url_returning 'expense_list_page' category_id=item.category_id as category_href %}
+          <a href="{{ category_href }}" class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700">
+            <i class="fas fa-eye w-4 text-gray-400"></i>{% trans "View details" %}
+          </a>
+          {% endif %}
+          <a href="{% url 'expense_update' item.pk %}" class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-700">
+            <i class="fas fa-edit w-4 text-yellow-500"></i>{% trans "Edit" %}
+          </a>
+        {% endif %}
+        <div class="my-1 border-t border-zinc-600"></div>
+        <button type="button" data-action="delete" data-url="{% url delete_url_name item.pk %}"
+                data-confirm="{{ confirm_message }} &quot;{{ item.description }}&quot;?"
+                class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-400 hover:bg-red-900/40">
+          <i class="fas fa-trash w-4"></i>{% trans "Delete" %}
+        </button>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center py-8 text-gray-400"><i class="fas fa-inbox text-4xl mb-3 opacity-50 block"></i>{{ empty_message }}</p>
+    {% endfor %}
+  </div>
+</section>

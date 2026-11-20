@@ -1,220 +1,102 @@
 """
-Tests for the recent-incomes repository and service.
+Tests for the income registration page: saving, the recent-incomes list it renders, and deleting.
 """
 
-from datetime import date
+import re
+from datetime import date, timedelta
 
 from django.contrib import messages as django_messages
 from django.contrib.auth.models import User
+from django.forms import Field
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from registers.models import Category, Income
-from registers.repository.recent_income_repository import RecentIncomeRepository
-from registers.services.recent_income_service import RecentIncomeService
 
 
-class RecentIncomeRepositoryTest(TestCase):
+class IncomePageTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.other_user = User.objects.create_user(username='otheruser', password='12345')
         self.category = Category.objects.create(name='Salary', type='income')
-        self.repository = RecentIncomeRepository()
-
-    def test_get_recent_incomes_for_user_excludes_other_users(self):
-        Income.objects.create(
-            user=self.user, description='Paycheck', amount=1000,
-            date=date(2026, 7, 1), category=self.category,
-        )
-        Income.objects.create(
-            user=self.other_user, description='Other income', amount=500,
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        incomes = list(self.repository.get_recent_incomes_for_user(self.user))
-
-        self.assertEqual(len(incomes), 1)
-        self.assertEqual(incomes[0].description, 'Paycheck')
-
-    def test_get_recent_incomes_for_user_respects_limit(self):
-        for i in range(3):
-            Income.objects.create(
-                user=self.user, description=f'Income {i}', amount=100,
-                date=date(2026, 7, 1), category=self.category,
-            )
-
-        incomes = list(self.repository.get_recent_incomes_for_user(self.user, limit=2))
-
-        self.assertEqual(len(incomes), 2)
-
-    def test_get_income_by_id_for_user_returns_none_for_other_users_income(self):
-        income = Income.objects.create(
-            user=self.other_user, description='Other income', amount=500,
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        result = self.repository.get_income_by_id_for_user(income.id, self.user)
-
-        self.assertIsNone(result)
-
-    def test_get_income_by_id_for_user_returns_matching_income(self):
-        income = Income.objects.create(
-            user=self.user, description='Paycheck', amount=1000,
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        result = self.repository.get_income_by_id_for_user(income.id, self.user)
-
-        self.assertEqual(result, income)
-
-
-class RecentIncomeServiceTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='12345')
-        self.category = Category.objects.create(name='Salary', type='income')
-        self.service = RecentIncomeService()
-
-    def test_get_recent_incomes_formats_currency_and_date(self):
-        Income.objects.create(
-            user=self.user, description='Paycheck', amount='1234.50',
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        incomes = self.service.get_recent_incomes(self.user)
-
-        self.assertEqual(len(incomes), 1)
-        income = incomes[0]
-        self.assertEqual(income['description'], 'Paycheck')
-        self.assertEqual(income['amount_formatted'], 'R$ 1.234,50')
-        self.assertEqual(income['date_formatted'], '01/07/2026')
-        self.assertEqual(income['category_name'], 'Salary')
-
-    def test_get_income_for_autofill_returns_none_when_not_found(self):
-        result = self.service.get_income_for_autofill(999999, self.user)
-
-        self.assertIsNone(result)
-
-    def test_get_income_for_autofill_returns_form_fields(self):
-        income = Income.objects.create(
-            user=self.user, description='Paycheck', amount='1234.50',
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        result = self.service.get_income_for_autofill(income.id, self.user)
-
-        self.assertEqual(result['description'], 'Paycheck')
-        self.assertEqual(result['amount'], '1234.500')
-        self.assertEqual(result['date'], '2026-07-01')
-        self.assertEqual(result['category_id'], self.category.id)
-        self.assertEqual(result['category_name'], 'Salary')
-
-
-class RegisterIncomeSuccessFlowTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='12345')
         self.client.force_login(self.user)
-        self.category = Category.objects.create(name='Salary', type='income')
 
-    def test_successful_post_redirects_to_register_income(self):
-        response = self.client.post(reverse('register_income'), {
-            'description': 'Paycheck',
-            'amount': '1000',
-            'date': '2026-07-01',
-            'category': self.category.id,
-        })
+    def income(self, user=None, description='Paycheck', amount=1000):
+        return Income.objects.create(
+            user=user or self.user, description=description, amount=amount,
+            date=date(2026, 7, 1), category=self.category,
+        )
+
+
+class RecentIncomesTest(IncomePageTestCase):
+    def recent(self):
+        """Descriptions of the recent incomes listed under the form, in page order."""
+        html = self.client.get(reverse('register_income')).content.decode()
+        return re.findall(r'data-description="([^"]*)"', html)
+
+    def test_lists_only_own_incomes(self):
+        self.income(description='Paycheck')
+        self.income(user=self.other_user, description='Other income')
+
+        self.assertEqual(self.recent(), ['Paycheck'])
+
+    def test_lists_latest_ten_most_recently_updated_first(self):
+        incomes = [self.income(description=f'Income {i}') for i in range(11)]
+        start = timezone.now()
+        for minutes, income in enumerate(incomes):
+            Income.objects.filter(pk=income.pk).update(updated_at=start + timedelta(minutes=minutes))
+
+        self.assertEqual(self.recent(), [f'Income {i}' for i in range(10, 0, -1)])
+
+    def test_renders_formatted_amount_date_and_fill_data(self):
+        self.income(amount='1234.50')
+
+        response = self.client.get(reverse('register_income'))
+
+        self.assertContains(response, 'R$ 1.234,50')
+        self.assertContains(response, '01/07/2026')
+        # What "Use" copies into the form.
+        self.assertContains(response, 'data-amount="1234.500"')
+        self.assertContains(response, 'data-date="2026-07-01"')
+        self.assertContains(response, f'data-category-id="{self.category.id}"')
+
+
+class RegisterIncomeTest(IncomePageTestCase):
+    def post(self, **data):
+        return self.client.post(reverse('register_income'), data, follow=True)
+
+    def test_successful_post_saves_and_redirects_with_success_message(self):
+        response = self.post(description='Paycheck', amount='1000', date='2026-07-01', category=self.category.id)
 
         self.assertRedirects(response, reverse('register_income'))
-        self.assertEqual(Income.objects.count(), 1)
-
-    def test_successful_post_sets_success_message(self):
-        response = self.client.post(reverse('register_income'), {
-            'description': 'Paycheck',
-            'amount': '1000',
-            'date': '2026-07-01',
-            'category': self.category.id,
-        }, follow=True)
-
+        self.assertEqual(Income.objects.get().user, self.user)
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].level, django_messages.SUCCESS)
         self.assertIn('Paycheck', str(messages[0]))
 
+    def test_missing_category_shows_form_error(self):
+        response = self.post(description='Pay', amount='10', date='2026-11-08')
 
-class RecentIncomesAjaxViewsTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='12345')
-        self.other_user = User.objects.create_user(username='otheruser', password='12345')
-        self.category = Category.objects.create(name='Salary', type='income')
-        self.client.force_login(self.user)
+        self.assertContains(response, Field.default_error_messages['required'])
+        self.assertFalse(Income.objects.exists())
 
-    def test_recent_incomes_ajax_returns_only_own_incomes(self):
-        Income.objects.create(
-            user=self.user, description='Paycheck', amount=1000,
-            date=date(2026, 7, 1), category=self.category,
-        )
-        Income.objects.create(
-            user=self.other_user, description='Other', amount=500,
-            date=date(2026, 7, 1), category=self.category,
-        )
 
-        response = self.client.get(reverse('recent_incomes_ajax'))
-        data = response.json()
-
-        self.assertTrue(data['success'])
-        self.assertEqual(data['count'], 1)
-        self.assertEqual(data['incomes'][0]['description'], 'Paycheck')
-
-    def test_income_autofill_ajax_returns_form_data(self):
-        income = Income.objects.create(
-            user=self.user, description='Paycheck', amount=1000,
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        response = self.client.get(reverse('income_autofill_ajax', args=[income.id]))
-        data = response.json()
-
-        self.assertTrue(data['success'])
-        self.assertEqual(data['form_data']['description'], 'Paycheck')
-
-    def test_income_autofill_ajax_404_for_other_users_income(self):
-        income = Income.objects.create(
-            user=self.other_user, description='Other', amount=500,
-            date=date(2026, 7, 1), category=self.category,
-        )
-
-        response = self.client.get(reverse('income_autofill_ajax', args=[income.id]))
-
-        self.assertEqual(response.status_code, 404)
-
-    def test_delete_income_removes_own_income(self):
-        income = Income.objects.create(
-            user=self.user, description='Paycheck', amount=1000,
-            date=date(2026, 7, 1), category=self.category,
-        )
+class DeleteIncomeTest(IncomePageTestCase):
+    def test_deletes_own_income(self):
+        income = self.income()
 
         response = self.client.post(reverse('delete_income', args=[income.id]))
-        data = response.json()
 
-        self.assertTrue(data['success'])
+        self.assertTrue(response.json()['success'])
         self.assertFalse(Income.objects.filter(id=income.id).exists())
 
-    def test_delete_income_rejects_other_users_income(self):
-        income = Income.objects.create(
-            user=self.other_user, description='Other', amount=500,
-            date=date(2026, 7, 1), category=self.category,
-        )
+    def test_other_users_income_is_not_found(self):
+        income = self.income(user=self.other_user)
 
         response = self.client.post(reverse('delete_income', args=[income.id]))
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('error', response.json())
         self.assertTrue(Income.objects.filter(id=income.id).exists())
-
-
-class RegisterIncomeMissingCategoryTest(TestCase):
-    def test_missing_category_shows_django_error(self):
-        user = User.objects.create_user(username='mc', password='x')
-        self.client.force_login(user)
-        response = self.client.post(reverse('register_income'), {
-            'description': 'Pay', 'amount': '10', 'date': '2026-11-08'})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'errorlist')

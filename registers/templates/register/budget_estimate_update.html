@@ -14,33 +14,13 @@
 
   <form method="post" class="space-y-4">
     {% csrf_token %}
-    <div>
-      <label class="block text-sm text-gray-400 mb-1">{% trans "Category" %}</label>
-      {{ form.category }}
+    {% include "register/components/form_errors.html" %}
+    {% include "register/components/form_field.html" with field=form.category %}
+    {% include "register/components/form_field.html" with field=form.amount %}
+    <div class="grid grid-cols-2 gap-4">
+      {% include "register/components/form_field.html" with field=form.month %}
+      {% include "register/components/form_field.html" with field=form.year %}
     </div>
-    <div>
-      <label class="block text-sm text-gray-400 mb-1">{% trans "Estimated Amount (R$)" %}</label>
-      {{ form.amount }}
-    </div>
-    <div class="flex gap-4">
-      <div class="flex-1">
-        <label class="block text-sm text-gray-400 mb-1">{% trans "Month" %}</label>
-        {{ form.month }}
-      </div>
-      <div class="flex-1">
-        <label class="block text-sm text-gray-400 mb-1">{% trans "Year" %}</label>
-        {{ form.year }}
-      </div>
-    </div>
-    {% if form.errors %}
-    <div class="text-red-400 text-sm">
-      {% for field, errors in form.errors.items %}
-        {% for error in errors %}
-          <p>{{ field }}: {{ error }}</p>
-        {% endfor %}
-      {% endfor %}
-    </div>
-    {% endif %}
     <button type="submit"
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors">
       {% trans "Save Changes" %}

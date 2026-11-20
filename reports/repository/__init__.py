@@ -1,6 +1,0 @@
-from .category_repository import CategoryRepository
-from .expense_repository import ExpenseRepository
-from .income_repository import IncomeRepository
-from .payment_method_repository import PaymentMethodRepository
-from .installment_repository import InstallmentRepository
-from .budget_estimate_repository import BudgetEstimateRepository

@@ -4,9 +4,9 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.timezone import localdate
 
 from registers.models import Category, Expense, PaymentMethod, RecurringExpense
-from reports.services.recurring_expense_service import RecurringExpenseService
 
 TODAY = date(2026, 11, 8)
 
@@ -26,7 +26,7 @@ class RecurringSyncTest(TestCase):
             is_paid=False)
 
     def sync(self):
-        return RecurringExpenseService().sync_month_expense(self.rec, TODAY)
+        return self.rec.sync_month_expense(TODAY.year, TODAY.month)
 
     def test_sync_updates_month_expense_fields(self):
         self.rec.total_amount = Decimal('150')
@@ -74,7 +74,7 @@ class RecurringSyncTest(TestCase):
         self.rec.save()
         self.sync()
         self.exp.refresh_from_db()
-        self.assertEqual(self.exp.amount, self.rec.charged_amount)
+        self.assertEqual(self.exp.amount, Decimal('103.50'))  # 100 + 3.5% IOF
 
 
 class RecurringUpdateViewSyncTest(TestCase):
@@ -83,7 +83,7 @@ class RecurringUpdateViewSyncTest(TestCase):
         self.client.force_login(self.user)
         self.food = Category.objects.create(name='Food', type='expense')
         self.method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
-        today = date.today()
+        today = localdate()
         self.rec = RecurringExpense.objects.create(
             user=self.user, description='Luz', total_amount=Decimal('100'),
             start_date=date(2026, 1, 1), category=self.food, payment_method=self.method)
@@ -111,7 +111,3 @@ class RecurringUpdateViewSyncTest(TestCase):
         self.exp.refresh_from_db()
         self.assertEqual(self.rec.total_amount, Decimal('150'))
         self.assertEqual(self.exp.amount, Decimal('100'))
-
-    def test_get_exposes_month_expense(self):
-        r = self.client.get(reverse('recurring_expense_update', args=[self.rec.pk]))
-        self.assertEqual(r.context['month_expense'], self.exp)

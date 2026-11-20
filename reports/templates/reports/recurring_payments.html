@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load static currency_filters %}
+{% load static formatting %}
 {% block content %}
 <article class="space-y-6">
   <header class="space-y-3">
@@ -8,10 +8,10 @@
     <form method="get" class="flex flex-wrap gap-3 items-end">
       <label>Mês
         <select name="month" class="block bg-zinc-800 border border-zinc-600 rounded p-2">
-          {% for number, name in all_months %}<option value="{{ number }}" {% if number == selected_month %}selected{% endif %}>{{ name|translate_month }}</option>{% endfor %}
+          {% month_choices as months %}{% for number, name in months %}<option value="{{ number }}" {% if number == selected_month %}selected{% endif %}>{{ name }}</option>{% endfor %}
         </select>
       </label>
-      <label>Ano<input name="year" type="number" min="2000" max="2100" required value="{{ selected_year }}" class="block bg-zinc-800 border border-zinc-600 rounded p-2 w-28"></label>
+      <label>Ano<input name="year" type="number" {% year_bounds %} required value="{{ selected_year }}" class="block bg-zinc-800 border border-zinc-600 rounded p-2 w-28"></label>
       <button class="bg-blue-700 hover:bg-blue-600 rounded px-4 py-2">Ver mês</button>
       <a href="{% url 'recurring_expense_list' %}" class="text-blue-400 py-2">Gerenciar recorrentes e gerar despesas</a>
     </form>
@@ -32,7 +32,7 @@
   <section aria-labelledby="missing-heading" class="space-y-3">
     <h2 id="missing-heading" class="text-xl font-bold">Ainda não geradas ({{ missing_count }})</h2>
     <p class="text-sm text-gray-400">Gere os lançamentos na tela de recorrentes para controlar o pagamento. Estas despesas não estão incluídas no total a pagar acima.</p>
-    {% for schedule in missing_schedules %}<div class="bg-zinc-800/50 rounded-lg p-4 flex flex-wrap justify-between gap-2"><span>{{ schedule.description }}</span><span>{{ schedule.total_amount|format_brl }} · Não gerada</span></div>{% endfor %}
+    {% for schedule in missing_schedules %}<div class="bg-zinc-800/50 rounded-lg p-4 flex flex-wrap justify-between gap-2"><span>{{ schedule.description }}</span><span>{{ schedule.charged_amount|format_brl }} · Não gerada</span></div>{% endfor %}
   </section>
   {% endif %}
   <section aria-labelledby="paid-heading" class="space-y-3">

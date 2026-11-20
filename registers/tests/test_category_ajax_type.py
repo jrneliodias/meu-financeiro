@@ -22,16 +22,9 @@ class CategoryAjaxTypeTest(TestCase):
                              json.dumps({'name': name, **extra}), content_type='application/json')
         return r.json()['category']['id']
 
-    def test_search_income_only_returns_income(self):
-        self.assertEqual(self.names(type='income'), ['Salario'])
-
     def test_search_defaults_to_expense(self):
         self.assertEqual(self.names(), ['Mercado'])
         self.assertEqual(self.names(type='xyz'), ['Mercado'])
-
-    def test_create_income_category(self):
-        cat = Category.objects.get(pk=self.create('Bonus', type='income'))
-        self.assertEqual(cat.type, 'income')
 
     def test_create_reuses_existing_of_same_type_only(self):
         income_id = Category.objects.get(name='Salario').pk

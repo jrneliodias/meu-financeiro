@@ -1,15 +1,6 @@
-/**
- * Category Autocomplete Module
- *
- * Provides search-as-you-type for the category field
- * with inline creation of new categories.
- */
+// Search-as-you-type for the category field (register/components/category_autocomplete.html),
+// with inline creation of new categories. Fills the hidden <select id="id_category"> the form posts.
 const CategoryAutocomplete = {
-    ENDPOINTS: {
-        SEARCH: '/register/categories/search/',
-        CREATE: '/register/categories/create/',
-    },
-
     elements: {
         wrapper: null,
         searchInput: null,
@@ -198,7 +189,7 @@ const CategoryAutocomplete = {
         var self = this;
         var request = ++this.latestRequest;
 
-        return fetch(this.ENDPOINTS.SEARCH + '?q=' + encodeURIComponent(searchTerm) +
+        return fetch(this.elements.wrapper.dataset.searchUrl + '?q=' + encodeURIComponent(searchTerm) +
             '&type=' + this.categoryType)
             .then(function (response) { return response.json(); })
             .then(function (data) {
@@ -272,7 +263,6 @@ const CategoryAutocomplete = {
     selectCategory: function (id, name) {
         var select = this.elements.hiddenSelect;
 
-        // Check if option exists in select, if not add it
         var optionExists = false;
         for (var i = 0; i < select.options.length; i++) {
             if (String(select.options[i].value) === String(id)) {
@@ -296,14 +286,7 @@ const CategoryAutocomplete = {
     createCategory: function (name) {
         var self = this;
 
-        return fetch(this.ENDPOINTS.CREATE, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': this.getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ name: name, type: this.categoryType }),
-        })
+        return App.post(this.elements.wrapper.dataset.createUrl, { name: name, type: this.categoryType })
             .then(function (response) { return response.json(); })
             .then(function (data) {
                 if (data.success && data.category) {
@@ -329,20 +312,6 @@ const CategoryAutocomplete = {
         return div.innerHTML;
     },
 
-    getCookie: function (name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    },
 };
 
 document.addEventListener('DOMContentLoaded', function () {

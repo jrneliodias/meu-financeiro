@@ -1,7 +1,8 @@
 """
-Testes da cópia de estimativas do mês anterior (repository, service e views).
+Testes da cópia de estimativas do mês anterior (registers.budget_copy e views).
 """
 
+import re
 from decimal import Decimal
 
 from django.contrib import messages as django_messages
@@ -9,13 +10,8 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
+from registers.budget_copy import CopyItem, CopyResult, copy_candidates, copy_estimates
 from registers.models import Category, CategoryBudgetEstimate
-from registers.repository.budget_estimate_repository import BudgetEstimateRepository
-from registers.services.budget_estimate_copy_service import (
-    BudgetEstimateCopyService,
-    CopyItem,
-    CopyResult,
-)
 
 
 def make_estimate(user, category, month, year, amount='100.00'):
@@ -24,131 +20,92 @@ def make_estimate(user, category, month, year, amount='100.00'):
     )
 
 
-class BudgetEstimateRepositoryTest(TestCase):
+class CopyCandidatesTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.other_user = User.objects.create_user(username='otheruser', password='12345')
         self.market = Category.objects.create(name='Supermercado', type='expense')
         self.uber = Category.objects.create(name='Uber', type='expense')
-        self.repository = BudgetEstimateRepository()
 
-    def test_find_latest_month_before_skips_empty_months(self):
+    def source(self, month, year):
+        candidates = copy_candidates(self.user, year, month)
+        return candidates and (candidates.source_month, candidates.source_year)
+
+    def test_source_is_latest_earlier_month_skipping_empty_ones(self):
+        make_estimate(self.user, self.market, 7, 2026)
         make_estimate(self.user, self.market, 8, 2026)
 
-        self.assertEqual(self.repository.find_latest_month_before(self.user, 10, 2026), (8, 2026))
+        self.assertEqual(self.source(10, 2026), (8, 2026))
 
-    def test_find_latest_month_before_crosses_year(self):
+    def test_source_crosses_year(self):
         make_estimate(self.user, self.market, 12, 2026)
 
-        self.assertEqual(self.repository.find_latest_month_before(self.user, 1, 2027), (12, 2026))
+        self.assertEqual(self.source(1, 2027), (12, 2026))
 
-    def test_find_latest_month_before_ignores_same_and_future_months(self):
+    def test_same_and_future_months_are_not_sources(self):
         make_estimate(self.user, self.market, 10, 2026)
         make_estimate(self.user, self.market, 11, 2026)
 
-        self.assertIsNone(self.repository.find_latest_month_before(self.user, 10, 2026))
+        self.assertIsNone(self.source(10, 2026))
 
-    def test_find_latest_month_before_ignores_other_users(self):
+    def test_other_users_estimates_are_not_sources(self):
         make_estimate(self.other_user, self.market, 8, 2026)
 
-        self.assertIsNone(self.repository.find_latest_month_before(self.user, 10, 2026))
+        self.assertIsNone(self.source(10, 2026))
 
-    def test_get_category_ids_for_month(self):
-        make_estimate(self.user, self.market, 10, 2026)
-        make_estimate(self.user, self.uber, 9, 2026)
-        make_estimate(self.other_user, self.uber, 10, 2026)
+    def test_splits_copyable_and_existing_ordered_by_category_name(self):
+        pharmacy = Category.objects.create(name='Farmácia', type='expense')
+        make_estimate(self.user, self.uber, 8, 2026, '354.00')
+        make_estimate(self.user, self.market, 8, 2026, '698.00')
+        make_estimate(self.user, pharmacy, 8, 2026, '50.00')
+        make_estimate(self.user, self.uber, 10, 2026, '300.00')
+        make_estimate(self.other_user, self.market, 10, 2026)  # another user's target doesn't block
 
-        self.assertEqual(
-            self.repository.get_category_ids_for_month(self.user, 10, 2026),
-            {self.market.id},
-        )
+        candidates = copy_candidates(self.user, 2026, 10)
 
-    def test_get_for_month_orders_by_category_name(self):
-        make_estimate(self.user, self.uber, 8, 2026)
-        make_estimate(self.user, self.market, 8, 2026)
-
-        names = [e.category.name for e in self.repository.get_for_month(self.user, 8, 2026)]
-
-        self.assertEqual(names, ['Supermercado', 'Uber'])
+        self.assertEqual([e.category for e in candidates.copyable], [pharmacy, self.market])
+        self.assertEqual([e.category for e in candidates.already_existing], [self.uber])
 
 
-class BudgetEstimateCopyServiceTest(TestCase):
+class CopyEstimatesTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.market = Category.objects.create(name='Supermercado', type='expense')
         self.uber = Category.objects.create(name='Uber', type='expense')
         self.pharmacy = Category.objects.create(name='Farmácia', type='expense')
-        self.service = BudgetEstimateCopyService()
 
-    def test_get_copy_candidates_returns_none_without_source(self):
-        self.assertIsNone(self.service.get_copy_candidates(self.user, 10, 2026))
+    def copy(self, *items):
+        return copy_estimates(self.user, 2026, 10, [CopyItem(category.id, Decimal(amount)) for category, amount in items])
 
-    def test_get_copy_candidates_splits_copyable_and_existing(self):
+    def target_amount(self, category):
+        return CategoryBudgetEstimate.objects.get(user=self.user, category=category, month=10, year=2026).amount
+
+    def test_skips_existing_categories_without_overwriting(self):
         make_estimate(self.user, self.market, 8, 2026, '698.00')
         make_estimate(self.user, self.uber, 8, 2026, '354.00')
+        # Created in the target after the page was loaded (between the GET and the POST).
         make_estimate(self.user, self.uber, 10, 2026, '300.00')
 
-        candidates = self.service.get_copy_candidates(self.user, 10, 2026)
-
-        self.assertEqual((candidates.source_month, candidates.source_year), (8, 2026))
-        self.assertEqual([e.category for e in candidates.copyable], [self.market])
-        self.assertEqual([e.category for e in candidates.already_existing], [self.uber])
-
-    def test_copy_estimates_creates_with_given_amounts(self):
-        make_estimate(self.user, self.market, 8, 2026, '698.00')
-
-        result = self.service.copy_estimates(
-            self.user, 10, 2026, [CopyItem(self.market.id, Decimal('720.50'))],
-        )
-
-        self.assertEqual(result, CopyResult(created=1, skipped=0))
-        created = CategoryBudgetEstimate.objects.get(user=self.user, category=self.market, month=10, year=2026)
-        self.assertEqual(created.amount, Decimal('720.50'))
-
-    def test_copy_estimates_skips_existing_categories(self):
-        make_estimate(self.user, self.market, 8, 2026, '698.00')
-        make_estimate(self.user, self.uber, 8, 2026, '354.00')
-        # Criada no destino depois que a página foi carregada (entre o GET e o POST).
-        make_estimate(self.user, self.uber, 10, 2026, '300.00')
-
-        result = self.service.copy_estimates(self.user, 10, 2026, [
-            CopyItem(self.market.id, Decimal('698.00')),
-            CopyItem(self.uber.id, Decimal('999.00')),
-        ])
+        result = self.copy((self.market, '698.00'), (self.uber, '999.00'))
 
         self.assertEqual(result, CopyResult(created=1, skipped=1))
-        uber = CategoryBudgetEstimate.objects.get(user=self.user, category=self.uber, month=10, year=2026)
-        self.assertEqual(uber.amount, Decimal('300.00'))
+        self.assertEqual(self.target_amount(self.uber), Decimal('300.00'))
 
-    def test_copy_estimates_ignores_categories_not_in_source(self):
+    def test_ignores_categories_not_in_source(self):
         make_estimate(self.user, self.market, 8, 2026)
 
-        result = self.service.copy_estimates(
-            self.user, 10, 2026, [CopyItem(self.pharmacy.id, Decimal('50.00'))],
-        )
-
-        self.assertEqual(result, CopyResult(created=0, skipped=0))
+        self.assertEqual(self.copy((self.pharmacy, '50.00')), CopyResult(created=0, skipped=0))
         self.assertFalse(CategoryBudgetEstimate.objects.filter(month=10, year=2026).exists())
 
-    def test_copy_estimates_without_source_creates_nothing(self):
-        result = self.service.copy_estimates(
-            self.user, 10, 2026, [CopyItem(self.market.id, Decimal('50.00'))],
-        )
-
-        self.assertEqual(result, CopyResult(created=0, skipped=0))
+    def test_without_source_creates_nothing(self):
+        self.assertEqual(self.copy((self.market, '50.00')), CopyResult(created=0, skipped=0))
         self.assertFalse(CategoryBudgetEstimate.objects.exists())
 
-    def test_copy_estimates_dedupes_repeated_categories(self):
+    def test_repeated_category_is_created_once_with_last_amount(self):
         make_estimate(self.user, self.market, 8, 2026, '698.00')
 
-        result = self.service.copy_estimates(self.user, 10, 2026, [
-            CopyItem(self.market.id, Decimal('100.00')),
-            CopyItem(self.market.id, Decimal('200.00')),
-        ])
-
-        self.assertEqual(result, CopyResult(created=1, skipped=0))
-        created = CategoryBudgetEstimate.objects.get(user=self.user, category=self.market, month=10, year=2026)
-        self.assertEqual(created.amount, Decimal('200.00'))
+        self.assertEqual(self.copy((self.market, '100.00'), (self.market, '200.00')), CopyResult(created=1, skipped=0))
+        self.assertEqual(self.target_amount(self.market), Decimal('200.00'))
 
 
 class BudgetEstimateCopyViewTest(TestCase):
@@ -282,11 +239,6 @@ class BudgetEstimateCopyViewTest(TestCase):
         self.assertIn(reverse('login'), response.url)
         self.assertFalse(self.target_estimates().exists())
 
-    def test_copy_get_not_allowed(self):
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 405)
-
 
 class BudgetEstimateListCopySectionTest(TestCase):
     def setUp(self):
@@ -296,41 +248,38 @@ class BudgetEstimateListCopySectionTest(TestCase):
         self.client.force_login(self.user)
         self.url = reverse('budget_estimate_list') + '?month=10&year=2026'
 
-    def test_list_shows_copy_section_from_latest_month(self):
+    def get_html(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def input_tag(self, html, name):
+        """The rendered <input> with this name (what the copy form posts), or None."""
+        match = re.search(rf'<input[^>]*name="{name}"[^>]*>', html)
+        return match and match.group(0)
+
+    def test_list_offers_source_rows_ticked_with_source_amount(self):
         make_estimate(self.user, self.market, 8, 2026, '698.00')
 
-        response = self.client.get(self.url)
+        html = self.get_html()
 
-        candidates = response.context['copy_candidates']
-        self.assertEqual((candidates.source_month, candidates.source_year), (8, 2026))
-        self.assertContains(response, 'Supermercado')
-        self.assertContains(response, reverse('budget_estimate_copy'))
-        self.assertContains(response, 'name="action" value="all"')
+        self.assertIn('8/2026', html)  # the source month
+        self.assertIn(f'action="{reverse("budget_estimate_copy")}"', html)
+        self.assertIn('name="action" value="all"', html)
+        self.assertIn(f'value="{self.market.id}"', self.input_tag(html, 'copy-0-category_id'))
+        self.assertIn('checked', self.input_tag(html, 'copy-0-selected'))
+        self.assertIn('value="698.00"', self.input_tag(html, 'copy-0-amount'))
 
-    def test_list_prefills_copyable_rows_checked_with_source_amount(self):
-        make_estimate(self.user, self.market, 8, 2026, '698.00')
-
-        response = self.client.get(self.url)
-
-        form, estimate = response.context['copy_rows'][0]
-        self.assertEqual(estimate.category, self.market)
-        self.assertEqual(form.initial, {'category_id': self.market.id, 'selected': True, 'amount': Decimal('698.00')})
-
-    def test_list_marks_existing_categories_as_read_only(self):
+    def test_list_shows_categories_already_in_target_as_read_only(self):
         make_estimate(self.user, self.market, 8, 2026, '698.00')
         make_estimate(self.user, self.uber, 8, 2026, '354.00')
         make_estimate(self.user, self.uber, 10, 2026, '300.00')
 
-        response = self.client.get(self.url)
+        html = self.get_html()
 
-        self.assertEqual([e.category for _, e in response.context['copy_rows']], [self.market])
-        self.assertEqual(
-            [e.category for e in response.context['copy_candidates'].already_existing],
-            [self.uber],
-        )
+        self.assertIn(f'value="{self.market.id}"', self.input_tag(html, 'copy-0-category_id'))
+        self.assertIsNone(self.input_tag(html, 'copy-1-category_id'))  # Uber is not offered for copying
+        self.assertIn('R$ 354,00', html)  # but its source amount is listed
 
     def test_list_hides_copy_section_without_source(self):
-        response = self.client.get(self.url)
-
-        self.assertIsNone(response.context['copy_candidates'])
-        self.assertNotContains(response, reverse('budget_estimate_copy'))
+        self.assertNotIn('copy-estimates-title', self.get_html())

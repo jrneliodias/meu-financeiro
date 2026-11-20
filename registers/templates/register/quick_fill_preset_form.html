@@ -1,8 +1,8 @@
 {% extends "core/base.html" %}
-{% load custom_filters i18n %}
+{% load i18n %}
 
 {% block content %}
-<main class="mx-auto mt-10 max-w-lg w-full px-1 sm:px-0">
+<div class="mx-auto mt-10 max-w-lg w-full px-1 sm:px-0">
     <header class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">
             {% if is_editing %}{% trans "Edit Quick Fill Preset" %}{% else %}{% trans "Create Quick Fill Preset" %}{% endif %}
@@ -17,54 +17,21 @@
         <form method="post" class="space-y-4">
             {% csrf_token %}
 
-            <fieldset>
-                <div class="mb-4 space-y-2">
-                    <label for="id_name" class="text-gray-400">{% trans "Name (Button Label)" %}</label>
-                    {{ form.name|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-            </fieldset>
-
-            <fieldset>
-                <div class="mb-4 space-y-2">
-                    <label for="id_description" class="text-gray-400">{% trans "Description" %}</label>
-                    {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-            </fieldset>
-
-            <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="id_default_amount" class="text-gray-400">{% trans "Default Amount" %}</label>
-                    {{ form.default_amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-                <div class="space-y-2">
-                    <label for="id_icon" class="text-gray-400">{% trans "Icon (FontAwesome)" %}</label>
-                    {{ form.icon|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                    <p class="text-xs text-gray-500">{% trans "e.g. fa-car-side, fa-utensils, fa-shopping-cart" %}</p>
-                </div>
-            </fieldset>
-
-            <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="id_category" class="text-gray-400">{% trans "Category" %}</label>
-                    {{ form.category|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
-                </div>
-                <div class="space-y-2">
-                    <label for="id_payment_method" class="text-gray-400">{% trans "Payment Method" %}</label>
-                    {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
-                </div>
-            </fieldset>
-
-            <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="id_display_order" class="text-gray-400">{% trans "Display Order" %}</label>
-                    {{ form.display_order|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-                <div class="space-y-2 flex items-center gap-2 pt-6">
-                    {{ form.is_active|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
-                    <label for="id_is_active" class="text-gray-400">{% trans "Active" %}</label>
-                </div>
-            </fieldset>
-
+            {% include "register/components/form_errors.html" %}
+            {% include "register/components/form_field.html" with field=form.name %}
+            {% include "register/components/form_field.html" with field=form.description %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% include "register/components/form_field.html" with field=form.default_amount %}
+                {% include "register/components/form_field.html" with field=form.icon %}
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% include "register/components/form_field.html" with field=form.category %}
+                {% include "register/components/form_field.html" with field=form.payment_method %}
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                {% include "register/components/form_field.html" with field=form.display_order %}
+                {% include "register/components/form_field.html" with field=form.is_active %}
+            </div>
             <button type="submit"
                     class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 <i class="fas fa-save mr-2"></i>
@@ -73,14 +40,5 @@
         </form>
     </section>
 
-    {% if messages %}
-    <aside class="mt-4">
-        <ul class="messages space-y-2">
-            {% for message in messages %}
-            <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    </aside>
-    {% endif %}
-</main>
+</div>
 {% endblock content %}

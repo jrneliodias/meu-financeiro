@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from registers.models import Category, Expense, PaymentMethod, RecurringExpense
+from utils.tests.html import links_to, page
 
 
 class RecurringProcessPageTest(TestCase):
@@ -19,18 +20,40 @@ class RecurringProcessPageTest(TestCase):
             start_date=date(2024, 9, 25), category=cat, payment_method=method)
         self.url = reverse('recurring_expense_process')
 
-    def test_get_shows_form(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, 'id="processMonth"')
-        self.assertNotContains(response, 'id="process-result"')
+    def test_get_shows_the_month_form_without_a_result(self):
+        elements = page(self.client.get(self.url))
+        [form] = [e for e in elements if e['tag'] == 'form' and any(f.get('name') == 'month' for f in e['inner'])]
+        self.assertEqual(form['method'], 'post')
+        self.assertIn('year', {field.get('name') for field in form['inner']})
+        self.assertFalse([e for e in elements if e.get('role') == 'status'])
 
-    def test_creates_expense_and_is_idempotent(self):
+    def test_creates_an_unpaid_expense_and_is_idempotent(self):
         first = self.client.post(self.url, {'month': 11, 'year': 2026})
-        self.assertEqual(first.status_code, 200)
-        self.assertEqual((first.context['result']['created_count'], first.context['result']['skipped_count']), (1, 0))
-        self.assertEqual(Expense.objects.filter(reccurring_expense=self.rec).count(), 1)
+        self.assertContains(first, '1 despesa(s) criada(s)')
+        self.assertContains(first, '0 já existente(s)')
+        [expense] = Expense.objects.filter(reccurring_expense=self.rec)
+        self.assertEqual((expense.date, expense.amount), (date(2026, 11, 25), Decimal('100')))
+        self.assertFalse(expense.is_paid)
+        self.assertIsNone(expense.paid_at)
         again = self.client.post(self.url, {'month': 11, 'year': 2026})
-        self.assertEqual((again.context['result']['created_count'], again.context['result']['skipped_count']), (0, 1))
+        self.assertContains(again, '0 despesa(s) criada(s)')
+        self.assertContains(again, '1 já existente(s)')
+        self.assertEqual(Expense.objects.filter(reccurring_expense=self.rec).count(), 1)
+
+    def test_day_31_is_clamped_to_month_end(self):
+        self.rec.start_date = date(2024, 1, 31)
+        self.rec.save()
+        self.client.post(self.url, {'month': 2, 'year': 2027})
+        self.client.post(self.url, {'month': 2, 'year': 2028})
+        self.assertEqual(
+            sorted(Expense.objects.filter(reccurring_expense=self.rec).values_list('date', flat=True)),
+            [date(2027, 2, 28), date(2028, 2, 29)])
+
+    def test_any_expense_in_the_same_month_counts_as_generated(self):
+        Expense.objects.create(user=self.user, description='Unimed', amount=Decimal('100'),
+                               date=date(2026, 11, 3), reccurring_expense=self.rec)
+        self.client.post(self.url, {'month': 11, 'year': 2026})
+        self.assertEqual(Expense.objects.filter(reccurring_expense=self.rec).count(), 1)
 
     def test_invalid_month_year_returns_400(self):
         for data in ({'month': 13, 'year': 2026}, {'month': 'x', 'year': 2026}, {'year': 2026}):
@@ -40,7 +63,5 @@ class RecurringProcessPageTest(TestCase):
         self.client.logout()
         self.assertEqual(self.client.get(self.url).status_code, 302)
 
-    def test_list_page_links_to_process_page_without_modal(self):
-        html = self.client.get(reverse('recurring_expense_list')).content.decode()
-        self.assertIn(self.url, html)
-        self.assertNotIn('processRecurringModal', html)
+    def test_list_page_links_to_process_page(self):
+        self.assertTrue(links_to(page(self.client.get(reverse('recurring_expense_list'))), self.url))

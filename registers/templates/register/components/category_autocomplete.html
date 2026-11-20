@@ -1,5 +1,6 @@
 {% load i18n %}
-<div class="relative" id="category-autocomplete-wrapper" data-category-type="{{ category_type|default:'expense' }}">
+<div class="relative" id="category-autocomplete-wrapper" data-category-type="{{ category_type|default:'expense' }}"
+     data-search-url="{% url 'category_search_ajax' %}" data-create-url="{% url 'category_create_ajax' %}">
     <input type="text"
            id="category-search-input"
            placeholder="{% trans 'Search or create category...' %}"
@@ -14,4 +15,5 @@
     <div class="hidden">
         {{ form.category }}
     </div>
+    {% for error in form.category.errors %}<p class="mt-1 text-sm text-red-400">{{ error }}</p>{% endfor %}
 </div>

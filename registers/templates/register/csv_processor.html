@@ -1,146 +1,44 @@
 {% extends 'core/base.html' %}
-{% load i18n static %}
+{% load i18n %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-white mb-2">{% trans "CSV Processor" %}</h1>
         <p class="text-gray-400">{% trans "Transform Nubank CSV exports to standardized format. Converts dates, parses descriptions, and reorganizes columns." %}</p>
     </div>
 
-    <!-- Processor Form -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
-        <form method="post" enctype="multipart/form-data" class="space-y-6">
+        <form method="post" enctype="multipart/form-data" class="group space-y-6">
             {% csrf_token %}
+            {% include "register/components/csv_source_fields.html" %}
 
-            <!-- Input Method Toggle -->
-            <div class="mb-6">
-                <div class="flex space-x-4">
-                    <button type="button" id="fileToggle" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-file mr-2"></i>{% trans "Upload File" %}
-                    </button>
-                    <button type="button" id="textToggle" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-paste mr-2"></i>{% trans "Paste Text" %}
-                    </button>
-                </div>
-            </div>
-
-            <!-- File Upload Section -->
-            <div id="fileUploadSection" class="space-y-4">
-                <div>
-                    <label for="{{ form.csv_file.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                        {{ form.csv_file.label }}
-                    </label>
-                    {{ form.csv_file }}
-                    {% if form.csv_file.help_text %}
-                        <p class="mt-1 text-sm text-gray-400">{{ form.csv_file.help_text }}</p>
-                    {% endif %}
-                    {% if form.csv_file.errors %}
-                        <div class="mt-1 text-red-400 text-sm">
-                            {% for error in form.csv_file.errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Text Input Section -->
-            <div id="textInputSection" class="space-y-4" style="display: none;">
-                <div>
-                    <label for="{{ form.csv_text.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                        {{ form.csv_text.label }}
-                    </label>
-                    {{ form.csv_text }}
-                    {% if form.csv_text.help_text %}
-                        <p class="mt-1 text-sm text-gray-400">{{ form.csv_text.help_text }}</p>
-                    {% endif %}
-                    {% if form.csv_text.errors %}
-                        <div class="mt-1 text-red-400 text-sm">
-                            {% for error in form.csv_text.errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Configuration Options -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- CSV Settings -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-white">{% trans "CSV Settings" %}</h3>
-
-                    <div>
-                        <label for="{{ form.separator.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                            {{ form.separator.label }}
-                        </label>
-                        {{ form.separator }}
-                        {% if form.separator.help_text %}
-                            <p class="mt-1 text-sm text-gray-400">{{ form.separator.help_text }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="flex items-center">
-                        {{ form.auto_detect }}
-                        <label for="{{ form.auto_detect.id_for_label }}" class="ml-2 text-sm text-white">
-                            {{ form.auto_detect.label }}
-                        </label>
-                    </div>
-                    {% if form.auto_detect.help_text %}
-                        <p class="mt-1 text-sm text-gray-400">{{ form.auto_detect.help_text }}</p>
-                    {% endif %}
+                    {% include "register/components/form_field.html" with field=form.separator %}
+                    {% include "register/components/form_field.html" with field=form.auto_detect %}
                 </div>
 
-                <!-- Manual Column Mapping (hidden when auto_detect is true) -->
-                <div class="space-y-4" id="manualMappingSection">
+                {# Dimmed while auto-detect is checked: the column names are only used without it. #}
+                <div class="space-y-4 group-has-[#id\_auto\_detect:checked]:opacity-50 group-has-[#id\_auto\_detect:checked]:pointer-events-none">
                     <h3 class="text-lg font-semibold text-white">{% trans "Manual Column Mapping" %}</h3>
                     <p class="text-sm text-gray-400">{% trans "Specify column names when auto-detect is disabled" %}</p>
-
-                    <div>
-                        <label for="{{ form.date_column.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                            {{ form.date_column.label }}
-                        </label>
-                        {{ form.date_column }}
-                        {% if form.date_column.help_text %}
-                            <p class="mt-1 text-sm text-gray-400">{{ form.date_column.help_text }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        <label for="{{ form.amount_column.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                            {{ form.amount_column.label }}
-                        </label>
-                        {{ form.amount_column }}
-                        {% if form.amount_column.help_text %}
-                            <p class="mt-1 text-sm text-gray-400">{{ form.amount_column.help_text }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        <label for="{{ form.description_column.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                            {{ form.description_column.label }}
-                        </label>
-                        {{ form.description_column }}
-                        {% if form.description_column.help_text %}
-                            <p class="mt-1 text-sm text-gray-400">{{ form.description_column.help_text }}</p>
-                        {% endif %}
-                    </div>
+                    {% include "register/components/form_field.html" with field=form.date_column %}
+                    {% include "register/components/form_field.html" with field=form.amount_column %}
+                    {% include "register/components/form_field.html" with field=form.description_column %}
                 </div>
             </div>
 
-            <!-- Submit Button -->
             <div class="flex justify-end pt-4">
-                <button type="submit" id="processBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-cogs mr-2" id="processIcon"></i>
-                    <span id="processText">{% trans "Process CSV" %}</span>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-cogs mr-2"></i>
+                    <span>{% trans "Process CSV" %}</span>
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- CSV Format Guide -->
     <div class="bg-zinc-800 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-white mb-4">{% trans "Nubank CSV Format Guide" %}</h3>
 
@@ -181,141 +79,5 @@
             </div>
         </div>
     </div>
-
-    <!-- Error Messages -->
-    {% if messages %}
-        <div class="mt-6 space-y-2">
-            {% for message in messages %}
-                <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-900 text-red-200{% elif message.tags == 'warning' %}bg-yellow-900 text-yellow-200{% elif message.tags == 'success' %}bg-green-900 text-green-200{% else %}bg-blue-900 text-blue-200{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Get toggle buttons and sections
-    const fileToggle = document.getElementById('fileToggle');
-    const textToggle = document.getElementById('textToggle');
-    const fileUploadSection = document.getElementById('fileUploadSection');
-    const textInputSection = document.getElementById('textInputSection');
-    const fileInput = document.querySelector('input[type="file"]');
-    const textInput = document.querySelector('textarea[name="csv_text"]');
-    const processForm = document.querySelector('form');
-    const processButton = document.getElementById('processBtn');
-    const processIcon = document.getElementById('processIcon');
-    const processText = document.getElementById('processText');
-    const autoDetectCheckbox = document.getElementById('id_auto_detect');
-    const manualMappingSection = document.getElementById('manualMappingSection');
-
-    // Toggle functionality
-    fileToggle.addEventListener('click', function() {
-        fileUploadSection.style.display = 'block';
-        textInputSection.style.display = 'none';
-
-        // Update button styles
-        fileToggle.classList.remove('bg-gray-600');
-        fileToggle.classList.add('bg-blue-600');
-        textToggle.classList.remove('bg-blue-600');
-        textToggle.classList.add('bg-gray-600');
-
-        // Clear text input
-        if (textInput) {
-            textInput.value = '';
-        }
-    });
-
-    textToggle.addEventListener('click', function() {
-        textInputSection.style.display = 'block';
-        fileUploadSection.style.display = 'none';
-
-        // Update button styles
-        textToggle.classList.remove('bg-gray-600');
-        textToggle.classList.add('bg-blue-600');
-        fileToggle.classList.remove('bg-blue-600');
-        fileToggle.classList.add('bg-gray-600');
-
-        // Clear file input
-        if (fileInput) {
-            fileInput.value = '';
-            const label = fileInput.parentElement.querySelector('label');
-            if (label && label.textContent.startsWith('Selected:')) {
-                label.textContent = fileInput.getAttribute('data-original-label') || gettext('CSV File');
-            }
-        }
-    });
-
-    // File upload preview
-    if (fileInput) {
-        const label = fileInput.parentElement.querySelector('label');
-        if (label) {
-            fileInput.setAttribute('data-original-label', label.textContent);
-        }
-
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && label) {
-                label.textContent = interpolate(gettext('Selected: %(name)s'), {name: file.name}, true);
-            } else if (label) {
-                label.textContent = fileInput.getAttribute('data-original-label') || gettext('CSV File');
-            }
-        });
-    }
-
-    // Auto-detect toggle - show/hide manual mapping section
-    function toggleManualMapping() {
-        if (autoDetectCheckbox && manualMappingSection) {
-            if (autoDetectCheckbox.checked) {
-                manualMappingSection.style.opacity = '0.5';
-                manualMappingSection.style.pointerEvents = 'none';
-            } else {
-                manualMappingSection.style.opacity = '1';
-                manualMappingSection.style.pointerEvents = 'auto';
-            }
-        }
-    }
-
-    if (autoDetectCheckbox) {
-        // Initial state
-        toggleManualMapping();
-
-        // Listen for changes
-        autoDetectCheckbox.addEventListener('change', toggleManualMapping);
-    }
-
-    // Initialize with file upload section visible
-    if (fileUploadSection && textInputSection) {
-        fileUploadSection.style.display = 'block';
-        textInputSection.style.display = 'none';
-    }
-
-    // Add loading state to process form
-    if (processForm && processButton) {
-        processForm.addEventListener('submit', function(e) {
-            // Validate that either file or text is provided
-            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
-            const hasText = textInput && textInput.value.trim() !== '';
-
-            if (!hasFile && !hasText) {
-                alert(gettext('Please select a CSV file or paste CSV text before processing.'));
-                e.preventDefault();
-                return;
-            }
-
-            // Disable button and show loading state
-            processButton.disabled = true;
-            processButton.classList.remove('hover:bg-blue-700');
-            processButton.classList.add('opacity-75', 'cursor-not-allowed');
-
-            // Change icon to spinner
-            processIcon.className = 'fas fa-spinner fa-spin mr-2';
-
-            // Update text
-            processText.textContent = gettext('Processing...');
-        });
-    }
-});
-</script>
 {% endblock %}

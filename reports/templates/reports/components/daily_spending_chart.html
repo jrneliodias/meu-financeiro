@@ -1,14 +1,19 @@
 {% load i18n static %}
-<div class="bg-zinc-800/50 rounded-lg p-3 w-full min-w-0 flex flex-col lg:flex-1 lg:min-h-0">
+<div id="daily-spending-chart"
+     class="bg-zinc-800/50 rounded-lg p-3 w-full min-w-0 flex flex-col lg:flex-1 lg:min-h-0"
+     data-url="{% url 'daily_spending_data_ajax' %}"
+     data-day-url="{% url 'expense_list_page' %}"
+     data-outlier-threshold="1000"
+     data-label-daily="{% trans 'Daily Spending' %}"
+     data-label-average="{% trans '7-Day Average' %}"
+     data-label-outliers="{% trans 'Outliers' %}">
   <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4 lg:mb-1">
     <h2 class="text-xl md:text-2xl lg:text-lg font-bold">{% trans "Daily Spending Chart" %}</h2>
     <div class="grid grid-cols-2 md:flex gap-2">
+      {# `selected` is the period daily_spending_data was built for #}
       <select id="dailyChartPeriod"
               class="bg-zinc-700 text-white text-sm rounded px-2 py-1">
-        <option value="7">{% trans "7 Days" %}</option>
-        <option value="30" selected>{% trans "30 Days" %}</option>
-        <option value="60">{% trans "60 Days" %}</option>
-        <option value="90">{% trans "90 Days" %}</option>
+        {% for days in period_days %}<option value="{{ days }}" {% if days == daily_spending_days %}selected{% endif %}>{% blocktrans %}{{ days }} Days{% endblocktrans %}</option>{% endfor %}
       </select>
       <select id="dailyCategoryFilter"
               class="bg-zinc-700 text-white text-sm rounded px-2 py-1 col-span-2 md:col-span-1">
@@ -34,32 +39,20 @@
       </select>
     </div>
   </div>
-  <!-- Debug Information Display -->
-  <div id="debugInfo"
-       class="mb-4 p-2 bg-zinc-700 rounded text-sm text-white"
-       style="display: none">
-    <strong>Debug Information:</strong>
-    <div id="debugContent"></div>
-  </div>
+  <p data-error role="alert" class="text-sm text-red-400" hidden>{% trans "Error loading new data. Please try again." %}</p>
   <div class="relative h-[50vh] min-h-[300px] md:h-[60vh] lg:h-auto lg:min-h-0 lg:flex-1 mt-2 p-3 px-0 w-full">
-    <canvas id="dailySpendingChart" class="w-full"></canvas>
+    <canvas class="w-full"></canvas>
+    {# `hidden` lives on a wrapper: Tailwind's .flex would override it on the overlay itself #}
+    <div data-loading hidden>
+      <div class="absolute inset-0 z-10 flex items-center justify-center bg-zinc-800/90 text-white">
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+          {% trans "Loading new data..." %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-<!-- Django's json_script for safe data passing -->
 {{ daily_spending_data|json_script:"daily-spending-data" }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-<script>
-  window.DailyChartI18n = {
-    dailySpending: "{% trans 'Daily Spending' %}",
-    sevenDayAverage: "{% trans '7-Day Average' %}",
-    dateLabel: "{% trans 'Date' %}",
-    loadingData: "{% trans 'Loading new data...' %}",
-    errorLoadingData: "{% trans 'Error loading new data. Please try again.' %}",
-    outliersLabel: "{% trans 'Outliers (>R$ 1,000)' %}",
-    errorLoadingChart: "{% trans 'Error loading daily spending chart' %}",
-    checkConsole: "{% trans 'Check browser console for more details' %}",
-    showDebugInfo: "{% trans 'Show Debug Info' %}",
-  };
-</script>
+{% include "reports/components/chartjs.html" %}
 <script src="{% static 'js/daily_spending_chart.js' %}"></script>

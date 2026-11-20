@@ -498,9 +498,6 @@ du -sh /var/lib/docker
 ```bash
 # Monitor Django queries (if SQL logging enabled)
 docker compose logs web | grep "SELECT"
-
-# Use Django performance command
-docker compose run --rm web python manage.py measure_performance --iterations=5
 ```
 
 ---

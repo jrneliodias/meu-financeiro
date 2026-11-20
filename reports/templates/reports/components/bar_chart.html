@@ -1,0 +1,9 @@
+{# Horizontal bar chart drawn by js/bar_chart.js. Params: title, chart_id, data ({labels, datasets: [{label, data}]}), palette ("r,g,b r,g,b …"), legend (show on desktop). #}
+<div class="bg-zinc-800/50 rounded-lg p-3 w-full min-w-0 flex flex-col lg:min-h-0">
+  <h2 class="text-xl md:text-2xl lg:text-lg font-bold">{{ title }}</h2>
+  <div class="relative h-[65vh] min-h-[360px] lg:h-auto lg:min-h-0 lg:flex-1 mt-2 p-3 px-0 w-full">
+    <canvas id="{{ chart_id }}" class="w-full" data-bar-chart="{{ chart_id }}-data"
+            data-palette="{{ palette }}" {% if legend %}data-legend{% endif %}></canvas>
+  </div>
+  {% with data_id=chart_id|add:"-data" %}{{ data|json_script:data_id }}{% endwith %}
+</div>

@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load i18n currency_filters %}
+{% load i18n formatting %}
 
 {% block content %}
 <div class="flex flex-col gap-6">
@@ -9,16 +9,16 @@
     <div class="flex flex-col gap-1">
       <label class="text-xs text-zinc-400">{% trans "Month" %}</label>
       <select name="month" class="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
-        {% for month_num, month_name in months %}
-          <option value="{{ month_num }}" {% if selected_month == month_num %}selected{% endif %}>{{ month_name|translate_month }}</option>
+        {% month_choices as months %}{% for month_num, month_name in months %}
+          <option value="{{ month_num }}" {% if selected_month == month_num %}selected{% endif %}>{{ month_name }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="flex flex-col gap-1">
       <label class="text-xs text-zinc-400">{% trans "Year" %}</label>
       <select name="year" class="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
-        {% for year_val, year_label in years %}
-          <option value="{{ year_val }}" {% if selected_year == year_val %}selected{% endif %}>{{ year_label }}</option>
+        {% for year in years %}
+          <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
         {% endfor %}
       </select>
     </div>
@@ -71,13 +71,7 @@
               <td class="px-4 py-2 text-zinc-300">{{ e.category.name|default:"N/A" }}</td>
               <td class="px-4 py-2 text-zinc-300">{{ e.payment_method.name|default:"N/A" }}</td>
               <td class="px-4 py-2">
-                {% if e.installment_plan_id %}
-                  <span class="text-xs px-2 py-0.5 rounded bg-purple-900/50 text-purple-300">{% trans "Installment" %}</span>
-                {% elif e.reccurring_expense_id %}
-                  <span class="text-xs px-2 py-0.5 rounded bg-blue-900/50 text-blue-300">{% trans "Recurring" %}</span>
-                {% else %}
-                  <span class="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">{% trans "Single" %}</span>
-                {% endif %}
+                <span class="text-xs px-2 py-0.5 rounded {% if e.kind == 'installment' %}bg-purple-900/50 text-purple-300{% elif e.kind == 'recurring' %}bg-blue-900/50 text-blue-300{% else %}bg-zinc-700 text-zinc-300{% endif %}">{{ e.kind_label }}</span>
               </td>
               <td class="px-4 py-2 text-zinc-400 text-xs">{{ e.created_at|date:"d/m/Y H:i" }}</td>
             </tr>

@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from registers.models import Category, Expense, PaymentMethod
+from utils.tests.html import page
 
 
 class ExpenseUpdateNextTest(TestCase):
@@ -22,8 +23,10 @@ class ExpenseUpdateNextTest(TestCase):
                      'category': cat.pk, 'payment_method': method.pk}
 
     def test_get_renders_next_as_hidden_field(self):
-        r = self.client.get(self.url + '?next=/recurring-payments/')
-        self.assertContains(r, 'name="next" value="/recurring-payments/"')
+        elements = page(self.client.get(self.url + '?next=/recurring-payments/'))
+        [form] = [e for e in elements if e['tag'] == 'form' and any(i.get('name') == 'description' for i in e['inner'])]
+        fields = {i.get('name'): i for i in form['inner'] if i['tag'] == 'input'}
+        self.assertEqual((fields['next']['type'], fields['next']['value']), ('hidden', '/recurring-payments/'))
 
     def test_next_param_is_used(self):
         r = self.client.post(self.url, {**self.data, 'next': '/recurring-payments/'})

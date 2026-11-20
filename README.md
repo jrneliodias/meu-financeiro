@@ -35,42 +35,20 @@ A production personal finance management platform built with Django and PostgreS
 
 ## Architecture
 
-The codebase uses a layered architecture with clear separation of concerns:
-
-### Service Layer
-Business logic is decoupled from views into dedicated service classes. Views delegate all domain operations to services, keeping them thin and testable.
+Domain rules live on the models; each feature keeps its views, logic and templates together.
 
 ```
-registers/services/
-├── ExpenseService       # expense creation, editing, validation
-├── IncomeService        # income management
-├── InstallmentService   # multi-payment plan handling
-└── CSVImportService     # bulk import orchestration
+registers/models.py      # models + rules: billing month (ExpenseQuerySet), recurring occurrences, installment plans
+registers/views/         # data entry, one module per feature (expenses, incomes, presets, estimates, CSV)
+registers/csv/           # importer (standard CSV → expenses/incomes) and processor (Nubank → standard CSV)
+reports/services/        # dashboard numbers per feature: summary, budget, installments, recurring, categories, daily
+reports/views/           # dashboard tabs, expense list, recurring expenses and the month's payments
+utils/                   # dates, money formatting, small HTTP helpers
 ```
 
-### Repository Pattern
-Complex database queries are isolated in repository classes, using `select_related` and aggregated queries to eliminate N+1 problems. Report pages that previously issued 50+ queries now run in 3–5.
-
-```
-reports/repository/
-├── ExpenseRepository    # optimized monthly expense queries
-├── CategoryRepository   # category aggregation
-├── PaymentMethodRepository
-└── IncomeRepository
-```
-
-### Strategy Pattern — CSV Import
-The CSV import pipeline uses a strategy pattern to classify each record type, making it extensible without modifying existing code.
-
-```
-RecordStrategyFactory
-├── ExplicitTypeStrategy         # 'type' column takes precedence
-├── NegativeAmountExpenseStrategy # negative amount → Expense
-└── PositiveAmountIncomeStrategy  # positive amount → Income
-```
-
-### Component Pattern — Forms
-Form components use dependency injection via `kwargs.pop('user')` to configure fields with user-scoped context (e.g., populating payment method dropdowns with the user's own accounts).
+- Every query is scoped to the logged-in user.
+- Dashboard aggregations are single grouped queries (`Expense.objects.filter(user=…).in_billing_year(year)…`).
+- Money is formatted once, on the server (`|format_brl`); JS receives numbers via `json_script`.
 
 ---
 
@@ -98,15 +76,12 @@ The app runs on SQLite by default. Set `DATABASE_URL` in `.env` to switch to Pos
 ## Running Tests
 
 ```bash
-# All tests
-python manage.py test
+# All tests (unset DATABASE_URL so they run on SQLite)
+DATABASE_URL= python manage.py test
 
-# Specific app
-python manage.py test registers
-python manage.py test reports
-
-# Single test class
-python manage.py test registers.tests.test_csv_record_strategies.NegativeAmountExpenseStrategyTest
+# Specific app / module
+DATABASE_URL= python manage.py test registers
+DATABASE_URL= python manage.py test registers.tests.test_csv_import
 ```
 
 ---

@@ -1,28 +1,16 @@
-{% load currency_filters i18n %}
+{% load i18n links %}
+{% url_returning 'expense_list_page' installments=1 month=selected_month year=selected_year as installments_href %}
+{% url_returning 'budget_breakdown' month=selected_month year=selected_year as budget_href %}
+{% url_returning 'expense_list_page' date=today_date|date:"Y-m-d" as today_href %}
+{% if fixed_expenses_summary.pending_count %}{% blocktrans count count=fixed_expenses_summary.pending_count asvar pending_note %}{{ count }} pending{% plural %}{{ count }} pending{% endblocktrans %}{% endif %}
 <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7 lg:[&>*]:p-2 lg:[&_.font-bold]:text-lg xl:[&_.font-bold]:text-xl 2xl:[&_.font-bold]:text-2xl [&>*]:min-w-0 [&_.font-bold]:break-words">
-    <div class="col-span-2 sm:col-span-1 flex flex-col items-start bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
-      <p class="text-white text-xs md:text-sm">{% trans "Balance:" %}</p>
-      <span id="balanceDisplay" class="text-white text-xl md:text-2xl font-bold">{{ global_balance|format_brl }}</span>
-    </div>
-    {% include "reports/components/fixed_expenses_card.html" %}
-    {% include "reports/components/installment_monthly_card.html" %}
-    {% include "reports/components/regular_expenses_card.html" %}
-    {% include "reports/components/estimated_expenses_card.html" %}
-    {% include "reports/components/monthly_budget_card.html" %}
-    {% include "reports/components/daily_total_card.html" with today_total=today_total today_date=today_date %}
+  <div class="col-span-2 sm:col-span-1 grid">
+    {% include "reports/components/stat_card.html" with label=_("Balance:") amount=global_balance color="text-white" only %}
+  </div>
+  {% include "reports/components/stat_card.html" with label=_("Fixed Expenses:") amount=fixed_expenses_summary.total_amount color="text-orange-400" note=pending_note only %}
+  {% include "reports/components/stat_card.html" with label=_("Monthly Installments:") amount=budget_summary.total_installments color="text-purple-400" href=installments_href title=_("See installment expenses") only %}
+  {% include "reports/components/stat_card.html" with label=_("Daily Expenses:") amount=budget_summary.total_regular color="text-cyan-400" only %}
+  {% include "reports/components/stat_card.html" with label=_("Estimated:") amount=budget_summary.total_estimated color="text-yellow-400" only %}
+  {% include "reports/components/stat_card.html" with label=_("Expected Total:") amount=budget_summary.adjusted_expected color="text-blue-400" href=budget_href title=_("See breakdown") only %}
+  {% include "reports/components/stat_card.html" with label=_("Spent Today:") amount=today_total color="text-blue-400" href=today_href title=_("See today expenses") only %}
 </section>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Get the balance value
-    const balanceValue = {{ global_balance|default:0 }};
-
-    // Format as BRL currency
-    const formattedBalance = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(balanceValue);
-
-    // Display the formatted value
-    document.getElementById('balanceDisplay').textContent = formattedBalance;
-  });
-</script>

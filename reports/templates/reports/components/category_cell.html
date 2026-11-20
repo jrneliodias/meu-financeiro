@@ -1,0 +1,10 @@
+{% load formatting links %}
+{# One category × month amount. Params: amount, category ({name, id}), month, year. Links to the list of those expenses. #}
+<td class="text-left heatmap-cell" data-amount="{{ amount|stringformat:'f' }}">
+  {% if amount and category.id %}
+  {% url_returning 'expense_list_page' category_id=category.id month=month year=year as href %}
+  <a href="{{ href }}" title="{{ category.name }}" class="group inline-flex items-center gap-1 rounded hover:bg-blue-900/30 transition-all duration-200">
+    {{ amount|format_brl }}<i class="fas fa-eye text-xs text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden="true"></i>
+  </a>
+  {% else %}<span class="{% if not amount %}text-zinc-600{% endif %}">{{ amount|format_brl }}</span>{% endif %}
+</td>

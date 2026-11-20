@@ -1,4 +1,64 @@
 {% extends "reports/tabs/_layout.html" %}
+{% load i18n static formatting %}
 {% block tab_content %}
-  {% include "reports/components/expense_category_table.html" %}
+{% month_choices as months %}
+<div class="my-3 space-y-4 bg-zinc-800/50 rounded-lg p-3" data-category-table>
+  <h2 class="text-2xl font-bold">{% trans "Expenses by Category" %}</h2>
+  <table class="hidden md:table w-full p-2" data-heatmap>
+    <thead class="sticky top-16 lg:top-0 z-10">
+      <tr class="*:p-2 border-b border-zinc-700 bg-zinc-900">
+        <th class="text-left">{% trans "Category" %}</th>
+        {% for number, name in months %}<th class="text-left">{{ name }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="*:p-2 border-b border-zinc-700 bg-zinc-800/50">
+        <td class="font-bold">{% trans "Total" %}</td>
+        {% for value in category_table.totals %}<td class="text-left font-bold">{{ value|format_brl }}</td>{% endfor %}
+      </tr>
+      {% for category in category_table.categories %}
+        <tr class="*:p-2 border-b border-zinc-700">
+          <td class="font-medium">{{ category.name }}</td>
+          {% for amount in category.months %}
+            {% include "reports/components/category_cell.html" with month=forloop.counter year=selected_year %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="md:hidden">
+    <label for="monthSelector" class="sr-only">{% trans "Month" %}</label>
+    <select id="monthSelector"
+            class="w-full mb-4 px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900">
+      {% for number, name in months %}<option value="{{ number }}" {% if number == selected_month %}selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+    <div id="mobileStatsDisplay" class="mb-3 text-xs bg-zinc-800 p-2 rounded" hidden>
+      <h4 class="font-semibold">Estatísticas do mês</h4>
+      <div id="statsContent" class="grid grid-cols-2 gap-1"></div>
+    </div>
+    <table class="p-2 w-full">
+      <thead>
+        <tr class="*:p-2 border-b border-zinc-700">
+          <th class="text-left">{% trans "Category" %}</th>
+          <th class="text-left">{% trans "Month" %}</th>
+        </tr>
+      </thead>
+      {% for number, name in months %}
+      <tbody data-month="{{ number }}" data-heatmap {% if number != selected_month %}hidden{% endif %}>
+        <tr class="*:p-2 border-b border-zinc-700 bg-zinc-800/50">
+          <td class="font-bold">{% trans "Total" %}</td>
+          <td class="text-left font-bold" data-total="{{ category_table.totals|at:forloop.counter0|stringformat:'f' }}">{{ category_table.totals|at:forloop.counter0|format_brl }}</td>
+        </tr>
+        {% for category in category_table.categories %}
+        <tr class="*:p-2 border-b border-zinc-700">
+          <td class="font-medium">{{ category.name }}</td>
+          {% include "reports/components/category_cell.html" with amount=category.months|at:forloop.parentloop.counter0 month=number year=selected_year %}
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<script src="{% static 'js/category_table.js' %}"></script>
 {% endblock %}
