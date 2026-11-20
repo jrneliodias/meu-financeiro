@@ -40,7 +40,7 @@ class ExpenseListPageTest(TestCase):
         self.assertNotContains(response, 'Outro dia')
         self.assertNotContains(response, 'De outro usuário')
         elements = page(response)
-        self.assertEqual(with_id(elements, 'list-total')[0]['text'].strip(), 'R$ 100,00')
+        self.assertEqual(with_id(elements, 'list-total')[0]['text'].strip(), 'R$\xa0100,00')
         self.assertEqual(with_id(elements, 'list-count')[0]['text'].strip(), '2')
 
     def test_by_category_and_month(self):

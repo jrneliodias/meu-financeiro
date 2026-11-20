@@ -51,4 +51,4 @@ class InstallmentProgressTest(TestCase):
     def test_parcelas_tab_shows_remaining_in_reais(self):
         self.client.force_login(self.user)
         response = self.client.get(reverse('dashboard_installments'), {'month': 2, 'year': 2026})
-        self.assertContains(response, 'R$ 33,33')
+        self.assertContains(response, 'R$\xa033,33')

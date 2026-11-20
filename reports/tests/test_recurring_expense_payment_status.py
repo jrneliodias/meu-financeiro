@@ -57,7 +57,7 @@ class RecurringExpenseListSummaryTest(TestCase):
 
         response = self.client.get(reverse('recurring_expense_list'))
 
-        self.assertContains(response, 'R$ 130,00')  # active only: 50 + 80
+        self.assertContains(response, 'R$\xa0130,00')  # active only: 50 + 80
         [pending] = [e for e in page(response) if 'data-pending-count' in e]
         self.assertEqual(pending['text'].strip(), '1')
 

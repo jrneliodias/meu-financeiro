@@ -70,19 +70,19 @@ class DashboardTabsTest(TestCase):
         # Gastos: the per-category estimates, with a link to manage the month's estimates
         gastos = self._get('dashboard_spending')
         self.assertTrue(links_to(page(gastos), reverse('budget_estimate_list'), month='10', year='2026'))
-        self.assertContains(gastos, 'R$ 500,00')
+        self.assertContains(gastos, 'R$\xa0500,00')
         # Resumo: the estimated total and the expected total (500 estimated + 42 spent), linking to the breakdown
         resumo = self._get('expense_report')
-        self.assertContains(resumo, 'R$ 500,00')
+        self.assertContains(resumo, 'R$\xa0500,00')
         [expected_card] = links_to(page(resumo), reverse('budget_breakdown'), month='10', year='2026')
-        self.assertIn('R$ 542,00', expected_card['text'])
+        self.assertIn('R$\xa0542,00', expected_card['text'])
 
     def test_budget_breakdown_page_shows_totals_and_returns_to_resumo(self):
         CategoryBudgetEstimate.objects.create(
             user=self.user, category=self.mercado, amount=Decimal('500.00'), month=10, year=2026)
         response = self._get('budget_breakdown')
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'R$ 500,00')
+        self.assertContains(response, 'R$\xa0500,00')
         # without ?back= the back link returns to the Resumo of the same month
         self.assertTrue(links_to(page(response), reverse('expense_report'), month='10', year='2026'))
 

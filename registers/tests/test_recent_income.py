@@ -54,7 +54,7 @@ class RecentIncomesTest(IncomePageTestCase):
 
         response = self.client.get(reverse('register_income'))
 
-        self.assertContains(response, 'R$ 1.234,50')
+        self.assertContains(response, 'R$\xa01.234,50')
         self.assertContains(response, '01/07/2026')
         # What "Use" copies into the form.
         self.assertContains(response, 'data-amount="1234.500"')

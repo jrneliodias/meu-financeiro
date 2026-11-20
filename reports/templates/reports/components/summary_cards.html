@@ -3,10 +3,8 @@
 {% url_returning 'budget_breakdown' month=selected_month year=selected_year as budget_href %}
 {% url_returning 'expense_list_page' date=today_date|date:"Y-m-d" as today_href %}
 {% if fixed_expenses_summary.pending_count %}{% blocktrans count count=fixed_expenses_summary.pending_count asvar pending_note %}{{ count }} pending{% plural %}{{ count }} pending{% endblocktrans %}{% endif %}
-<section class="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7 lg:[&>*]:p-2 lg:[&_.font-bold]:text-lg xl:[&_.font-bold]:text-xl 2xl:[&_.font-bold]:text-2xl [&>*]:min-w-0 [&_.font-bold]:break-words">
-  <div class="col-span-2 sm:col-span-1 grid">
-    {% include "reports/components/stat_card.html" with label=_("Balance:") amount=global_balance color="text-white" only %}
-  </div>
+<section class="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7 [&>:first-child]:col-span-2 sm:[&>:first-child]:col-span-1 lg:[&>*]:p-2 [&>*]:min-w-0">
+  {% include "reports/components/stat_card.html" with label=_("Balance:") amount=global_balance color="text-white" only %}
   {% include "reports/components/stat_card.html" with label=_("Fixed Expenses:") amount=fixed_expenses_summary.total_amount color="text-orange-400" note=pending_note only %}
   {% include "reports/components/stat_card.html" with label=_("Monthly Installments:") amount=budget_summary.total_installments color="text-purple-400" href=installments_href title=_("See installment expenses") only %}
   {% include "reports/components/stat_card.html" with label=_("Daily Expenses:") amount=budget_summary.total_regular color="text-cyan-400" only %}
