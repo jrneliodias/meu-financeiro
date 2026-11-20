@@ -10,7 +10,7 @@ from utils.dates import YEAR_RANGE
 
 from .fields import ThreePlacesDecimalField
 from .models import (
-    Category, CategoryBudgetEstimate, Expense, Income, PaymentMethod, QuickFillPreset, RecurringExpense,
+    Category, CategoryBudgetEstimate, Expense, Income, Installment, PaymentMethod, QuickFillPreset, RecurringExpense,
 )
 
 INPUT_CLASS = 'w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -55,7 +55,8 @@ class ExpenseForm(StyledForm, forms.ModelForm):
 
 
 class ExpenseCreateForm(ExpenseForm):
-    installments = forms.IntegerField(label=_('Installments'), min_value=1, initial=1)
+    installments = forms.IntegerField(label=_('Installments'), min_value=1, max_value=Installment.MAX_INSTALLMENTS,
+                                      initial=1)
     is_recurring = forms.BooleanField(label=_('Recurring expense'), required=False)
 
     def __init__(self, *args, preset=None, **kwargs):

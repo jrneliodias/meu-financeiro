@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, F, Q, When
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.translation import gettext_lazy as _
@@ -67,24 +67,30 @@ class Installment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Bounds what one form post can create (one expense per installment).
+    MAX_INSTALLMENTS = 120
+
     def __str__(self):
         return f"{self.description} - Total: {self.total_amount} ({self.total_installments} installments)"
 
     @classmethod
     def create_plan(cls, user, *, description, total_amount, total_installments,
                     start_date, category, payment_method):
-        """The plan plus one expense per month, each `total / n`, described "desc - i/n"."""
-        plan = cls.objects.create(
-            user=user, description=description, total_amount=total_amount,
-            total_installments=total_installments, start_date=start_date,
-            category=category, payment_method=payment_method,
-        )
-        for i in range(total_installments):
-            Expense.objects.create(
-                user=user, description=f"{description} - {i + 1}/{total_installments}",
-                amount=total_amount / total_installments,
-                date=start_date + relativedelta(months=i),
-                category=category, payment_method=payment_method, installment_plan=plan,
+        """The plan plus one expense per month, each `total / n`, described "desc - i/n" (all or nothing)."""
+        with transaction.atomic():
+            plan = cls.objects.create(
+                user=user, description=description, total_amount=total_amount,
+                total_installments=total_installments, start_date=start_date,
+                category=category, payment_method=payment_method,
+            )
+            Expense.objects.bulk_create(
+                Expense(
+                    user=user, description=f"{description} - {i + 1}/{total_installments}",
+                    amount=total_amount / total_installments,
+                    date=start_date + relativedelta(months=i),
+                    category=category, payment_method=payment_method, installment_plan=plan,
+                )
+                for i in range(total_installments)
             )
         return plan
 

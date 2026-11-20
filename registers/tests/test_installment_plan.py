@@ -42,3 +42,10 @@ class InstallmentPlanTest(TestCase):
         self.register('1')
         self.assertEqual(Installment.objects.count(), 0)
         self.assertIsNone(Expense.objects.get().installment_plan)
+
+    def test_at_most_120_installments(self):
+        self.assertEqual(self.register('121').status_code, 200)
+        self.assertFalse(Installment.objects.exists())
+        self.assertFalse(Expense.objects.exists())
+        self.register('120')
+        self.assertEqual(Installment.objects.get().expenses.count(), 120)
