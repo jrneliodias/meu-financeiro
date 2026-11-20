@@ -121,7 +121,7 @@ class ExpenseCategoryKeyboardTest(CategoryKeyboardMixin, UITestCase):
 
 
 class IncomeCategoryKeyboardTest(CategoryKeyboardMixin, UITestCase):
-    kind, path, next_selector = 'income', '/register/income', 'button[type=submit]'
+    kind, path, next_selector = 'income', '/register/income', 'main button[type=submit]'
 
 
 class IncomeCategoryRequiredUITest(UITestCase):
@@ -133,7 +133,7 @@ class IncomeCategoryRequiredUITest(UITestCase):
         self.page.fill('#id_description', 'Pay')
         self.page.fill('#id_amount', '10')
         self.page.fill('#id_date', '2026-11-08')
-        self.page.click('form button[type=submit]')
+        self.page.click('main button[type=submit]')
         msg = self.page.evaluate("document.querySelector('#category-search-input').validationMessage")
         self.assertTrue(msg, 'the visible category input must explain why the form was not sent')
         self.assertIn('/register/income', self.page.url)

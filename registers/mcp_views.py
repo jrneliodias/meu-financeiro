@@ -14,13 +14,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .models import Category, Expense, Income, PaymentMethod
-from .services.expense_service import ExpenseService
-from .services.income_service import IncomeService
 
 PROTOCOL_VERSION = "2025-06-18"
+DESCRIPTION_MAX = Expense._meta.get_field("description").max_length
 
 _COMMON = {
-    "description": {"type": "string", "description": "Descricao curta (max 100 caracteres)"},
+    "description": {"type": "string", "description": f"Descricao curta (max {DESCRIPTION_MAX} caracteres)"},
     "amount": {"type": "number", "description": "Valor em reais, positivo"},
     "date": {"type": "string", "description": "YYYY-MM-DD"},
     "category": {"type": "string", "description": "Nome exato de uma categoria de listar_opcoes"},
@@ -56,6 +55,10 @@ TOOLS = [
 ]
 
 
+class UnknownTool(Exception):
+    pass
+
+
 def _lookup(model, name, **filters):
     obj = model.objects.filter(name__iexact=name.strip(), **filters).first()
     if not obj:
@@ -73,7 +76,7 @@ def _parse(args):
         raise ValueError("amount ou date invalido (date = YYYY-MM-DD)")
     if amount <= 0:
         raise ValueError("amount deve ser positivo")
-    desc = args.get("description", "").strip()[:100]
+    desc = args.get("description", "").strip()[:DESCRIPTION_MAX]
     if not desc:
         raise ValueError("description obrigatoria")
     return desc, amount, when
@@ -82,8 +85,8 @@ def _parse(args):
 def _call_tool(name, args, user):
     if name == "listar_opcoes":
         return json.dumps({
-            "categorias_despesa": list(Category.objects.filter(type="expense").values_list("name", flat=True)),
-            "categorias_receita": list(Category.objects.filter(type="income").values_list("name", flat=True)),
+            "categorias_despesa": list(Category.objects.expense().values_list("name", flat=True)),
+            "categorias_receita": list(Category.objects.income().values_list("name", flat=True)),
             "formas_pagamento": list(PaymentMethod.objects.values_list("name", flat=True)),
         }, ensure_ascii=False)
 
@@ -95,19 +98,17 @@ def _call_tool(name, args, user):
                 user=user, date=when, amount=amount, description__iexact=desc).exists():
             raise ValueError(
                 "Ja existe uma despesa igual. Confirme com o usuario e use force=true se for outra.")
-        e = ExpenseService().create_single_expense(user, {
-            "description": desc, "amount": amount, "date": when,
-            "category": category, "payment_method": method})
+        e = Expense.objects.create(user=user, description=desc, amount=amount, date=when,
+                                   category=category, payment_method=method)
         return f"Despesa #{e.pk} cadastrada: {desc} R$ {amount} em {when} ({category}, {method})"
 
     if name == "criar_receita":
         desc, amount, when = _parse(args)
         category = _lookup(Category, args.get("category", ""), type="income")
-        i = IncomeService().create_income(user, {
-            "description": desc, "amount": amount, "date": when, "category": category})
+        i = Income.objects.create(user=user, description=desc, amount=amount, date=when, category=category)
         return f"Receita #{i.pk} cadastrada: {desc} R$ {amount} em {when} ({category})"
 
-    raise KeyError(name)
+    raise UnknownTool(name)
 
 
 def _handle(msg, user):
@@ -134,7 +135,7 @@ def _handle(msg, user):
         try:
             text, is_error = _call_tool(params.get(
                 "name"), params.get("arguments") or {}, user), False
-        except KeyError:
+        except UnknownTool:
             return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32602, "message": "tool desconhecida"}}
         except ValueError as exc:
             text, is_error = str(exc), True

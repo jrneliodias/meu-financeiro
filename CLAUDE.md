@@ -8,62 +8,44 @@ This is a Django-based personal finance management application called "Meu Finan
 
 ## Architecture
 
-### Core Django Apps
-- **finance**: Main Django project settings and URL routing
-- **registers**: Handles data entry for expenses, incomes, installments, and CSV imports
-- **reports**: Generates financial reports and analytics with performance-optimized views
-- **utils**: Shared utilities like date handling functions
+### Apps
+- **finance**: settings and root URLs (also routes the MCP endpoint in `registers/mcp_views.py`)
+- **registers**: models, data entry (expense/income/recurring/presets/estimates), CSV import/processing
+- **reports**: dashboard tabs, expense list, recurring expenses management and the month's payments
+- **export**: monthly CSV export
+- **utils**: helpers shared by every app (`dates`, `money`, `http`) and the shared template tags (`formatting`, `links`, `navigation`)
+- `templates/` and `static/` (project level): the site chrome every app's pages extend
 
-### Key Models (registers/models.py)
-- **Expense**: Individual expense records with category, payment method, and installment/recurring expense links
-- **Income**: Income records with categories
-- **Category**: Expense/income categorization with type field (expense/income)
-- **PaymentMethod**: Credit cards, bank accounts with billing cycles
-- **Installment**: Multi-payment purchase plans that generate individual expenses
-- **RecurringExpense**: Monthly recurring expenses that auto-generate expense records
-- **Investment**: Investment tracking
+Dependency direction: `utils` ← `registers.models` ← everything else. `registers` never imports `reports`.
 
-### Service Layer Architecture
-The codebase uses a service layer pattern with clear separation of concerns:
+### Models (registers/models.py) own the domain rules
+- `Expense.objects` is an `ExpenseQuerySet`: `in_billing_month(year, month)`, `in_billing_year(year)` (an expense dated before its payment method's `start_billing_day` belongs to the previous month's bill), `in_month(year, month)` (calendar month). This is the only definition of a billing period.
+- `Expense.kind` / `kind_label` (installment, recurring or single).
+- `RecurringExpense`: `charged_amount` (adds IOF when international), `due_date(y, m)` (day clamped to month end), `month_expense(y, m)`, `generate_for_month(y, m)` (at most one expense per calendar month), `sync_month_expense(y, m)`.
+- `Installment.create_plan(...)` creates the plan and one expense per month.
+- `RecurringExpense.objects.due_in(year, month)` (active and started by that month: the schedules that get an expense) and `.charged_total()` (IOF included).
+- `Category.objects.expense()` / `.income()`; categories and payment methods are ordered by name (Meta).
+- Every query in a view is scoped to `request.user`; another user's record is a 404.
 
-#### registers/services
-- **ExpenseService**: Expense creation, editing, and business logic
-- **IncomeService**: Income management and validation
-- **InstallmentService**: Multi-payment purchase plan handling
-- **CSVImportService**: Bulk data import with validation and error handling
+### registers
+- `views/` one module per feature (`expenses`, `incomes`, `recurring`, `presets`, `categories`, `budget_estimates`, `csv_import`, `csv_processor`); `urls.py` imports the modules directly.
+- `forms.py`: forms own their fields, labels and validation; `StyledForm` gives widgets the app's Tailwind classes. Templates render each field with `register/components/form_field.html` (label, help, errors) and form-wide errors with `form_errors.html`; views don't flash field errors. `ExpenseForm` edits, `ExpenseCreateForm` adds installments, the recurring flag and quick-fill presets.
+- `csv/importer.py` (standard CSV → Expense/Income: `type` column, else the amount's sign) and `csv/processor.py` (Nubank export → standard CSV, no DB writes).
+- `budget_copy.py`: copy category estimates from the latest earlier month.
 
-#### reports/services
-- **ExpenseService**: Report-specific expense calculations
-- **BalanceService**: Financial balance calculations
-- **ExpenseCalculator**: Monthly and period-based expense aggregations
-- **CategoryCalculator**: Category-based expense analysis
-- **BillingPeriodCalculator**: Credit card billing cycle calculations
-- **DailyExpenseCalculator**: Daily spending trend analysis
+### reports
+- `services/` one module per dashboard feature, each a set of functions taking `user`: `summary` (balance, spent today, yearly charts), `budget` (`monthly_budget` → BudgetSummary), `installments`, `recurring` (`month_overview`, `generate_month`, `set_paid`), `categories`, `daily`.
+- `views/dashboard.py`: the five tabs (`/`, `/gastos/`, `/categorias/`, `/parcelas/`, `/despesas/`) and `/orcamento/detalhamento/`; each tab computes only what it shows. Templates in `reports/templates/reports/tabs/` (`_layout.html`, `_header.html`, `_nav.html`).
+- `views/expense_list.py`: `/despesas/lista/` (`?date=` | `?category_id=[&month=&year=]` | `?installments=1&month=&year=`, `back=` returns to the origin). Build links to it with `{% url_returning 'expense_list_page' … %}` (templatetags/links.py).
+- `views/recurring.py`: recurring list/edit/delete/toggle, `/recurring-expenses/processar/`, `/recurring-payments/`, the bell pop-up (`payment_notifications`) and the paid checkbox endpoint.
+- Modals only for confirmations; lists and edits are pages.
 
-#### reports/repository
-Data access layer with performance-optimized queries:
-- **ExpenseRepository**: Complex expense queries with select_related optimizations
-- **CategoryRepository**: Category-based data aggregation
-- **PaymentMethodRepository**: Payment method analysis queries
-- **IncomeRepository**: Income data access with performance optimizations
-- **RecurringExpenseRepository**: Recurring expense data access
-
-#### reports/views (pacote)
-Dashboard em 5 abas, cada uma calcula só o que mostra (`dashboard.py`):
-- `/` resumo (`expense_report`), `/gastos/`, `/categorias/`, `/parcelas/`, `/despesas/`
-- Templates em `reports/templates/reports/tabs/` (herdam `_layout.html`; `_nav.html` é a barra de abas)
-- `ajax.py` (gasto diário), `recurring.py` (recorrentes/pagamentos/processar), `expense_update.py`, `expense_list.py` (lista genérica), `_common.py` (singletons e helpers)
-- **Modais só para confirmação** (excluir, sincronizar). Listas/edição são páginas: `/despesas/lista/` (`?date=` | `?category_id=[&month=&year=]` | `?installments=1&month=&year=`, com `&back=`), `/orcamento/detalhamento/`, `/recurring-expenses/processar/`; o sino abre o pop-up de pagamentos do mês (com link para `/recurring-payments/`)
-- Modais só para confirmação (excluir, sincronizar). Listas/edições são páginas:
-  `/despesas/lista/` (`expense_list.py`: `?date=` | `?category_id=[&month=&year=]` | `?installments=1&month=&year=`, `back=` volta à origem),
-  `/orcamento/detalhamento/`, `/recurring-expenses/processar/`, e o sino é um pop-up (`payment_notifications_dialog.html`) com link para `/recurring-payments/`
-- JS grande vive em `registers/static/js/` (`daily_spending_chart.js`, `category_table.js`); o template só injeta config
-
-#### registers/components
-Form component architecture using dependency injection:
-- **ExpenseFormComponent**: Configures expense form fields with user context
-- **QuickFillMenu**: Pre-configured expense templates for rapid data entry
-- Forms receive user context via `kwargs.pop('user')` pattern
+### Templates and JS
+- Site chrome lives at project level: `templates/core/base.html` (sidebar via `{% sidebar_nav %}` from `utils/templatetags/navigation.py`, flash messages in `core/messages.html`, the bell once per page — dashboard tabs move it to the header via the `sidebar_bell` block), `templates/auth/login.html`, and `static/` (`js/app.js`, `js/tailwind_config.js`, `css/typography.css`).
+- Money is formatted on the server with `{{ value|format_brl }}` (`{% load formatting %}`, backed by `utils/money.py`); month names come from `{% month_choices %}` (Django's translated `MONTHS`). Services return numbers, never formatted strings.
+- Strings JS shows come from the template (`data-*` rendered with `{% trans %}`); there is no JS translation catalog.
+- Data for JS goes through `json_script` or `data-*` attributes; endpoints are rendered with `{% url %}`, never hard-coded in JS.
+- `static/js/app.js` (every page): `App.brl`, `App.post` (CSRF), `<form data-confirm>` and `<button data-post-url [data-confirm]>` (POST, reload on success). Page scripts live next to their app (`reports/static/js/`, `registers/static/js/`).
 
 ## Common Development Commands
 
@@ -95,46 +77,25 @@ python manage.py createsuperuser
 sqlite3 db.sqlite3
 ```
 
-### Performance Testing
-```bash
-# Measure query performance (custom command)
-python manage.py measure_performance --iterations=5
-
-# Run with SQL query explanation
-python manage.py measure_performance --explain
-```
-
 ### Custom Management Commands
 ```bash
-# Import CSV data
-python manage.py import_csv path/to/file.csv
+# Import a standard CSV (date,description,amount[,category,type,payment_method])
+python manage.py import_csv path/to/file.csv [--user USERNAME] [--preview]
 
-# Export expenses to CSV
-python manage.py export_expenses
+# Export all expenses to CSV
+python manage.py export_expenses --output expenses.csv
 
-# Process recurring payments (monthly automation)
-python manage.py recurrence_payment
-
-# Import legacy data
-python manage.py import_data
-
-# Run expense service operations
-python manage.py run_expense_service
+# Generate this year's expenses of every user's active recurring expenses
+python manage.py recurrence_payment [--month N]
 ```
 
 ### CSV Import
-The application supports CSV import with the following expected format:
+Expected format:
 ```csv
 date,description,amount,category,type,payment_method
 2025-09-02,Uber Uber *Trip Help.U,8.96,Uber,expense,Crédito - Nubank
 ```
-
-The CSV import uses a **Strategy Pattern** (`registers/services/csv_record_strategies.py`) to determine record type:
-1. **ExplicitTypeStrategy**: Checks for 'type' column (takes precedence)
-2. **NegativeAmountExpenseStrategy**: Negative amounts → Expense records
-3. **PositiveAmountIncomeStrategy**: Positive amounts → Income records
-
-To add new record type handling, create a new strategy class implementing `RecordCreationStrategy` and register it with `RecordStrategyFactory`.
+A row is an expense or an income by its `type` column; without it, by the amount's sign (negative = expense). Amounts are stored as absolute values. See `registers/csv/importer.py`.
 
 ## Database Configuration
 
@@ -142,21 +103,10 @@ Uses SQLite for development and PostgreSQL for production via DATABASE_URL envir
 - SQLite: Local development with connection pooling (60s max age)
 - PostgreSQL: Production with SSL and optimized connection settings
 
-## Performance Optimizations
-
-The codebase has been heavily optimized for performance:
-
-### Query Optimization
-- All admin views use `select_related()` to eliminate N+1 queries
-- Report views use consolidated queries instead of multiple database hits
-- Repository pattern abstracts complex queries
-- Cache configuration using Django's local memory cache (5-minute timeout)
-
-### Key Optimization Areas
-- **Admin Interface**: Uses select_related for all foreign key relationships
-- **Expense Reports**: Single aggregated queries replace multiple individual queries
-- **Monthly Reports**: Optimized data retrieval reduces 50+ queries to 3-5 queries
-- **Template Rendering**: Pre-aggregated data prevents N+1 queries in templates
+## Performance Notes
+- Querysets that feed templates use `select_related` for the foreign keys they render.
+- Dashboard aggregations are single grouped queries (`in_billing_year(...).values(...).annotate(Sum)`).
+- Admin list views use `select_related` in `get_queryset`.
 
 ## Environment Configuration
 
@@ -181,61 +131,43 @@ The codebase has been heavily optimized for performance:
 - `/register/income`: Add new income
 - `/register/csv-import`: Bulk import from CSV files
 
-### API Endpoints
-- `/daily-spending-data/`: AJAX endpoint for spending trends
-- `/expense-details/`: AJAX endpoint for detailed expense information
+### JSON Endpoints
+- `/daily-spending-data/`: daily spending chart data (`?days=&category_id=`)
+- `/payment-notifications/`: the bell pop-up (counts + HTML)
+- `/recurring-expense/<id>/payment/`: save a recurring occurrence's paid state
+- `/register/categories/search/` and `/register/categories/create/`: category autocomplete
+- `/register/{expense,income}/<id>/delete/`, `/register/quick-fill-presets/<id>/delete/`, `/recurring-expense/<id>/{delete,toggle}/`
+- `/mcp/<MCP_TOKEN>/`: MCP server for registering expenses/incomes from Claude
 
 ## Key Development Patterns
 
-### Service Layer Usage
-Always use services for business logic instead of putting logic in views:
-```python
-# Good
-expense_service = ExpenseService()
-expense = expense_service.create_single_expense(user, expense_data)
-
-# Avoid putting business logic directly in views
-```
+### Where code goes
+- A rule about one model (billing month, recurring occurrence, installment plan) → a method/queryset on the model.
+- A dashboard number or chart → a function in `reports/services/<feature>.py` that takes `user` and returns numbers.
+- A page → a view module next to its feature; the template formats.
 
 ### Query Optimization
-Always use select_related/prefetch_related for foreign key access:
 ```python
-# Good (note: 'reccurring_expense' has a typo in the field name - legacy code)
+# note: 'reccurring_expense' has a typo (double 'c') that persists in migrations
 queryset.select_related('category', 'payment_method', 'reccurring_expense')
-
-# Bad - causes N+1 queries
-queryset  # then accessing .category in templates
 ```
-
-**Note**: The field `reccurring_expense` has a typo (double 'c') that persists in migrations and cannot be easily renamed.
-
-### Repository Pattern
-Use repository classes for complex queries:
-```python
-expense_repository = ExpenseRepository()
-expenses = expense_repository.get_optimized_monthly_expenses(month)
-```
+**Note**: The field `reccurring_expense` has a typo (double 'c') that persists in migrations and cannot be easily renamed. Its reverse accessor on RecurringExpense is `recurring_expenses`.
 
 ## Testing Commands
 
+`.env` points `DATABASE_URL` at the production database, so always clear it when running tests (SQLite):
+
 ```bash
-# Run all tests
-python manage.py test
+# Run all tests (includes Playwright UI tests in registers/tests/ui/)
+DATABASE_URL= python manage.py test
 
-# Test specific app
-python manage.py test registers
-python manage.py test reports
-
-# Run a single test file
-python manage.py test registers.tests.test_csv_record_strategies
-python manage.py test reports.tests.test_billing_period_calculator
-
-# Run a single test class
-python manage.py test registers.tests.test_csv_record_strategies.NegativeAmountExpenseStrategyTest
-
-# Run a single test method
-python manage.py test registers.tests.test_csv_record_strategies.NegativeAmountExpenseStrategyTest.test_can_handle_negative_amount
+# One app / module / class / method (apps with tests: registers, reports, export, utils)
+DATABASE_URL= python manage.py test reports
+DATABASE_URL= python manage.py test registers.tests.test_csv_import
+DATABASE_URL= python manage.py test reports.tests.test_billing_month
 ```
+
+Shared test helpers live in `utils/tests/`: `clock.today_is(date)` / `clock.at(datetime)` freeze Django's clock, `html.page(response)` / `links_to` / `with_id` read a rendered page.
 
 ## Database Migration Between SQLite and PostgreSQL
 
@@ -310,4 +242,4 @@ python manage.py migrate --fake-initial
 
 ## Static Files
 
-Static files are located in `registers/static/css/` and served via WhiteNoise in production. Run `python manage.py collectstatic` before deployment.
+Static files live in `static/` (site-wide) and each app's `static/` folder, and are served via WhiteNoise in production. Run `python manage.py collectstatic` before deployment.

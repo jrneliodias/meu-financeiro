@@ -1,30 +1,25 @@
-from datetime import datetime
 import calendar
+from datetime import date
+
+from django.utils.timezone import localdate
+
+YEAR_RANGE = (2000, 2100)
 
 
-def get_current_date():
-    """Get current year and month."""
-    current = datetime.now()
-    return current.year, current.month
+def month_end(year, month):
+    return date(year, month, calendar.monthrange(year, month)[1])
 
 
-def get_all_months():
-    """Get list of all months."""
-    return list(calendar.month_name)[1:]  # Skip empty first item
+def parse_month_year(params, required=False):
+    """(year, month) from request params; missing ones default to today's unless `required`.
 
-
-def get_all_months_tuples():
-    """Get list of all months as tuples of (month_number, month_name).
-
-    Returns:
-        list: List of tuples [(1, 'January'), (2, 'February'), ..., (12, 'December')]
+    Raises ValueError for missing required values, non-numbers, months outside 1-12 and years outside YEAR_RANGE.
     """
-    return [(month, calendar.month_name[month]) for month in range(1, 13)]
-
-
-def get_last_day_of_current_month():
-    """Get the last day of the current month as a date object."""
-    from django.utils import timezone
-    today = timezone.now().date()
-    last_day = calendar.monthrange(today.year, today.month)[1]
-    return today.replace(day=last_day)
+    if required and not (params.get('month') and params.get('year')):
+        raise ValueError('month and year are required')
+    today = localdate()
+    month = int(params.get('month') or today.month)
+    year = int(params.get('year') or today.year)
+    if not (1 <= month <= 12 and YEAR_RANGE[0] <= year <= YEAR_RANGE[1]):
+        raise ValueError(f'invalid month/year: {month}/{year}')
+    return year, month

@@ -31,7 +31,7 @@ class NotificationEditUITest(UITestCase):
         link.wait_for(state='visible')
         link.click()
         self.page.wait_for_url(lambda u: f'/expense/{self.exp.pk}/update/' in u)
-        self.page.click('form button[type=submit]')
+        self.page.click('main button[type=submit]')
         self.page.wait_for_url(lambda u: '/update/' not in u)
         self.assertIn('/recurring-expenses/', self.page.url)
 
@@ -43,7 +43,7 @@ class NotificationEditUITest(UITestCase):
         link.click()
         self.page.wait_for_url(lambda u: f'/expense/{self.exp.pk}/update/' in u)
         self.page.fill('#id_amount', '120')
-        self.page.click('form button[type=submit]')
+        self.page.click('main button[type=submit]')
         self.page.wait_for_url(lambda u: '/update/' not in u)
         self.assertIn('/recurring-payments/', self.page.url)
         self.exp.refresh_from_db()

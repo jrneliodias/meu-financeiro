@@ -1,0 +1,14 @@
+{# One form field with its label, help text and errors. Usage: include with field=form.x #}
+<div class="space-y-2">
+  {% if field.widget_type == 'checkbox' %}
+  <div class="flex items-center gap-2">
+    {{ field }}
+    <label for="{{ field.id_for_label }}" class="text-gray-400">{{ field.label }}</label>
+  </div>
+  {% else %}
+  <label for="{{ field.id_for_label }}" class="block text-gray-400">{{ field.label }}</label>
+  {{ field }}
+  {% endif %}
+  {% if field.help_text %}<p class="text-xs text-gray-500">{{ field.help_text }}</p>{% endif %}
+  {% for error in field.errors %}<p class="text-sm text-red-400">{{ error }}</p>{% endfor %}
+</div>

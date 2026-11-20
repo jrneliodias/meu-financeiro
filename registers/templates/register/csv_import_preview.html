@@ -1,15 +1,13 @@
 {% extends 'core/base.html' %}
-{% load custom_filters i18n static %}
+{% load formatting i18n %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
-    <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-white mb-2">{% trans "CSV Import Preview" %}</h1>
         <p class="text-gray-400">{% blocktrans count count=preview_data.total_rows %}Review your data before importing. {{ count }} record found.{% plural %}Review your data before importing. {{ count }} records found.{% endblocktrans %}</p>
     </div>
 
-    <!-- Import Summary -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
         <h3 class="text-lg font-semibold text-white mb-4">{% trans "Import Summary" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -28,10 +26,9 @@
         </div>
     </div>
 
-    <!-- Data Preview -->
     <div class="bg-zinc-800 rounded-lg p-6 mb-6">
         <h3 class="text-lg font-semibold text-white mb-4">{% blocktrans count count=preview_data.sample_data|length %}Data Preview (First {{ count }} record){% plural %}Data Preview (First {{ count }} records){% endblocktrans %}</h3>
-        
+
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-300">
                 <thead class="text-xs text-gray-400 uppercase bg-zinc-700">
@@ -47,17 +44,9 @@
                             {% for column in preview_data.columns %}
                                 <td class="px-6 py-4">
                                     {% if column == 'amount' %}
-                                        <span class="font-mono">R$ {{ row.amount|floatformat:2 }}</span>
+                                        <span class="font-mono">{{ row.amount|format_brl }}</span>
                                     {% elif column == 'date' %}
                                         <span class="font-mono">{{ row.date|date:"Y-m-d" }}</span>
-                                    {% elif column == 'description' %}
-                                        {{ row.description|default:"-" }}
-                                    {% elif column == 'category' %}
-                                        {{ row.category|default:"-" }}
-                                    {% elif column == 'payment_method' %}
-                                        {{ row.payment_method|default:"-" }}
-                                    {% elif column == 'type' %}
-                                        {{ row.type|default:"-" }}
                                     {% else %}
                                         {{ row|get_item:column|default:"-" }}
                                     {% endif %}
@@ -70,15 +59,16 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="flex justify-between items-center">
         <a href="{% url 'csv_import' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
             {% trans "Back to Upload" %}
         </a>
-        
+
         <div class="flex space-x-4">
-            <form method="post" action="{% url 'csv_import_confirm' %}" class="inline" id="confirmImportForm">
+            {% blocktrans count count=preview_data.total_rows asvar confirm_message %}Are you sure you want to import {{ count }} record? This action cannot be undone.{% plural %}Are you sure you want to import {{ count }} records? This action cannot be undone.{% endblocktrans %}
+            <form method="post" action="{% url 'csv_import_confirm' %}" class="inline" id="confirmImportForm"
+                  data-confirm="{{ confirm_message }}" data-importing-label="{% trans 'Importing...' %}">
                 {% csrf_token %}
                 <button type="submit" id="confirmImportBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
                     <i class="fas fa-check mr-2" id="confirmIcon"></i>
@@ -88,7 +78,6 @@
         </div>
     </div>
 
-    <!-- Import Settings -->
     <div class="mt-6 bg-zinc-800 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-white mb-4">{% trans "Import Settings" %}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -111,28 +100,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const icon = document.getElementById('confirmIcon');
     const text = document.getElementById('confirmText');
 
-    form.addEventListener('submit', function(e) {
-        // Show confirmation dialog
-        if (!confirm(ngettext(
-            'Are you sure you want to import %(count)s record? This action cannot be undone.',
-            'Are you sure you want to import %(count)s records? This action cannot be undone.',
-            {{ preview_data.total_rows }}
-        ).replace('%(count)s', '{{ preview_data.total_rows }}'))) {
-            e.preventDefault();
-            return;
-        }
-
-        // Disable button and show loading state
+    // On document, after app.js's data-confirm handler: a "no" there leaves the button alone.
+    document.addEventListener('submit', function(e) {
+        if (e.target !== form || e.defaultPrevented) return;
         button.disabled = true;
         button.classList.remove('hover:bg-green-700');
         button.classList.add('opacity-75', 'cursor-not-allowed');
 
-        // Change icon to spinner
         icon.className = 'fas fa-spinner fa-spin mr-2';
 
-        // Update text
-        text.textContent = gettext('Importing...');
+        text.textContent = form.dataset.importingLabel;
     });
 });
 </script>
-{% endblock %} 
+{% endblock %}

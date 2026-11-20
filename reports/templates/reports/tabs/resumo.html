@@ -1,9 +1,12 @@
 {% extends "reports/tabs/_layout.html" %}
+{% load i18n static %}
 {% block tab_content %}
   {% include "reports/components/summary_cards.html" %}
-  {# desktop: os dois gráficos lado a lado, dividindo a altura restante #}
+  {# desktop: both charts side by side, sharing the remaining height #}
   <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:flex-1 lg:min-h-0">
-    {% include "reports/components/expense_income_chart.html" %}
-    {% include "reports/components/payment_method_chart.html" %}
+    {% include "reports/components/bar_chart.html" with title=_("Expense and Income by Month") chart_id="expenseIncomeTotalChart" data=yearly_charts.expense_income palette="255,99,132 52,211,153" only %}
+    {% include "reports/components/bar_chart.html" with title=_("Monthly Expenses by Payment Method") chart_id="calculatedPaymentMethodExpenseChart" data=yearly_charts.payment_methods palette="253,186,116 167,139,250 255,99,132" legend=True only %}
   </div>
+  {% include "reports/components/chartjs.html" %}
+  <script src="{% static 'js/bar_chart.js' %}"></script>
 {% endblock %}

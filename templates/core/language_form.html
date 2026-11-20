@@ -1,0 +1,14 @@
+{% load i18n %}
+{# Language switcher for settings.LANGUAGES. Params: form_class, select_id, select_class; compact shows "PT" instead of the name. #}
+{% get_current_language as LANGUAGE_CODE %}{% get_available_languages as LANGUAGES %}
+<form action="{% url 'set_language' %}" method="post" class="{{ form_class }}">
+  {% csrf_token %}
+  <input name="next" type="hidden" value="{{ request.get_full_path }}">
+  <i class="fa-solid fa-language text-sm lg:text-xs"></i>
+  <label for="{{ select_id }}" class="sr-only">{% trans "Language" %}</label>
+  <select id="{{ select_id }}" name="language" onchange="this.form.submit()" class="{{ select_class }}">
+    {% for code, name in LANGUAGES %}
+    <option value="{{ code }}" {% if code == LANGUAGE_CODE %}selected{% endif %}>{% if compact %}{{ code|slice:":2"|upper }}{% else %}{{ name }}{% endif %}</option>
+    {% endfor %}
+  </select>
+</form>

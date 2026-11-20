@@ -1,0 +1,17 @@
+{% load i18n static %}
+{# The CSV comes as an uploaded file or as pasted text (CSVSourceForm); js/csv_source.js switches between them. #}
+{% include "register/components/form_errors.html" %}
+<div id="csvSource" class="space-y-6" data-empty-message="{% trans 'Please provide either a CSV file or CSV text.' %}"
+     data-selected-label="{% trans 'Selected:' %}" data-processing-label="{% trans 'Processing...' %}">
+    <div class="flex space-x-4">
+        <button type="button" data-source="file" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <i class="fas fa-file mr-2"></i>{% trans "Upload File" %}
+        </button>
+        <button type="button" data-source="text" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+            <i class="fas fa-paste mr-2"></i>{% trans "Paste Text" %}
+        </button>
+    </div>
+    <div data-section="file"{% if form.csv_text.value %} hidden{% endif %}>{% include "register/components/form_field.html" with field=form.csv_file %}</div>
+    <div data-section="text"{% if not form.csv_text.value %} hidden{% endif %}>{% include "register/components/form_field.html" with field=form.csv_text %}</div>
+</div>
+<script src="{% static 'js/csv_source.js' %}"></script>

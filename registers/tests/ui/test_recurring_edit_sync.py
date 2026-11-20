@@ -29,7 +29,7 @@ class RecurringEditSyncUITest(UITestCase):
     def edit_amount_and_submit(self):
         self.page.goto(self.url(f'/recurring-expense/{self.rec.pk}/update/'))
         self.page.fill('#id_total_amount', '150')
-        self.page.click('form button[type=submit]')
+        self.page.click('main button[type=submit]')
 
     def amounts(self):
         self.rec.refresh_from_db()
@@ -62,6 +62,6 @@ class RecurringEditSyncUITest(UITestCase):
     def test_no_dialog_when_nothing_changed(self):
         self.add_month_expense()
         self.page.goto(self.url(f'/recurring-expense/{self.rec.pk}/update/'))
-        self.page.click('form button[type=submit]')
+        self.page.click('main button[type=submit]')
         self.page.wait_for_url(lambda u: '/update/' not in u)
         self.assertEqual(self.amounts(), (Decimal('100'), Decimal('100')))

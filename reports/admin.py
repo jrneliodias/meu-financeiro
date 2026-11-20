@@ -1,6 +1,5 @@
 from django.contrib import admin
 from .models import BillingPeriod
-# Register your models here.
 
 
 class BillingPeriodAdmin(admin.ModelAdmin):

@@ -21,10 +21,8 @@ class ExpenseAmountUITest(UITestCase):
 
     def test_edit_expense_accepts_four_decimals_and_rounds(self):
         self.page.goto(self.url(f'/expense/{self.expense.pk}/update/'))
-        amount = self.page.locator('#id_amount')
-        self.assertEqual(amount.get_attribute('step'), 'any')
-        amount.fill('12.3456')
-        self.page.click('button[type=submit]')
+        self.page.locator('#id_amount').fill('12.3456')  # the browser must not block it
+        self.page.click('main button[type=submit]')
         self.page.wait_for_url(lambda u: '/update/' not in u)
         self.expense.refresh_from_db()
         self.assertEqual(self.expense.amount, Decimal('12.346'))

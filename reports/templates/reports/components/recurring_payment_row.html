@@ -1,4 +1,4 @@
-{% load currency_filters %}
+{% load formatting %}
 <div class="payment-row payment-row--{{ expense.due_status }}">
   <div class="payment-name"><h3 class="payment-description" title="{{ expense.description }}">{{ expense.description }}</h3><span class="payment-mobile-amount">{{ expense.amount|format_brl }}</span>{% if expense.is_paid %}<span class="payment-mobile-date">Pago: {{ expense.paid_at|date:'d/m/Y'|default:'sem data' }}</span>{% endif %}</div>
   <div class="payment-due">

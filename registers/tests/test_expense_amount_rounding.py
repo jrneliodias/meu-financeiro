@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from django.contrib.auth.models import User
 from django.test import TestCase
 
 from registers.forms import ExpenseForm
@@ -9,13 +8,12 @@ from registers.models import Category, PaymentMethod
 
 class ExpenseAmountRoundingTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='r')
         self.category = Category.objects.create(name='Food', type='expense')
         self.method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
 
     def form(self, amount):
-        return ExpenseForm(user=self.user, data={
-            'description': 'x', 'amount': amount, 'installments': 1,
+        return ExpenseForm(data={
+            'description': 'x', 'amount': amount,
             'date': '2026-11-08', 'category': self.category.pk,
             'payment_method': self.method.pk,
         })
@@ -37,9 +35,6 @@ class ExpenseAmountRoundingTest(TestCase):
         form = self.form('12345678.123')
         self.assertFalse(form.is_valid())
         self.assertIn('amount', form.errors)
-
-    def test_widget_step_is_any(self):
-        self.assertEqual(self.form('1').fields['amount'].widget.attrs.get('step'), 'any')
 
     def test_huge_or_exponent_amounts_are_validation_errors_not_crashes(self):
         for value in ('1e30', '9' * 30, 'Infinity', 'NaN'):

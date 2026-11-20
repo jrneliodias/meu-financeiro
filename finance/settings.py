@@ -17,7 +17,6 @@ import dj_database_url
 from django.utils.translation import gettext_lazy as _
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -27,15 +26,12 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(
     ",") if os.getenv("ALLOWED_HOSTS") else []
 
-# CSRF Trusted Origins (required for HTTPS)
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(
     ",") if os.getenv("CSRF_TRUSTED_ORIGINS") else []
 
-# Security settings for HTTPS
+# nginx terminates TLS and forwards the original scheme in this header
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'rangefilter',
@@ -48,6 +44,7 @@ INSTALLED_APPS = [
     'registers',
     'reports',
     'export',
+    'utils',
 ]
 
 MIDDLEWARE = [
@@ -67,7 +64,7 @@ ROOT_URLCONF = 'finance.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,15 +80,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'finance.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# Usa Postgres quando DATABASE_URL existir; senão, mantém SQLite (dev)
 if os.getenv("DATABASE_URL"):
     DATABASES = {
         "default": dj_database_url.config(
             env="DATABASE_URL",
-            conn_max_age=60,  # Optimized: Reduced from 600 to 60 seconds for better balance
+            conn_max_age=60,
             ssl_require=os.getenv("DB_SSL_REQUIRE", "true").lower() == "true",
         )
     }
@@ -100,12 +93,9 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
-            'CONN_MAX_AGE': 60,  # Add connection reuse for SQLite too
+            'CONN_MAX_AGE': 60,
         }
     }
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -144,11 +134,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Hashed filenames (app.<hash>.js): nginx serves /static/ as `immutable` for 30 days,
 # so a changed file MUST get a new URL or phones keep running the old JS.
@@ -160,49 +148,32 @@ if "test" not in sys.argv:
     }
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# =============================================================================
-# PERFORMANCE OPTIMIZATION SETTINGS
-# =============================================================================
-
-# Cache Configuration
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-        'TIMEOUT': 300,  # 5 minutes default timeout
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-            'CULL_FREQUENCY': 3,
-        }
+        'OPTIONS': {'MAX_ENTRIES': 1000},
     }
 }
 
-# Cache key prefix to avoid collisions
-CACHE_KEY_PREFIX = 'meu_financeiro'
 
-# Session optimization
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS = 'default'
 
 LOGGING = {
     "version": 1,
+    "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
+    # Django's own console handler only prints with DEBUG=True; this one shows production errors (500s) too.
+    "root": {"handlers": ["console"], "level": "ERROR"},
     "loggers": {
         "django.db.backends": {
             "handlers": ["console"],
-            "level": "DEBUG",  # mostra SQL + duração
+            "level": "DEBUG",  # SQL and duration of each query (Django logs them only when DEBUG=True)
         }
     },
 }
-
-# =============================================================================
-# AUTHENTICATION SETTINGS
-# =============================================================================
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'

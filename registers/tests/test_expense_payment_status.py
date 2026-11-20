@@ -4,34 +4,26 @@ Tests for the fixed-expense payment status feature (Expense.is_paid/paid_at).
 from datetime import date
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import TestCase
+from django.urls import reverse
 
-from registers.models import Category, Expense, PaymentMethod
+from registers.models import Category, Expense, PaymentMethod, RecurringExpense
 
 
 class ExpenseIsPaidDefaultTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='12345')
-        self.category = Category.objects.create(name='Food', type='expense')
-        self.payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
+    def test_expense_registered_by_hand_is_paid(self):
+        user = User.objects.create_user(username='testuser', password='12345')
+        self.client.force_login(user)
+        category = Category.objects.create(name='Food', type='expense')
+        payment_method = PaymentMethod.objects.create(name='Cash', start_billing_day=1)
 
-    def test_manually_created_expense_defaults_to_paid(self):
-        expense = Expense.objects.create(
-            user=self.user,
-            description='Coffee',
-            amount=10,
-            date=date(2026, 9, 1),
-            category=self.category,
-            payment_method=self.payment_method,
-        )
+        self.client.post(reverse('register_expense'), {
+            'description': 'Coffee', 'amount': '10', 'installments': 1, 'date': '2026-09-01',
+            'category': category.id, 'payment_method': payment_method.id,
+        })
 
-        self.assertTrue(expense.is_paid)
-        self.assertIsNone(expense.paid_at)
-
-
-from django.core.management import call_command
-
-from registers.models import RecurringExpense
+        self.assertTrue(Expense.objects.get(description='Coffee').is_paid)
 
 
 class RecurrencePaymentCommandPaymentStatusTest(TestCase):
@@ -49,9 +41,9 @@ class RecurrencePaymentCommandPaymentStatusTest(TestCase):
         )
 
     def test_generated_expense_is_not_paid(self):
-        current_month = 9  # September for consistency
-        call_command('recurrence_payment', month=current_month)
+        call_command('recurrence_payment', month=9)
 
         expense = Expense.objects.get(reccurring_expense=self.recurring_expense)
+        self.assertEqual(expense.date.month, 9)
         self.assertFalse(expense.is_paid)
         self.assertIsNone(expense.paid_at)

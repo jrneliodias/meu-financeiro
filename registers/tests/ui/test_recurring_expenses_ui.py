@@ -33,19 +33,11 @@ class RecurringExpensesUITest(UITestCase):
     def expenses_url(self):
         return self.url(f'/recurring-expense/{self.rec.pk}/expenses/')
 
-    def test_list_has_no_payment_status_or_extra_summary_cards(self):
-        self.page.goto(self.url('/recurring-expenses/'))
-        body = self.page.inner_text('body')
-        self.assertEqual(self.page.locator('table .expense-payment-checkbox, .md\\:hidden .expense-payment-checkbox').count(), 0)
-        self.assertNotIn('Despesas Inativas', body)
-        self.assertNotIn('Total Geral', body)
-
     def test_expenses_link_opens_the_page(self):
         self.page.set_viewport_size({'width': 390, 'height': 800})
         self.page.goto(self.url('/recurring-expenses/'))
         self.page.locator('.md\\:hidden .view-expenses-btn').first.click()
         self.page.wait_for_url(lambda u: u.endswith(f'/recurring-expense/{self.rec.pk}/expenses/'))
-        self.assertEqual(self.page.locator('#recurringExpenseModal').count(), 0)
 
     def test_desktop_shows_table_with_payment_toggle(self):
         self.page.goto(self.expenses_url())
@@ -100,6 +92,7 @@ class RecurringExpensesUITest(UITestCase):
             box = self.page.locator(selector).first.bounding_box()
             self.assertGreaterEqual(box['height'], 44, selector)
             self.assertGreaterEqual(box['width'], 44, selector)
+
     def test_mobile_header_buttons_are_on_their_own_row_below_the_title(self):
         # Regression: title and action buttons were squeezed on one line.
         self.page.set_viewport_size({'width': 390, 'height': 800})

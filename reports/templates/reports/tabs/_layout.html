@@ -1,8 +1,9 @@
 {% extends "core/base.html" %}
+{% block sidebar_bell %}{% endblock %}
 {% block content %}
-  {# fit_screen: no desktop a aba ocupa exatamente a altura da tela (main tem lg:p-6 = 3rem). #}
+  {# fit_screen: on desktop the tab fills exactly the screen height (main has lg:p-6 = 3rem). #}
   <article class="space-y-4 pb-24 lg:pb-0 {% if fit_screen %}lg:space-y-2 lg:h-[calc(100dvh-3rem)] lg:flex lg:flex-col{% endif %}">
-    {% include "reports/components/filter_form.html" %}
+    {% include "reports/tabs/_header.html" %}
     {% include "reports/tabs/_nav.html" %}
     <section class="flex flex-col space-y-4 {% if fit_screen %}lg:space-y-2 lg:flex-1 lg:min-h-0{% endif %}">
       {% block tab_content %}{% endblock %}

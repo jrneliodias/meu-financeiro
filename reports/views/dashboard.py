@@ -1,28 +1,25 @@
-"""Dashboard dividido em abas: resumo (home), gastos, categorias, parcelas, despesas.
+"""Dashboard tabs: resumo (home), gastos, categorias, parcelas, despesas.
 
-Cada aba calcula só o que mostra. O filtro de mês/ano vem de `_filters`.
+Each tab computes only what it shows; the month/year filter comes from `_filters`.
 """
-import calendar
-from datetime import date
-
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.dates import MONTHS
+from django.utils.timezone import localdate
 
-from registers.models import Category
-from reports.services import ExpenseService
-from reports.services.daily_expense_calculator import DailyExpenseCalculator
-from utils.dates import get_all_months, get_all_months_tuples, get_current_date
+from registers.models import Category, Expense
+from reports.services.budget import monthly_budget
+from reports.services.categories import category_month_table
+from reports.services.daily import DEFAULT_DAYS, PERIOD_DAYS, daily_spending
+from reports.services.installments import open_installments
+from reports.services.recurring import fixed_expenses_summary
+from reports.services.summary import global_balance, spent_on, yearly_charts
+from utils.dates import parse_month_year
 
-from ._common import (
-    balance_service, budget_estimate_service, expense_repository, format_brl,
-    get_selected_year_and_month, income_repository, installment_calculator,
-    recurring_expense_service,
-)
+from utils.http import safe_return_url
 
-TEMPLATE_DIR = 'reports/'
-
-# (chave, nome da url, ícone Font Awesome, rótulo) na ordem da barra de abas
+# (key, url name, Font Awesome icon, label) in tab-bar order
 DASHBOARD_TABS = [
     ('resumo', 'expense_report', 'fa-house', 'Resumo'),
     ('gastos', 'dashboard_spending', 'fa-chart-column', 'Gastos'),
@@ -33,176 +30,92 @@ DASHBOARD_TABS = [
 
 
 def _filters(request):
-    """Contexto do filtro de mês/ano, comum a todas as abas."""
-    current_year, current_month = get_current_date()
-    year, month, _name = get_selected_year_and_month(request, current_year, current_month)
+    """Month/year filter context shared by every tab; ValueError on a bad month/year."""
+    year, month = parse_month_year(request.GET)
     return {
         'selected_year': year,
         'selected_month': month,
-        'distinct_years': expense_repository.get_distinct_years_in_tuples(),
-        'distinct_months': get_all_months_tuples(),
+        'distinct_years': [d.year for d in Expense.objects.filter(user=request.user).dates('date', 'year')],
         'dashboard_tabs': DASHBOARD_TABS,
     }
 
 
-def _expense_service(year):
-    return ExpenseService(expense_repository, income_repository, year=year)
+def _tab(template, build_context):
+    """A dashboard tab view: filter context + the tab's own context, 400 on a bad month/year."""
+    @login_required
+    def view(request):
+        try:
+            ctx = _filters(request)
+        except ValueError:
+            return HttpResponseBadRequest('Mês/ano inválido')
+        ctx.update(build_context(request, ctx['selected_year'], ctx['selected_month']))
+        return render(request, template, ctx)
+    return view
 
 
-def _budget(user, month, year):
-    """Parcelas do mês, gasto avulso e orçamento mensal (usados no Resumo e na aba Gastos)."""
-    installment_summary = installment_calculator.get_monthly_installment_summary(
-        month=month, year=year, user=user)
-    regular_total = expense_repository.get_monthly_regular_expenses_total(
-        month=month, year=year, user=user)
-    budget = budget_estimate_service.get_monthly_budget_summary(
-        user, month, year,
-        monthly_installment_total=installment_summary['total_amount'])
-    budget.total_regular = regular_total
-    budget.adjusted_expected = budget.total_expected + regular_total
-    return installment_summary, regular_total, budget
-
-
-@login_required
-def expense_report(request):
-    """Aba Resumo (home): saldo, cards, orçamento e gráfico receita x despesa."""
-    ctx = _filters(request)
-    month, year = ctx['selected_month'], ctx['selected_year']
-
-    installment_summary, regular_total, budget = _budget(request.user, month, year)
-
-    today = date.today()
-    payment_data = _expense_service(year).get_optimized_payment_method_data()
-    ctx.update({
+def _resumo(request, year, month):
+    today = localdate()
+    return {
         'active_tab': 'resumo',
         'fit_screen': True,
-        'global_balance': balance_service.calculate_global_balance(),
-        'fixed_expenses_summary': recurring_expense_service.get_fixed_expenses_summary(
-            request.user, month, year),
-        'installment_monthly_summary': installment_summary,
-        'regular_expenses_summary': {
-            'total_amount': regular_total,
-            'formatted_total': format_brl(float(regular_total)),
-        },
-        'today_total': float(expense_repository.get_total_by_date(today)),
-        'today_date': today.strftime('%Y-%m-%d'),
-        'budget_summary': budget,
-        'monthly_expense_income_datasets': payment_data['combined_datasets'],
-        'calculated_monthy_payment_method_expense_totals': payment_data['datasets'],
-    })
-    return render(request, TEMPLATE_DIR + 'tabs/resumo.html', ctx)
+        'global_balance': global_balance(request.user),
+        'fixed_expenses_summary': fixed_expenses_summary(request.user, year, month),
+        'budget_summary': monthly_budget(request.user, year, month),
+        'today_total': spent_on(request.user, today),
+        'today_date': today,
+        'yearly_charts': yearly_charts(request.user, year),
+    }
+
+
+def _gastos(request, year, month):
+    return {
+        'active_tab': 'gastos',
+        'fit_screen': True,
+        'budget_summary': monthly_budget(request.user, year, month),
+        'daily_spending_data': daily_spending(request.user, DEFAULT_DAYS),
+        'daily_spending_days': DEFAULT_DAYS,
+        'period_days': PERIOD_DAYS,
+        'expense_categories': Category.objects.expense(),
+    }
+
+
+def _categorias(request, year, month):
+    return {'active_tab': 'categorias', 'category_table': category_month_table(request.user, year)}
+
+
+def _parcelas(request, year, month):
+    return {'active_tab': 'parcelas', 'installments_progress': open_installments(request.user, year, month)}
+
+
+def _despesas(request, year, month):
+    return {
+        'active_tab': 'despesas',
+        'monthly_expenses_queryset': (
+            Expense.objects.filter(user=request.user).in_month(year, month)
+            .select_related('category', 'payment_method', 'reccurring_expense')
+            .order_by('date', '-amount')
+        ),
+    }
+
+
+expense_report = _tab('reports/tabs/resumo.html', _resumo)
+spending = _tab('reports/tabs/gastos.html', _gastos)
+categories = _tab('reports/tabs/categorias.html', _categorias)
+installments = _tab('reports/tabs/parcelas.html', _parcelas)
+expenses = _tab('reports/tabs/despesas.html', _despesas)
 
 
 @login_required
 def budget_breakdown(request):
-    """Detalhamento do "Total esperado" (substitui o modal do card)."""
-    ctx = _filters(request)
-    back = request.GET.get('back', '')
-    ctx.update({
-        'budget_summary': _budget(request.user, ctx['selected_month'], ctx['selected_year'])[2],
-        'month_label': f"{calendar.month_name[ctx['selected_month']]} {ctx['selected_year']}",
-        'back_url': back if url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}) else '',
-    })
-    return render(request, TEMPLATE_DIR + 'budget_breakdown.html', ctx)
-
-
-@login_required
-def spending(request):
-    """Aba Gastos: gráfico de gasto diário."""
-    ctx = _filters(request)
-    ctx.update({
-        'active_tab': 'gastos',
-        'fit_screen': True,
-        'budget_summary': _budget(request.user, ctx['selected_month'], ctx['selected_year'])[2],
-        'daily_spending_data': get_daily_spending_data(
-            expense_repository, ctx['selected_year'], ctx['selected_month']),
-        'expense_categories': Category.objects.filter(type='expense').order_by('name'),
-    })
-    return render(request, TEMPLATE_DIR + 'tabs/gastos.html', ctx)
-
-
-@login_required
-def categories(request):
-    """Aba Categorias: tabela por categoria/mês."""
-    ctx = _filters(request)
-    all_months = get_all_months()
-    service = _expense_service(ctx['selected_year'])
-    data = service.get_optimized_expenses_data(all_months)
-    ctx.update({
-        'active_tab': 'categorias',
-        'all_months': all_months,
-        'category_ids': dict(Category.objects.filter(type='expense').values_list('name', 'id')),
-        'formatted_expenses_by_category': {
-            category: [format_brl(totals.get(m, 0.0)) for m in all_months]
-            for category, totals in data['expenses_by_category_by_month'].items()
-        },
-        'formatted_totals': [
-            format_brl(data['total_expense_by_month'].get(m, 0.0)) for m in all_months],
-    })
-    return render(request, TEMPLATE_DIR + 'tabs/categorias.html', ctx)
-
-
-@login_required
-def installments(request):
-    """Aba Parcelas: progresso das compras parceladas."""
-    ctx = _filters(request)
-    ctx.update({
-        'active_tab': 'parcelas',
-        'installments_progress': installment_calculator.get_installments_summary(
-            reference_month=ctx['selected_month'], reference_year=ctx['selected_year']),
-    })
-    return render(request, TEMPLATE_DIR + 'tabs/parcelas.html', ctx)
-
-
-@login_required
-def expenses(request):
-    """Aba Despesas: lista completa do mês."""
-    ctx = _filters(request)
-    ctx.update({
-        'active_tab': 'despesas',
-        'monthly_expenses_queryset': _expense_service(ctx['selected_year'])
-            .get_optimized_monthly_expenses(ctx['selected_month']),
-    })
-    return render(request, TEMPLATE_DIR + 'tabs/despesas.html', ctx)
-
-
-def get_daily_spending_data(expense_repository, year, month):
-    """
-    Get daily spending data for the chart.
-
-    Why separate function? Maintains the modular approach of your existing code
-    and makes testing easier.
-    """
+    """What the Resumo's "expected total" card adds up, for one month."""
     try:
-        daily_calculator = DailyExpenseCalculator(expense_repository, year, month)
-
-        # Get trend data for the last 30 days
-        trend_data = daily_calculator.get_daily_spending_trends(days=30)
-
-        # Format data for Chart.js - ensure all values are JSON-serializable
-        sorted_dates = sorted(trend_data['daily_expenses'].keys())
-
-        result = {
-            'labels': [str(date) for date in sorted_dates],  # Ensure strings
-            'dailyExpenses': [float(trend_data['daily_expenses'][date]) for date in sorted_dates],  # Ensure floats
-            'movingAverages': [float(trend_data['moving_averages'].get(date, 0)) for date in sorted_dates],  # Ensure floats
-            'totalSpending': float(trend_data['total_spending']),  # Ensure float
-            'averageDaily': float(trend_data['average_daily'])  # Ensure float
-        }
-
-        return result
-
-    except Exception as e:
-        print(f"ERROR in get_daily_spending_data: {e}")
-        import traceback
-        print(f"ERROR traceback: {traceback.format_exc()}")
-
-        # Return empty but valid data structure to prevent template errors
-        return {
-            'labels': [],
-            'dailyExpenses': [],
-            'movingAverages': [],
-            'totalSpending': 0.0,
-            'averageDaily': 0.0
-        }
-
+        year, month = parse_month_year(request.GET)
+    except ValueError:
+        return HttpResponseBadRequest('Mês/ano inválido')
+    return render(request, 'reports/budget_breakdown.html', {
+        'budget_summary': monthly_budget(request.user, year, month),
+        'selected_month': month,
+        'selected_year': year,
+        'month_label': f"{MONTHS[month]} {year}",
+        'back_url': safe_return_url(request, 'back'),
+    })

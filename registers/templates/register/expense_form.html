@@ -1,20 +1,21 @@
 {% extends "core/base.html" %}
-{% load custom_filters i18n static %}
+{% load i18n static %}
 {% block content %}
-    <main class="mx-auto mt-10 max-w-lg w-full px-1 sm:px-0">
+    <div class="mx-auto mt-10 max-w-lg w-full px-1 sm:px-0">
         <header class="flex flex-col  gap-4 mb-6">
-            <h1 class="text-2xl font-bold">{% trans "Register Expense" %}</h1>
+            <h1 class="text-2xl font-bold">{% if object %}{% trans "Edit Expense" %}{% else %}{% trans "Register Expense" %}{% endif %}</h1>
+            {% if not object %}
             <nav class="py-1">
                 <ul class="flex flex-wrap gap-2 justify-between">
-                    {% for key, option in quick_fill_options.items %}
+                    {% for preset in quick_fill_presets %}
                     <li>
-                        <a href="{% url 'register_expense' %}?quick_fill={{ key }}"
+                        <a href="{% url 'register_expense' %}?quick_fill={{ preset.pk }}"
                            class="block px-4 py-2 text-gray-300 hover:bg-zinc-700 rounded-lg">
-                            <i class="fas {{ option.icon }} mr-2"></i>{{ option.name }}
+                            <i class="fas {{ preset.icon }} mr-2"></i>{{ preset.name }}
                         </a>
                     </li>
                     {% endfor %}
-                    {% if quick_fill_options %}
+                    {% if quick_fill_presets %}
                     <li>
                         <a href="{% url 'quick_fill_preset_list' %}"
                            class="block px-4 py-2 text-gray-500 hover:bg-zinc-700 rounded-lg "
@@ -32,53 +33,28 @@
                     {% endif %}
                 </ul>
             </nav>
+            {% endif %}
         </header>
 
         <section class="bg-zinc-800/40 p-4 sm:p-6 rounded-lg shadow-lg">
-            <form id="expense-form" method="post" class="space-y-4">
+            <form method="post" class="space-y-4">
                 {% csrf_token %}
-                <fieldset>
-                    <div class="mb-4 space-y-2">
-                        <label for="id_description" class="text-gray-400">{% trans "Description" %}</label>
-                        {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                    </div>
-                </fieldset>
-
-                <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+                {% include "register/components/form_errors.html" %}
+                {% include "register/components/form_field.html" with field=form.description %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% include "register/components/form_field.html" with field=form.amount %}
+                    {% if form.installments %}{% include "register/components/form_field.html" with field=form.installments %}{% endif %}
+                </div>
+                {% include "register/components/form_field.html" with field=form.date %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label for="id_amount" class="text-gray-400">{% trans "Amount" %}</label>
-                        {{ form.amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                    </div>
-                    <div class="space-y-2">
-                        <label for="id_installments" class="text-gray-400">{% trans "Installments" %}</label>
-                        {{ form.installments|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <div class="mb-4 space-y-2">
-                        <label for="id_date" class="text-gray-400">{% trans "Date" %}</label>
-                        {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                    </div>
-                </fieldset>
-
-                <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label for="category-search-input" class="text-gray-400">{% trans "Category" %}</label>
+                        <label for="category-search-input" class="block text-gray-400">{{ form.category.label }}</label>
                         {% include "register/components/category_autocomplete.html" %}
                     </div>
-                    <div class="space-y-2">
-                        <label for="id_payment_method" class="text-gray-400">{% trans "Payment Method" %}</label>
-                        {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <div class="mb-4 space-y-2 flex items-center gap-2">
-                        {{ form.is_recurring|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
-                        <label for="id_is_recurring" class="text-gray-400">{% trans "Recurring expense" %}</label>
-                    </div>
-                </fieldset>
+                    {% include "register/components/form_field.html" with field=form.payment_method %}
+                </div>
+                {% if form.is_recurring %}{% include "register/components/form_field.html" with field=form.is_recurring %}{% endif %}
 
                 <button type="submit"
                         class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">
@@ -87,36 +63,14 @@
             </form>
         </section>
 
-        {% if messages %}
-            <aside class="mt-4">
-                <ul class="messages space-y-2">
-                    {% for message in messages %}
-                        <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            </aside>
+
+        {% if not object %}
+        {% trans "Recent Expenses" as title %}{% trans "No recent expenses found" as empty_message %}
+        {% trans "Do you really want to delete the expense" as confirm_message %}{% trans "Error deleting expense" as delete_error %}
+        {% include "register/components/recent_items.html" with items=recent_expenses delete_url_name="delete_expense" expense_actions=True %}
         {% endif %}
+    </div>
 
-        {% include "register/components/recent_expenses_table.html" %}
-    </main>
-
-    <script>
-        window.RecentExpensesI18n = {
-            use: "{% trans 'Use' %}",
-            viewDetails: "{% trans 'View details' %}",
-            edit: "{% trans 'Edit' %}",
-            delete: "{% trans 'Delete' %}",
-            actions: "{% trans 'Actions' %}",
-            confirmDelete: "{% trans 'Do you really want to delete the expense' %}",
-            loadError: "{% trans 'Error loading expenses' %}",
-            connectionError: "{% trans 'Connection error' %}",
-            deleteError: "{% trans 'Error deleting expense' %}",
-            autofillError: "{% trans 'Error loading data' %}",
-        };
-
-    </script>
-
-    <!-- Recent Expenses and Category Autocomplete -->
-    <script src="{% static 'js/recent_expenses.js' %}"></script>
+    {% if not object %}<script src="{% static 'js/recent_items.js' %}"></script>{% endif %}
     <script src="{% static 'js/category_autocomplete.js' %}"></script>
 {% endblock content %}

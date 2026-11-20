@@ -1,8 +1,9 @@
-    <button type="button" id="payment-notifications-toggle"
-      data-url="{% url 'payment_notifications' %}" aria-haspopup="dialog" aria-controls="payment-notifications"
-      title="Notificações de pagamentos" aria-label="Notificações de pagamentos"
-      class="relative min-h-[44px] lg:min-h-0 lg:py-1.5 bg-zinc-800/40 font-semibold flex items-center justify-center gap-2 hover:bg-zinc-700 p-4 px-4 py-2 lg:p-0 lg:px-3 rounded-lg">
-      <i class="fa-solid fa-bell" aria-hidden="true"></i>
-      <span class="text-sm">Notificações</span>
-      <span id="payment-notifications-count" class="notification-count" hidden></span>
-    </button>
+{# The bell that opens the month's payments pop-up (js/payment_notifications.js). Rendered once per page: in the sidebar, or in the dashboard header (which empties base.html's sidebar_bell block). #}
+<button type="button" id="payment-notifications-toggle"
+  data-url="{% url 'payment_notifications' %}" aria-haspopup="dialog" aria-controls="payment-notifications"
+  title="Notificações de pagamentos" aria-label="Notificações de pagamentos"
+  class="relative font-semibold flex items-center gap-2 hover:bg-zinc-700 rounded-lg {% if in_sidebar %}justify-start px-4 py-3 lg:py-2{% else %}justify-center min-h-[44px] lg:min-h-0 lg:py-1.5 bg-zinc-800/40 p-4 px-4 py-2 lg:p-0 lg:px-3{% endif %}">
+  <i class="fa-solid fa-bell" aria-hidden="true"></i>
+  <span class="text-sm {% if in_sidebar %}nav-label{% endif %}">Notificações</span>
+  <span id="payment-notifications-count" class="notification-count" hidden></span>
+</button>

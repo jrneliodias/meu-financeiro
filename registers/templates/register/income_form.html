@@ -1,53 +1,27 @@
 {% extends "core/base.html" %}
-{% load custom_filters i18n static %}
+{% load i18n static %}
 {% block content %}
     <div class="container mx-auto mt-10 max-w-lg ">
         <h2 class="text-2xl font-bold mb-6 ">{% trans "Register Income" %}</h2>
-        <form method="post" class="bg-zinc-800/50 p-6 rounded-lg shadow-lg">
+        <form method="post" class="bg-zinc-800/50 p-6 rounded-lg shadow-lg space-y-4">
             {% csrf_token %}
-            <div class="mb-4 space-y-2">
-                <label for="id_description" class=" text-gray-400">{% trans "Description" %}</label>
-                {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-            </div>
-            <div class="mb-4 space-y-2">
-                <label for="id_amount" class=" text-gray-400">{% trans "Amount" %}</label>
-                {{ form.amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-            </div>
-            <div class="mb-4 space-y-2">
-                <label for="id_date" class=" text-gray-400">{% trans "Date" %}</label>
-                {{ form.date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-            </div>
-            <div class="mb-4 space-y-2">
-                <label for="category-search-input" class=" text-gray-400">{% trans "Category" %}</label>
+            {% include "register/components/form_errors.html" %}
+            {% include "register/components/form_field.html" with field=form.description %}
+            {% include "register/components/form_field.html" with field=form.amount %}
+            {% include "register/components/form_field.html" with field=form.date %}
+            <div class="space-y-2">
+                <label for="category-search-input" class="block text-gray-400">{{ form.category.label }}</label>
                 {% include "register/components/category_autocomplete.html" with category_type="income" %}
-                {{ form.category.errors }}
             </div>
             <button type="submit"
                     class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">{% trans "Submit" %}</button>
         </form>
 
-        {% if messages %}
-            <ul class="messages mt-4 space-y-2">
-                {% for message in messages %}
-                    <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
 
-        {% include "register/components/recent_incomes_table.html" %}
+        {% trans "Recent Incomes" as title %}{% trans "No recent incomes found" as empty_message %}
+        {% trans "Do you really want to delete the income" as confirm_message %}{% trans "Error deleting income" as delete_error %}
+        {% include "register/components/recent_items.html" with items=recent_incomes delete_url_name="delete_income" %}
     </div>
-
-    <script>
-        window.RecentIncomesI18n = {
-            use: "{% trans 'Use' %}",
-            delete: "{% trans 'Delete' %}",
-            confirmDelete: "{% trans 'Do you really want to delete the income' %}",
-            loadError: "{% trans 'Error loading incomes' %}",
-            connectionError: "{% trans 'Connection error' %}",
-            deleteError: "{% trans 'Error deleting income' %}",
-            autofillError: "{% trans 'Error loading data' %}",
-        };
-    </script>
-    <script src="{% static 'js/recent_incomes.js' %}"></script>
+    <script src="{% static 'js/recent_items.js' %}"></script>
     <script src="{% static 'js/category_autocomplete.js' %}"></script>
 {% endblock content %}

@@ -1,78 +1,81 @@
 {% extends "core/base.html" %}
-{% load custom_filters i18n %}
+{% load i18n %}
 
 {% block content %}
-<main class="container mx-auto mt-10 max-w-lg">
+<div class="container mx-auto mt-10 max-w-lg">
     <header class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">{% trans "Register Recurring Expense" %}</h1>
+        <h1 class="text-2xl font-bold">{% if object %}{% trans "Edit Recurring Expense" %}{% else %}{% trans "Register Recurring Expense" %}{% endif %}</h1>
         <a href="{% url 'recurring_expense_list' %}"
            class="text-blue-400 hover:text-blue-300">
-            <i class="fas fa-list mr-2"></i>{% trans "View List" %}
+            {% if object %}<i class="fas fa-arrow-left mr-2"></i>{% trans "Back" %}{% else %}<i class="fas fa-list mr-2"></i>{% trans "View List" %}{% endif %}
         </a>
     </header>
 
     <section class="bg-zinc-800/40 p-6 rounded-lg shadow-lg">
-        <form method="post" class="space-y-4">
+        <form method="post" class="space-y-4" id="recurring-form"
+              data-has-month-expense="{{ month_expense|yesno:'true,false' }}">
             {% csrf_token %}
+            {% if object %}<input type="hidden" name="sync_month" id="sync-month" value="0">{% endif %}
 
-            <!-- Description -->
-            <fieldset>
-                <div class="mb-4 space-y-2">
-                    <label for="id_description" class="text-gray-400">{% trans "Description" %}</label>
-                    {{ form.description|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-            </fieldset>
-
-            <!-- Amount and Start Date -->
-            <fieldset class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="id_total_amount" class="text-gray-400">{% trans "Amount" %}</label>
-                    {{ form.total_amount|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-                <div class="space-y-2">
-                    <label for="id_start_date" class="text-gray-400">{% trans "Start Date" %}</label>
-                    {{ form.start_date|add_class:"w-full px-3 bg-transparent py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
-                </div>
-            </fieldset>
-
-            <!-- Category and Payment Method -->
-            <fieldset class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="id_category" class="text-gray-400">{% trans "Category" %}</label>
-                    {{ form.category|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
-                </div>
-                <div class="space-y-2">
-                    <label for="id_payment_method" class="text-gray-400">{% trans "Payment Method" %}</label>
-                    {{ form.payment_method|add_class:"w-full px-3 bg-transparent py-2 appearance-none border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 *:bg-zinc-900" }}
-                </div>
-            </fieldset>
-
-            <!-- Generate Debit Checkbox -->
-            <fieldset>
-                <div class="mb-4 space-y-2 flex items-center gap-2">
-                    {{ form.generate_debit|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
-                    <label for="id_generate_debit" class="text-gray-400">{% trans "Generate Monthly Debit" %}</label>
-                </div>
-                <div class="mb-4 space-y-2 flex items-center gap-2">
-                    {{ form.is_international|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
-                    <label for="id_is_international" class="text-gray-400">{% trans "International (adds 3.5% IOF)" %}</label>
-                </div>
-            </fieldset>
+            {% include "register/components/form_errors.html" %}
+            {% include "register/components/form_field.html" with field=form.description %}
+            <div class="grid grid-cols-2 gap-4">
+                {% include "register/components/form_field.html" with field=form.total_amount %}
+                {% include "register/components/form_field.html" with field=form.start_date %}
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                {% include "register/components/form_field.html" with field=form.category %}
+                {% include "register/components/form_field.html" with field=form.payment_method %}
+            </div>
+            {% include "register/components/form_field.html" with field=form.generate_debit %}
+            {% include "register/components/form_field.html" with field=form.is_international %}
 
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-save mr-2"></i>{% trans "Save" %}
+                <i class="fas fa-save mr-2"></i>{% if object %}{% trans "Update" %}{% else %}{% trans "Save" %}{% endif %}
             </button>
         </form>
     </section>
 
-    {% if messages %}
-    <aside class="mt-4">
-        <ul class="messages space-y-2">
-            {% for message in messages %}
-            <li class="{{ message.tags }} p-4 rounded-lg bg-zinc-700">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    </aside>
+
+    {% if object %}
+    {# Editing: ask whether this month's generated expense should get the changes too (sync_month=1). #}
+    <dialog id="sync-dialog" class="app-dialog bg-zinc-800 text-white rounded-lg p-6 max-w-sm">
+        <h2 class="text-lg font-bold mb-2">{% trans "Update this month's expense too?" %}</h2>
+        {% if month_expense %}
+        <p class="text-sm text-gray-300 mb-4">{{ month_expense.description }} · {{ month_expense.date|date:'d/m/Y' }}{% if month_expense.is_paid %} · {% trans "already paid" %}{% endif %}</p>
+        {% endif %}
+        <div class="flex flex-col gap-2">
+            <button type="button" id="sync-both" class="bg-blue-500 hover:bg-blue-700 text-white py-2 rounded-lg">{% trans "Registry and this month's expense" %}</button>
+            <button type="button" id="sync-registry-only" class="bg-zinc-700 hover:bg-zinc-600 text-white py-2 rounded-lg">{% trans "Registry only" %}</button>
+            <button type="button" id="sync-cancel" class="text-gray-400 py-1">{% trans "Cancel" %}</button>
+        </div>
+    </dialog>
+    <script>
+        (function () {
+            var form = document.getElementById('recurring-form');
+            var dialog = document.getElementById('sync-dialog');
+            var flag = document.getElementById('sync-month');
+            function changed() {
+                return Array.prototype.some.call(form.elements, function (el) {
+                    if (!el.name || el.type === 'hidden' || el.type === 'submit') return false;
+                    if (el.type === 'checkbox') return el.checked !== el.defaultChecked;
+                    if (el.tagName === 'SELECT') return Array.prototype.some.call(el.options, function (o) { return o.selected !== o.defaultSelected; });
+                    return el.value !== el.defaultValue;
+                });
+            }
+            function send(value) { flag.value = value; dialog.close(); form.submit(); }
+            form.addEventListener('submit', function (e) {
+                if (form.dataset.hasMonthExpense === 'true' && flag.value === '0' && changed()) {
+                    e.preventDefault();
+                    dialog.showModal();
+                }
+            });
+            document.getElementById('sync-both').addEventListener('click', function () { send('1'); });
+            document.getElementById('sync-registry-only').addEventListener('click', function () { send('2'); });
+            document.getElementById('sync-cancel').addEventListener('click', function () { dialog.close(); });
+        })();
+    </script>
     {% endif %}
-</main>
+
+</div>
 {% endblock content %}

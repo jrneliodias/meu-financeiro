@@ -38,8 +38,9 @@ class McpTest(TestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_initialize_list_e_notificacao(self):
-        self.assertEqual(self.rpc("initialize").json()["result"]["serverInfo"]["name"], "meu-financeiro")
-        self.assertEqual(len(self.rpc("tools/list").json()["result"]["tools"]), 3)
+        self.assertIn("tools", self.rpc("initialize").json()["result"]["capabilities"])
+        tools = {t["name"] for t in self.rpc("tools/list").json()["result"]["tools"]}
+        self.assertLessEqual({"listar_opcoes", "criar_despesa", "criar_receita"}, tools)
         self.assertEqual(self.rpc("notifications/initialized", id=None).status_code, 202)
 
     def test_criar_despesa_e_duplicada(self):

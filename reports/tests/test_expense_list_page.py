@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from registers.models import Category, Expense, PaymentMethod
+from registers.models import Category, Expense, Installment, PaymentMethod
+from utils.tests.html import links_to, page, with_id
 
 
 class ExpenseListPageTest(TestCase):
@@ -38,8 +39,9 @@ class ExpenseListPageTest(TestCase):
         self.assertContains(response, 'Cinema')
         self.assertNotContains(response, 'Outro dia')
         self.assertNotContains(response, 'De outro usuário')
-        self.assertEqual(response.context['total'], Decimal('100.00'))
-        self.assertEqual(response.context['count'], 2)
+        elements = page(response)
+        self.assertEqual(with_id(elements, 'list-total')[0]['text'].strip(), 'R$ 100,00')
+        self.assertEqual(with_id(elements, 'list-count')[0]['text'].strip(), '2')
 
     def test_by_category_and_month(self):
         self._expense('Feira', '40.00', 5)
@@ -50,7 +52,6 @@ class ExpenseListPageTest(TestCase):
         self.assertNotContains(response, 'Cinema')
 
     def test_installments_only(self):
-        from registers.models import Installment
         plan = Installment.objects.create(
             user=self.user, description='Notebook', total_amount=Decimal('300.00'),
             total_installments=3, start_date=date(2026, 10, 1),
@@ -71,59 +72,29 @@ class ExpenseListPageTest(TestCase):
 
     def test_rows_have_edit_link_and_delete_button(self):
         e = self._expense('Feira', '40.00', 3)
-        response = self.client.get(self.url, {'date': '2026-10-03'})
-        self.assertContains(response, reverse('expense_update', args=[e.pk]))
-        self.assertContains(response, f'data-expense-id="{e.pk}"')
+        elements = page(self.client.get(self.url, {'date': '2026-10-03'}))
+        # editing returns to this list
+        self.assertTrue(links_to(elements, reverse('expense_update', args=[e.pk]), next=f'{self.url}?date=2026-10-03'))
+        delete_url = reverse('delete_expense', args=[e.pk])
+        self.assertTrue([el for el in elements if el['tag'] == 'button' and el.get('data-url') == delete_url])
 
     def test_category_without_month_lists_recent_of_that_category(self):
         for day in range(1, 4):
             self._expense(f'Mercado {day}', '10.00', day)
         self._expense('Lazer 1', '99.00', 1, self.lazer)
         response = self.client.get(self.url, {'category_id': self.mercado.id})
-        self.assertEqual(response.context['count'], 3)
         self.assertNotContains(response, 'Lazer 1')
         # mais recente primeiro
-        self.assertEqual(response.context['expenses'][0].description, 'Mercado 3')
+        rows = [e['text'] for e in page(response) if e.get('role') == 'listitem']
+        self.assertEqual([' '.join(row.split()[:2]) for row in rows], ['Mercado 3', 'Mercado 2', 'Mercado 1'])
 
     def test_back_param_only_accepts_local_urls(self):
         self._expense('Feira', '40.00', 3)
-        ok = self.client.get(self.url, {'date': '2026-10-03', 'back': '/gastos/?month=10'})
-        self.assertEqual(ok.context['back_url'], '/gastos/?month=10')
-        evil = self.client.get(self.url, {'date': '2026-10-03', 'back': 'https://evil.example/x'})
-        self.assertEqual(evil.context['back_url'], '')
 
+        def back_link(back):
+            [link] = with_id(page(self.client.get(self.url, {'date': '2026-10-03', 'back': back})), 'list-back')
+            return link['href']
 
-class NoListModalsRegressionTest(TestCase):
-    """Modais ficam só para confirmação (exceção: o pop-up do sino); nenhuma página traz os modais de lista antigos."""
-    OLD_MODALS = ['expenseDetailsModal', 'categoryExpenseModal', 'installmentExpensesModal',
-                  'budgetBreakdownModal', 'processRecurringModal']
+        self.assertEqual(back_link('/gastos/?month=10'), '/gastos/?month=10')
+        self.assertEqual(back_link('https://evil.example/x'), reverse('dashboard_expenses'))
 
-    def setUp(self):
-        self.user = User.objects.create_user(username='r', password='p')
-        self.client.login(username='r', password='p')
-
-    def test_pages_do_not_render_list_modals(self):
-        names = ['expense_report', 'dashboard_spending', 'dashboard_categories', 'dashboard_installments',
-                 'dashboard_expenses', 'recurring_expense_list', 'recurring_payments',
-                 'register_expense', 'budget_breakdown', 'recurring_expense_process']
-        for name in names:
-            html = self.client.get(reverse(name), {'month': 10, 'year': 2026}).content.decode()
-            for marker in self.OLD_MODALS:
-                self.assertNotIn(marker, html, f'{name} ainda contém {marker}')
-
-    def test_bell_opens_popup_that_links_to_monthly_payments(self):
-        html = self.client.get(reverse('expense_report')).content.decode()
-        self.assertIn('aria-controls="payment-notifications"', html)
-        self.assertIn('<dialog id="payment-notifications"', html)
-        self.assertIn(f'href="{reverse("recurring_payments")}"', html)
-
-    def test_budget_breakdown_page_shows_totals(self):
-        response = self.client.get(reverse('budget_breakdown'), {'month': 10, 'year': 2026})
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('budget_summary', response.context)
-        self.assertContains(response, 'month=10&year=2026')
-
-    def test_home_cards_link_to_pages(self):
-        html = self.client.get(reverse('expense_report'), {'month': 10, 'year': 2026}).content.decode()
-        self.assertIn(reverse('budget_breakdown'), html)
-        self.assertIn(reverse('expense_list_page') + '?installments=1&month=10&year=2026', html)

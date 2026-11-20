@@ -1,0 +1,7 @@
+{% for item in items %}
+<a href="{% url item.url_name %}"
+   class="font-semibold flex items-center justify-start gap-2 px-4 py-3 lg:py-2 rounded-lg {% if item.active %}bg-blue-800 hover:bg-blue-800{% else %}hover:bg-zinc-700{% endif %}">
+  <i class="fa-solid {{ item.icon }} text-sm lg:text-xs"></i>
+  <span class="text-sm nav-label">{{ item.label }}</span>
+</a>
+{% endfor %}

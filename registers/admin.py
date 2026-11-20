@@ -6,40 +6,30 @@ from rangefilter.filters import DateRangeFilter
 @admin.action(description="Duplicate selected entries")
 def duplicate_entries(modeladmin, request, queryset):
     for obj in queryset:
-        # Create a copy of the object
-        obj.pk = None  # Set pk to None to create a new object instead of updating the existing one
-        obj.save()     # Save the new duplicated object
+        obj.pk = None
+        obj.save()
 
 
 @admin.action(description="Triplicate selected entries")
 def triplicate_entries(modeladmin, request, queryset):
     for obj in queryset:
         for _ in range(3):
-            # Create a copy of the object
-            obj.pk = None  # Set pk to None to create a new object instead of updating the existing one
-            obj.save()     # Save the new duplicated object
+            obj.pk = None
+            obj.save()
 
-   # Register the duplicate action
 
 
 class ExpenseAdmin(admin.ModelAdmin):
-    ordering = ['-date']  # Default order by date descending
+    ordering = ['-date']
     list_display = ('description', 'date',
                     'category', 'payment_method',  'amount', 'reccurring_expense', 'updated_at')
-    # Filtros por categoria e método de pagamento
     list_filter = (('date', DateRangeFilter),
                    'payment_method', 'category', 'reccurring_expense')
-    search_fields = ('description',)  # Habilitar pesquisa pela descrição
+    search_fields = ('description',)
     list_per_page = 40
     actions = [duplicate_entries, triplicate_entries]
 
-    # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
-        """
-        OPTIMIZED: Use select_related to eliminate N+1 queries in Django Admin.
-
-        This reduces ~120 queries to ~7 queries for the expense list page.
-        """
         return super().get_queryset(request).select_related(
             'user', 'category', 'payment_method', 'reccurring_expense', 'installment_plan'
         )
@@ -52,22 +42,21 @@ class CategoryAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-class ExpenseInline(admin.TabularInline):  # You can also use `admin.StackedInline`
+class ExpenseInline(admin.TabularInline):
     model = Expense
-    extra = 0  # Do not display extra blank forms
+    extra = 0
     fields = ['description', 'amount', 'date', 'category',
-              'payment_method']  # Customize the displayed fields
+              'payment_method']
     readonly_fields = ['description', 'amount', 'date', 'category',
-                       'payment_method']  # Make fields read-only if necessary
+                       'payment_method']
 
 
 class InstallmentAdmin(admin.ModelAdmin):
     list_display = ('description', 'total_amount', 'total_installments',
                     'start_date', 'category', 'payment_method', 'created_at', 'updated_at')
-    search_fields = ('name',)
+    search_fields = ('description',)
     inlines = [ExpenseInline]
 
-    # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             'user', 'category', 'payment_method'
@@ -80,7 +69,6 @@ class RecurringExpenseAdmin(admin.ModelAdmin):
     search_fields = ('description',)
     ordering = ['-generate_debit']
 
-    # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             'user', 'category', 'payment_method'
@@ -97,7 +85,6 @@ class IncomeAdmin(admin.ModelAdmin):
     list_filter = (('date', DateRangeFilter), 'category')
     actions = [duplicate_entries]
 
-    # PERFORMANCE OPTIMIZATION: Eliminate N+1 queries
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             'user', 'category'

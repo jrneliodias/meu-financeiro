@@ -1,6 +1,6 @@
 {% extends "reports/tabs/_layout.html" %}
 {% block tab_content %}
-  {# desktop: estimativa mensal na linha de cima (rola por dentro), gráfico diário ocupa o resto #}
+  {# desktop: monthly estimate on the top row (scrolls inside), daily chart takes the rest #}
   <div class="flex flex-col gap-4 lg:grid {% if budget_summary.estimates %}lg:grid-rows-[minmax(0,1fr)_minmax(0,2fr)]{% endif %} lg:flex-1 lg:min-h-0">
     {% if budget_summary.estimates %}<div class="lg:min-h-0 lg:overflow-y-auto">{% include "reports/components/budget_estimate_card.html" %}</div>{% endif %}
     {% include "reports/components/daily_spending_chart.html" %}
