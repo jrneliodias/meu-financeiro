@@ -11,15 +11,16 @@ from utils.tests.clock import today_is
 
 class MoneyTest(SimpleTestCase):
     def test_brl_format(self):
-        self.assertEqual(format_brl(Decimal('1234567.891')), 'R$ 1.234.567,89')
-        self.assertEqual(format_brl(Decimal('-1234.5')), 'R$ -1.234,50')
-        self.assertEqual(format_brl(0), 'R$ 0,00')
+        # like Intl's pt-BR currency format: sign first, and a no-break space so the value never wraps
+        self.assertEqual(format_brl(Decimal('1234567.891')), 'R$\xa01.234.567,89')
+        self.assertEqual(format_brl(Decimal('-42161.82')), '-R$\xa042.161,82')
+        self.assertEqual(format_brl(0), 'R$\xa00,00')
 
     def test_brl_filter_is_blank_for_non_numbers(self):
         template = Template('{% load formatting %}{{ x|format_brl }}')
         self.assertEqual(template.render(Context({})), '')
         self.assertEqual(template.render(Context({'x': 'abc'})), '')
-        self.assertEqual(template.render(Context({'x': Decimal('12.5')})), 'R$ 12,50')
+        self.assertEqual(template.render(Context({'x': Decimal('12.5')})), 'R$\xa012,50')
 
 
 class MonthYearTest(SimpleTestCase):

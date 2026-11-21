@@ -1,14 +1,15 @@
 {% load formatting %}
 {# A dashboard number. Params: label, amount, color (text class); optional href + title (whole card is a link), note. #}
 {% if href %}
-<a href="{{ href }}" title="{{ title }}" class="group relative bg-zinc-800/40 p-3 md:p-4 py-2 pr-6 rounded-lg hover:bg-zinc-700/40 transition-colors duration-150">
+<a href="{{ href }}" title="{{ title }}" class="group relative [container-type:inline-size] bg-zinc-800/40 p-3 md:p-4 py-2 pr-6 rounded-lg hover:bg-zinc-700/40 transition-colors duration-150">
   <i class="fa-solid fa-chevron-right absolute top-2 right-2 text-[10px] text-zinc-500 group-hover:text-zinc-200 transition-colors" aria-hidden="true"></i>
 {% else %}
-<div class="bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
+<div class="[container-type:inline-size] bg-zinc-800/40 p-3 md:p-4 py-2 rounded-lg">
 {% endif %}
   <div class="flex flex-col items-start">
     <p class="text-white text-xs md:text-sm">{{ label }}</p>
-    <span class="{{ color }} text-xl md:text-2xl font-bold">{{ amount|format_brl }}</span>
+    {# scales with the card so a 14-character amount (-R$ 142.161,82) fits on one line #}
+    <span class="{{ color }} text-[length:clamp(1rem,13cqi,1.75rem)] font-bold break-words">{{ amount|format_brl }}</span>
     {% if note %}<span class="text-yellow-400 text-xs mt-1">{{ note }}</span>{% endif %}
   </div>
 {% if href %}</a>{% else %}</div>{% endif %}

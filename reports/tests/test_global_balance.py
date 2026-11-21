@@ -23,7 +23,7 @@ class GlobalBalanceTest(TestCase):
         self.client.force_login(self.user)
         with today_is(date(2026, 3, 15)):
             self.assertEqual(global_balance(self.user), Decimal('383.001'))
-            self.assertContains(self.client.get(reverse('expense_report')), 'R$ 383,00')
+            self.assertContains(self.client.get(reverse('expense_report')), 'R$\xa0383,00')
 
     def test_balance_ignores_other_users(self):
         other = User.objects.create_user(username='other')

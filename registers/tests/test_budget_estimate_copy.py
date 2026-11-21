@@ -279,7 +279,7 @@ class BudgetEstimateListCopySectionTest(TestCase):
 
         self.assertIn(f'value="{self.market.id}"', self.input_tag(html, 'copy-0-category_id'))
         self.assertIsNone(self.input_tag(html, 'copy-1-category_id'))  # Uber is not offered for copying
-        self.assertIn('R$ 354,00', html)  # but its source amount is listed
+        self.assertIn('R$\xa0354,00', html)  # but its source amount is listed
 
     def test_list_hides_copy_section_without_source(self):
         self.assertNotIn('copy-estimates-title', self.get_html())

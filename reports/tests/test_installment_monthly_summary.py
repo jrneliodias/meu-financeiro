@@ -53,6 +53,6 @@ class MonthlyInstallmentsTest(TestCase):
             [card] = links_to(page(response), reverse('expense_list_page'), installments='1', month='6', year='2026')
             return card['text']
 
-        self.assertIn('R$ 0,00', card_text())
+        self.assertIn('R$\xa00,00', card_text())
         self._expense('iPhone 15 - 1/12', '1250.00', date(2026, 6, 10), self.installment)
-        self.assertIn('R$ 1.250,00', card_text())
+        self.assertIn('R$\xa01.250,00', card_text())

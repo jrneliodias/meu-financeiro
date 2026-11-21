@@ -114,6 +114,7 @@ Use Django's translated `django.utils.dates.MONTHS` for names and one `parse_mon
 - The expense description is limited to the model's 100 characters by the form (before: 200 in the form, database error on PostgreSQL).
 - Bad `?month=`/`?year=` on dashboard tabs, budget estimates and export answer 400 instead of 500.
 - CSV: a blank `type` cell falls back to the amount's sign (before: row error); a blank category uses the default instead of creating a category called "nan"; pasted text must contain the chosen separator (before: `|` was offered but rejected).
+- `format_brl` follows Intl's pt-BR currency format, like the inline scripts it replaced: sign before the symbol (`-R$ 42.161,82`, before: `R$ -42.161,82` from the server) and a no-break space, so an amount never wraps between `R$` and the number. Summary-card amounts scale with the card (`13cqi`, 16–28px) so a 14-character amount stays on one line in the 7-column row.
 - Month names on charts and in the category table are translated (before: English `calendar.month_name`); the heat-map now reads real numbers (before: it parsed formatted strings and broke above R$ 1.000.000).
 - Flash messages show on every page, at the top (before: some pages never showed them, e.g. after creating a recurring expense).
 - Recent expenses/incomes are rendered with the page instead of fetched by AJAX; the income list uses the same action menu as expenses. Their autofill/details/list endpoints are gone.

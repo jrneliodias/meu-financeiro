@@ -41,4 +41,4 @@ class SpentTodayTest(TestCase):
         self.client.force_login(self.user)
         elements = page(self.client.get(reverse('expense_report')))
         [card] = links_to(elements, reverse('expense_list_page'), date=today.isoformat())
-        self.assertIn('R$ 42,00', card['text'])
+        self.assertIn('R$\xa042,00', card['text'])

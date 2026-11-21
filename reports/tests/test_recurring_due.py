@@ -47,8 +47,8 @@ class RecurringDueTest(TestCase):
                                         HTTP_ACCEPT_LANGUAGE='en'))
         label = next(i for i, e in enumerate(elements) if e['tag'] == 'p' and e['text'].strip() == 'Fixed Expenses:')
         fixed_card_amount = next(e for e in elements[label:] if e['tag'] == 'span')
-        self.assertEqual(fixed_card_amount['text'].strip(), 'R$ 153,50')
-        self.assertContains(self.client.get(reverse('recurring_expense_list')), 'R$ 153,50')
+        self.assertEqual(fixed_card_amount['text'].strip(), 'R$\xa0153,50')
+        self.assertContains(self.client.get(reverse('recurring_expense_list')), 'R$\xa0153,50')
 
     def test_toggle_switches_generation_and_is_owner_only(self):
         url = reverse('recurring_expense_toggle', args=[self.spotify.pk])
