@@ -24,14 +24,25 @@
       <p class="text-xl font-bold text-purple-400">{{ installment_total|format_brl }}</p></div>
   </section>
 
-  <section class="bg-zinc-800/40 rounded-lg divide-y divide-zinc-700/60" role="list" aria-label="Lista de despesas">
-    {% for expense in expenses %}
+  {% for name, subtotal, items in groups %}
+  <section class="bg-zinc-800/40 rounded-lg divide-y divide-zinc-700/60"
+           {% if grouped %}aria-labelledby="group-{{ forloop.counter }}"{% else %}aria-label="Lista de despesas"{% endif %}>
+    {% if grouped %}
+    {# pr lines the subtotal up with the amounts, which sit left of the two 36px buttons #}
+    <h2 id="group-{{ forloop.counter }}" class="flex items-baseline gap-2 pl-3 pr-[6.75rem] py-2">
+      <span class="font-bold">{{ name }}</span>
+      <span class="text-xs text-zinc-400">{{ items|length }} despesa{{ items|length|pluralize }}</span>
+      <span class="ml-auto font-bold whitespace-nowrap">{{ subtotal|format_brl }}</span>
+    </h2>
+    {% endif %}
+    <div class="divide-y divide-zinc-700/60" role="list">
+    {% for expense in items %}
     <div class="flex items-center gap-3 p-3" role="listitem">
       <div class="min-w-0 flex-1">
         <p class="font-semibold break-words">{{ expense.description }}</p>
         <p class="text-xs text-zinc-400">
           {{ expense.date|date:"d/m/Y" }}
-          {% if expense.category %}· {{ expense.category.name }}{% endif %}
+          {% if expense.category and not grouped %}· {{ expense.category.name }}{% endif %}
           {% if expense.payment_method %}· {{ expense.payment_method.name }}{% endif %}
           {% if expense.installment_plan_id %}· <span class="text-purple-300">parcela</span>{% endif %}
           {% if expense.reccurring_expense_id %}· <span class="text-orange-300">recorrente</span>{% endif %}
@@ -45,10 +56,12 @@
               data-url="{% url 'delete_expense' expense.id %}" data-expense-description="{{ expense.description }}" aria-label="Excluir {{ expense.description }}">
         <i class="fas fa-trash-alt" aria-hidden="true"></i></button>
     </div>
-    {% empty %}
-    <p class="p-6 text-center text-zinc-400">Nenhuma despesa encontrada.</p>
     {% endfor %}
+    </div>
   </section>
+  {% empty %}
+  <p class="bg-zinc-800/40 rounded-lg p-6 text-center text-zinc-400">Nenhuma despesa encontrada.</p>
+  {% endfor %}
 </article>
 
 <dialog id="confirm-delete" class="app-dialog p-0 max-w-sm" aria-labelledby="confirm-delete-title">

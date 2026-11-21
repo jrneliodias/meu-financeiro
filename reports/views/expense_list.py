@@ -41,6 +41,15 @@ def _expenses_and_titles(user, params):
     return None
 
 
+def _by_category(expenses):
+    """[(category name, subtotal, expenses)], largest subtotal first; expenses keep their order."""
+    groups = {}
+    for expense in expenses:
+        groups.setdefault(expense.category.name if expense.category else 'Sem categoria', []).append(expense)
+    return sorted(((name, sum(e.amount for e in items), items) for name, items in groups.items()),
+                  key=lambda group: (-group[1], group[0]))
+
+
 @login_required
 def expense_list_page(request):
     try:
@@ -52,8 +61,10 @@ def expense_list_page(request):
 
     expenses, title, subtitle = found
     expenses = list(expenses)
+    groups = _by_category(expenses)
     return render(request, 'reports/expense_list.html', {
-        'title': title, 'subtitle': subtitle, 'expenses': expenses,
+        'title': title, 'subtitle': subtitle, 'groups': groups,
+        'grouped': len(groups) > 1,  # one category needs no headings (e.g. the category filter)
         'total': sum((e.amount for e in expenses), 0),
         'count': len(expenses),
         'recurring_total': sum((e.amount for e in expenses if e.reccurring_expense_id), 0),

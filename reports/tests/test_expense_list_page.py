@@ -43,6 +43,25 @@ class ExpenseListPageTest(TestCase):
         self.assertEqual(with_id(elements, 'list-total')[0]['text'].strip(), 'R$\xa0100,00')
         self.assertEqual(with_id(elements, 'list-count')[0]['text'].strip(), '2')
 
+    def _groups(self, response):
+        """[(heading text, [first word of each row])] of the category groups, in page order."""
+        elements = page(response)
+        return [(' '.join(heading['text'].split()),
+                 [row['text'].split()[0] for row in section['inner'] if row.get('role') == 'listitem'])
+                for section in elements if section['tag'] == 'section' and section.get('aria-labelledby')
+                for heading in with_id(elements, section.get('aria-labelledby'))]
+
+    def test_by_date_groups_by_category_largest_subtotal_first(self):
+        self._expense('Feira', '40.00', 3)
+        self._expense('Pão', '10.00', 3)
+        self._expense('Cinema', '60.00', 3, self.lazer)
+        Expense.objects.create(user=self.user, description='Avulsa', amount=Decimal('5.00'), date=date(2026, 10, 3))
+        self.assertEqual(self._groups(self.client.get(self.url, {'date': '2026-10-03'})), [
+            ('Lazer 1 despesa R$ 60,00', ['Cinema']),
+            ('Mercado 2 despesas R$ 50,00', ['Feira', 'Pão']),
+            ('Sem categoria 1 despesa R$ 5,00', ['Avulsa']),
+        ])
+
     def test_by_category_and_month(self):
         self._expense('Feira', '40.00', 5)
         self._expense('Cinema', '60.00', 5, self.lazer)
@@ -50,6 +69,7 @@ class ExpenseListPageTest(TestCase):
             'category_id': self.mercado.id, 'month': 10, 'year': 2026})
         self.assertContains(response, 'Feira')
         self.assertNotContains(response, 'Cinema')
+        self.assertEqual(self._groups(response), [])  # one category: the page title already names it
 
     def test_installments_only(self):
         plan = Installment.objects.create(
